@@ -1,34 +1,60 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.0;
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Itoken.sol";
 
-contract Lock {
-    uint public unlockTime;
-    address payable public owner;
+contract BridgeBase {
+    address public admin;
+    IToken public token;
+    uint public nonce;
+    mapping(uint => bool) public processedNonces;
 
-    event Withdrawal(uint amount, uint when);
+    enum Step {
+        Burn,
+        Mint
+    }
+    event Transfer(
+        address from,
+        address to,
+        uint amount,
+        uint date,
+        uint nonce,
+        Step indexed step
+    );
 
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
-
-        unlockTime = _unlockTime;
-        owner = payable(msg.sender);
+    constructor(address _token) {
+        admin = msg.sender;
+        token = IToken(_token);
     }
 
-    function withdraw() public {
-        // Uncomment this line, and the import of "hardhat/console.sol", to print a log in your terminal
-        // console.log("Unlock time is %o and block timestamp is %o", unlockTime, block.timestamp);
+    function burn(address to, uint amount) external {
+        token.burn(msg.sender, amount);
+        emit Transfer(
+            msg.sender,
+            to,
+            amount,
+            block.timestamp,
+            nonce,
+            Step.Burn
+        );
+        nonce++;
+    }
 
-        require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        require(msg.sender == owner, "You aren't the owner");
-
-        emit Withdrawal(address(this).balance, block.timestamp);
-
-        owner.transfer(address(this).balance);
+    function mint(address to, uint amount, uint otherChainNonce) external {
+        require(msg.sender == admin, "only admin");
+        require(
+            processedNonces[otherChainNonce] == false,
+            "transfer already processed"
+        );
+        processedNonces[otherChainNonce] = true;
+        token.mint(to, amount);
+        emit Transfer(
+            msg.sender,
+            to,
+            amount,
+            block.timestamp,
+            otherChainNonce,
+            Step.Mint
+        );
     }
 }
