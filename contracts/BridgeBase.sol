@@ -1,29 +1,34 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
-import "./Itoken.sol";
+import "./ERC20/ERC20.sol";
+import "./IToken.sol";
 
 contract BridgeBase {
     address public admin;
-    IToken public  token;
+    IToken public token;
     uint public nonce;
     mapping(uint => bool) public processedNonces;
 
-    enum Step { Burn, Mint };
+    enum Step {
+        Burn,
+        Mint
+    }
 
-    event Transfer {
+    event Transfer(
         address from,
         address to,
         uint amount,
         uint date,
-        uint nonce, 
+        uint nonce,
         Step indexed step
-    };
+    );
 
     constructor(address _token) {
         admin = msg.sender;
         token = IToken(_token);
     }
+
     function burn(address to, uint amount) external {
         token.burn(msg.sender, amount);
         emit Transfer(
@@ -39,13 +44,16 @@ contract BridgeBase {
 
     function mint(address to, uint amount, uint otherChainNonce) external {
         require(msg.sender == admin, "Only admin!");
-        require(processedNonces[otherChainNonce] == false, "Transfer already processed!");
+        require(
+            processedNonces[otherChainNonce] == false,
+            "Transfer already processed!"
+        );
         processedNonces[otherChainNonce] = true;
         token.mint(to, amount);
         emit Transfer(
             msg.sender,
             to,
-            amount, 
+            amount,
             block.timestamp,
             otherChainNonce,
             Step.Mint

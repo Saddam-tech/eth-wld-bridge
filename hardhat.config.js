@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("./tasks/get-accounts");
 /** @type import('hardhat/config').HardhatUserConfig */
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -12,5 +13,5 @@ module.exports = {
       chainId: 5,
     },
   },
-  solidity: "^0.8.0",
+  solidity: "0.8.0",
 };
