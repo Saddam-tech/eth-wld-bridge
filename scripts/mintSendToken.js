@@ -1,10 +1,10 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const GOERLIETH_ADDRESS = process.env.GOERLIETH_ADDRESS;
+const GOERLIETH_ADDRESS = process.env.GOERLIETH_ADDRESS; // token address
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
-const GOERLI_INFURA_API_KEY = process.env.GOERLI_INFURA_API_KEY;
+const chain_name = "goerli";
+const project_id = process.env.GOERLI_ALCHEMY_API_KEY;
 
 const erc20ABI = [
   "function balanceOf(address account) view returns (uint256)",
@@ -18,22 +18,23 @@ async function mintAndSendToken() {
   const privateKey = PRIVATE_KEY;
   const amount = ethers.utils.parseEther("1000");
 
-  const provider = new ethers.providers.AlchemyProvider(
-    "goerli",
-    "1CXoKBwOwKiTum1ahEB-RHeXWYzELT49"
-  );
-  console.log({ provider });
+  const provider = new ethers.providers.AlchemyProvider(chain_name, project_id);
   const wallet = new ethers.Wallet(privateKey, provider);
   const erc20Contract = new ethers.Contract(contractAddress, erc20ABI, wallet);
+  const balanceBefore = await erc20Contract.balanceOf(wallet.address);
 
   // minting point
   const tx = await erc20Contract.mint(wallet.address, amount);
   await tx.wait();
 
-  const balanceOf = erc20Contract.balancesOf(wallet.address);
+  const balanceAfter = await erc20Contract.balanceOf(wallet.address);
 
   console.log(
-    `Minted ${ethers.utils.formatEther(balanceOf)} to ${wallet.address}`
+    `Minted ${ethers.utils.formatEther(amount)} of ${contractAddress}  to ${
+      wallet.address
+    }. The balance before: ${ethers.utils.formatEther(
+      balanceBefore
+    )} and after: ${ethers.utils.formatEther(balanceAfter)}`
   );
 
   //   // transfer the minted amount to the user's wallet address
