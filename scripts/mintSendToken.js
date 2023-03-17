@@ -16,13 +16,13 @@ async function mintAndSendToken() {
   // connect to the deployed contract address
   const contractAddress = GOERLIETH_ADDRESS;
   const privateKey = PRIVATE_KEY;
-  const recipientAddress = ADMIN_ADDRESS;
   const amount = ethers.utils.parseEther("1000");
 
-  const provider = new ethers.providers.InfuraProvider(
+  const provider = new ethers.providers.AlchemyProvider(
     "goerli",
-    GOERLI_INFURA_API_KEY
+    "1CXoKBwOwKiTum1ahEB-RHeXWYzELT49"
   );
+  console.log({ provider });
   const wallet = new ethers.Wallet(privateKey, provider);
   const erc20Contract = new ethers.Contract(contractAddress, erc20ABI, wallet);
 
@@ -30,21 +30,27 @@ async function mintAndSendToken() {
   const tx = await erc20Contract.mint(wallet.address, amount);
   await tx.wait();
 
-  // transfer the minted amount to the user's wallet address
-  const balanceBefore = await erc20Contract.balanceOf(recipientAddress);
-  await erc20Contract.transfer(recipientAddress, amount);
-  const balanceAfter = await erc20Contract.balanceOf(recipientAddress);
+  const balanceOf = erc20Contract.balancesOf(wallet.address);
 
   console.log(
-    `Transfered ${ethers.utils.formatEther(amount)} tokens from ${
-      wallet.address
-    } to ${recipientAddress}`
+    `Minted ${ethers.utils.formatEther(balanceOf)} to ${wallet.address}`
   );
-  console.log(
-    `Recipient balance before ${ethers.utils.formatEther(
-      balanceBefore
-    )}, after ${ethers.utils.formatEther(balanceAfter)}`
-  );
+
+  //   // transfer the minted amount to the user's wallet address
+  //   const balanceBefore = await erc20Contract.balanceOf(recipientAddress);
+  //   await erc20Contract.transfer(recipientAddress, amount);
+  //   const balanceAfter = await erc20Contract.balanceOf(recipientAddress);
+
+  //   console.log(
+  //     `Transfered ${ethers.utils.formatEther(amount)} tokens from ${
+  //       wallet.address
+  //     } to ${recipientAddress}`
+  //   );
+  //   console.log(
+  //     `Recipient balance before ${ethers.utils.formatEther(
+  //       balanceBefore
+  //     )}, after ${ethers.utils.formatEther(balanceAfter)}`
+  //   );
 }
 
 mintAndSendToken();

@@ -2,11 +2,11 @@ const { ethers } = require("hardhat");
 
 async function main() {
   const MyToken = await ethers.getContractFactory("TokenBase");
-  const GoerliETH = await MyToken.deploy("GoerliETH", 1000000);
+  const LVE = await MyToken.deploy("LVE", "LVE");
 
-  await GoerliETH.deployed();
+  await LVE.deployed();
 
-  console.log(`GoerliETH deployed to: ${GoerliETH.address}`);
+  console.log(`Token deployed to: ${LVE.address}`);
 }
 
 main()
