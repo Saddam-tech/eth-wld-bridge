@@ -2,7 +2,7 @@ const { ethers } = require("hardhat");
 
 async function main() {
   const MyToken = await ethers.getContractFactory("TokenBase");
-  const LVE = await MyToken.deploy("LVE", "LVE");
+  const LVE = await MyToken.deploy("Tanga", "Tanga");
 
   await LVE.deployed();
 
