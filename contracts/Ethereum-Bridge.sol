@@ -8,37 +8,44 @@ contract EthereumBridge {
     uint256 public nonce;
     mapping(uint256 => bool) public processedNonces;
 
-    IERC20 public token;
-
     event Transfer(
         address indexed from,
-        uint256 indexed amount,
         address indexed to,
+        uint256 indexed amount,
+        address token,
+        string tokenType,
         uint256 nonce
     );
 
-    constructor(address _token) {
+    constructor() {
         owner = msg.sender;
-        token = IERC20(_token);
     }
 
-    function lockTokens(address to, uint256 amount) external {
+    function lockTokens(
+        address to,
+        uint256 amount,
+        string calldata tokenType,
+        address token
+    ) external {
         require(
-            token.transferFrom(msg.sender, address(this), amount),
+            // token.transferFrom(msg.sender, address(this), amount),
+            IERC20(token).transferFrom(msg.sender, address(this), amount),
             "Transfer failed"
         );
-        emit Transfer(msg.sender, amount, to, nonce);
+        emit Transfer(msg.sender, to, amount, token, tokenType, nonce);
         nonce++;
     }
 
     function unlockTokens(
         address to,
         uint256 amount,
+        address token,
         uint256 otherChainNonce
     ) external {
         require(msg.sender == owner, "Not authorized!");
         require(!processedNonces[otherChainNonce], "Already processed!");
         processedNonces[otherChainNonce] = true;
-        token.transfer(to, amount);
+        IERC20(token).transfer(to, amount);
+        // token.transfer(to, amount);
     }
 }
