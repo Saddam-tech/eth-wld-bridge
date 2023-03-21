@@ -18,6 +18,11 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       chainId: 80001,
     },
+    localhost: {
+      url: "http://127.0.0.1:8545/",
+      chainId: 31337,
+      gas: 100000,
+    },
   },
   solidity: "0.8.0",
 };

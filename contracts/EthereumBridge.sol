@@ -28,10 +28,7 @@ contract EthereumBridge {
         address token
     ) external {
         if (IERC20(token).allowance(msg.sender, address(this)) == 0) {
-            require(
-                IERC20(token).approve(address(this), 1000e18),
-                "Could not approve the funds!"
-            );
+            revert("Allowance is 0!");
         }
         require(
             // token.transferFrom(msg.sender, address(this), amount),
