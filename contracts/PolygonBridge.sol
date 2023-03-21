@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IToken.sol";
 
-contract BSCBridge {
+contract PolygonBridge {
     address public owner;
     uint256 public nonce;
     mapping(uint256 => bool) public processedNonces;
