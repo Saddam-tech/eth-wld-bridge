@@ -8,6 +8,7 @@ const abi = [
 ];
 const ABI_ETHEREUM_BRIDGE = [
   "function lockTokens(address to, uint256 amount, string calldata tokenType, address token) external returns (void)",
+  "function unlockTokens(address to, uint256 amount, address token, uint256 otherChainNonce) external returns (void)",
 ];
 
 const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS;
@@ -20,7 +21,7 @@ async function main() {
   // const MyContract = await MyContractFactory.deploy();
   // await MyContract.deployed();
   const signer = await ethers.getSigner();
-
+  const nonce = await signer.getTransactionCount();
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
@@ -53,6 +54,7 @@ async function main() {
     allowance,
     balanceOf_admin: ethers.utils.formatEther(balanceOf_admin),
     balanceOf_contract: ethers.utils.formatEther(balanceOf_contract),
+    signer_nonce: nonce,
   });
 
   // const tx = await MyContract.lockTokens(
@@ -62,9 +64,16 @@ async function main() {
   //   "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
   // );
 
-  // tx.wait();
+  const tx = await MyContract.unlockTokens(
+    process.env.ADMIN_ADDRESS,
+    ethers.utils.parseUnits("1", 18),
+    "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+    nonce
+  );
 
-  // console.log({ tx });
+  tx.wait();
+
+  console.log({ tx });
 }
 
 async function verify() {}
