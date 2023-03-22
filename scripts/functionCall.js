@@ -1,29 +1,18 @@
-const { ethers, run, network } = require("hardhat");
+const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const contract = "EthereumBridge";
-
-const abi = [
-  "function approve(address spender, uint256 amount) external returns (bool)",
-  "function allowance(address owner, address spender) external view returns (uint256)",
-  "function balanceOf(address account) external view returns (uint256)",
-];
 const ABI_ETHEREUM_BRIDGE = [
   "function lockTokens(address to, uint256 amount, string calldata tokenType, address token) external returns (void)",
   "function unlockTokens(address to, uint256 amount, address token, uint256 otherChainNonce) external returns (void)",
 ];
-
-const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
+const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
+const RECEIVER_ADDRRESS = process.env.RECEIVER_ADDRESS;
+
 async function main() {
-  // const MyContractFactory = await ethers.getContractFactory(contract);
-  // console.log("Deploying contract...");
-  // const MyContract = await MyContractFactory.deploy();
-  // await MyContract.deployed();
   const signer = await ethers.getSigner();
-  const nonce = await signer.getTransactionCount();
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
@@ -31,6 +20,18 @@ async function main() {
   );
 
   console.log({ MyContractAddress: MyContract.address });
+
+  const tx = await MyContract.lockTokens(
+    RECEIVER_ADDRRESS,
+    ethers.utils.parseUnits("20", 18),
+    "TANGA",
+    TANGA_TOKEN_ADDRESS_ETHEREUM
+  );
+  tx.wait();
+
+  console.log({ tx });
+
+  // const nonce = await signer.getTransactionCount();
 
   //   const ERC20 = new ethers.Contract(ERC20_ADDRESS, abi, ethers.provider);
 
@@ -65,23 +66,12 @@ async function main() {
   //   tx.wait();
   //   console.log({ tx });
 
-  const tx = await MyContract.lockTokens(
-    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-    ethers.utils.parseUnits("1", 18),
-    "TANGA",
-    "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
-  );
-
   // const tx = await MyContract.unlockTokens(
   //   process.env.ADMIN_ADDRESS,
   //   ethers.utils.parseUnits("1", 18),
   //   "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
   //   nonce
   // );
-
-  tx.wait();
-
-  console.log({ tx });
 }
 
 main()

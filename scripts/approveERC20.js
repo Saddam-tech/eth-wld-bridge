@@ -38,19 +38,18 @@ async function main() {
     signer.getAddress(),
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS
   );
-  console.log({ allowanceBefore: allowance });
+  console.log({ allowanceBefore: ethers.utils.formatEther(allowance) });
 
-  if (allowance >= 0) {
+  if (+ethers.utils.formatEther(allowance) >= 0) {
     console.log("Calling the ERC20 approve function...");
     const approve = await ERC20_WITHSIGNER.approve(
       MyContract.address,
       ethers.utils.parseUnits("10000", 18)
     );
-    tx.wait();
-    console.log({ tx });
+    approve.wait();
     console.log({ approve });
   }
-  console.log({ allowanceAfter: allowance });
+  console.log({ allowanceAfter: ethers.utils.formatEther(allowance) });
   const balanceOf_admin = await ERC20_WITHSIGNER.balanceOf(signer.getAddress());
   const balanceOf_contract = await ERC20_WITHSIGNER.balanceOf(
     MyContract.address
@@ -79,8 +78,6 @@ async function main() {
 
   // console.log({ tx });
 }
-
-async function verify() {}
 
 main()
   .then(() => process.exit(0))

@@ -11,8 +11,8 @@ async function main() {
   const signer = await ethers.getSigner();
   const nonce = await signer.getTransactionCount();
 
-  console.log({ MyContractAddress: MyContract.address });
-  console.log({ signer, nonce });
+  console.log(`Deployed contract at: ${MyContract.address}`);
+  console.log({ signer: signer.address, nonce });
 }
 
 main()
