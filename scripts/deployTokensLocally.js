@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const TANGA_TOKEN_ADDRESS = process.env.TANGA_TOKEN_ADDRESS; // token address
+const TANGA_TOKEN_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM; // token address
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const erc20ABI = [
@@ -36,22 +36,6 @@ async function mintAndSendToken() {
       balanceBefore
     )} and after: ${ethers.utils.formatEther(balanceAfter)}`
   );
-
-  //   // transfer the minted amount to the user's wallet address
-  //   const balanceBefore = await erc20Contract.balanceOf(recipientAddress);
-  //   await erc20Contract.transfer(recipientAddress, amount);
-  //   const balanceAfter = await erc20Contract.balanceOf(recipientAddress);
-
-  //   console.log(
-  //     `Transfered ${ethers.utils.formatEther(amount)} tokens from ${
-  //       wallet.address
-  //     } to ${recipientAddress}`
-  //   );
-  //   console.log(
-  //     `Recipient balance before ${ethers.utils.formatEther(
-  //       balanceBefore
-  //     )}, after ${ethers.utils.formatEther(balanceAfter)}`
-  //   );
 }
 
 mintAndSendToken();

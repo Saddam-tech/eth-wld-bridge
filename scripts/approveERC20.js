@@ -1,7 +1,5 @@
-const { ethers, run, network } = require("hardhat");
+const { ethers } = require("hardhat");
 require("dotenv").config();
-
-const contract = "PolygonBridge";
 
 const abi = [
   "function approve(address spender, uint256 amount) external returns (bool)",
@@ -13,9 +11,9 @@ const ABI_ETHEREUM_BRIDGE = [
   "function unlockTokens(address to, uint256 amount, address token, uint256 otherChainNonce) external returns (void)",
 ];
 
-const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
+const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
-  process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+  process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
 async function main() {
   // const MyContractFactory = await ethers.getContractFactory(contract);
@@ -36,35 +34,32 @@ async function main() {
 
   const ERC20_WITHSIGNER = ERC20.connect(signer);
 
-  const approve = await ERC20_WITHSIGNER.approve(
-    MyContract.address,
-    ethers.utils.parseUnits("10000", 18)
-  );
-  console.log({ approve });
-
   const allowance = await ERC20_WITHSIGNER.allowance(
     signer.getAddress(),
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS
   );
+  console.log({ allowanceBefore: allowance });
 
+  if (allowance >= 0) {
+    console.log("Calling the ERC20 approve function...");
+    const approve = await ERC20_WITHSIGNER.approve(
+      MyContract.address,
+      ethers.utils.parseUnits("10000", 18)
+    );
+    tx.wait();
+    console.log({ tx });
+    console.log({ approve });
+  }
+  console.log({ allowanceAfter: allowance });
   const balanceOf_admin = await ERC20_WITHSIGNER.balanceOf(signer.getAddress());
   const balanceOf_contract = await ERC20_WITHSIGNER.balanceOf(
     MyContract.address
   );
-
   console.log({
-    allowance,
     balanceOf_admin: ethers.utils.formatEther(balanceOf_admin),
     balanceOf_contract: ethers.utils.formatEther(balanceOf_contract),
     signer_nonce: nonce,
   });
-
-  const tx = await ERC20_WITHSIGNER.approve(
-    MyContract.address,
-    ethers.utils.parseUnits("1000000", 18)
-  );
-  tx.wait();
-  console.log({ tx });
 
   // const tx = await MyContract.lockTokens(
   //   "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
