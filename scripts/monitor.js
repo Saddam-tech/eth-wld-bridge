@@ -79,9 +79,11 @@ async function monitorLockEvents() {
       const tx = await chain2MintContract
         .connect(wallet)
         .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce);
+      tx.wait();
       console.log(
         `Minted equivalent amount of ${tokenType} to ${to} on Mumbai Testnet`
       );
+
       console.log({ tx });
       console.log(`Txhash: ${tx.hash}`);
     }
