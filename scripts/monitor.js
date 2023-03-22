@@ -63,7 +63,9 @@ async function monitorLockEvents() {
   chain1LockContract.on(
     "Transfer",
     async (from, to, amount, token, tokenType, nonce) => {
-      console.log("Lock event detected on Ethereum chain: ");
+      console.log(
+        "<<<<<<<<<< Lock event detected on Ethereum chain >>>>>>>>>>> "
+      );
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));

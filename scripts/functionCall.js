@@ -12,7 +12,10 @@ const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
 const RECEIVER_ADDRRESS = process.env.RECEIVER_ADDRESS;
 
 async function main() {
-  const signer = await ethers.getSigner();
+  const provider = ethers.provider;
+
+  const signer = new ethers.Wallet(process.env.PRIVATE_KEY_1, provider);
+  // const signer = await ethers.getSigner();
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
@@ -23,7 +26,7 @@ async function main() {
 
   const tx = await MyContract.lockTokens(
     RECEIVER_ADDRRESS,
-    ethers.utils.parseUnits("20", 18),
+    ethers.utils.parseUnits("24", 18),
     "TANGA",
     TANGA_TOKEN_ADDRESS_ETHEREUM
   );

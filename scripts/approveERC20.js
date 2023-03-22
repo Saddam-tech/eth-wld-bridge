@@ -20,6 +20,9 @@ async function main() {
   // console.log("Deploying contract...");
   // const MyContract = await MyContractFactory.deploy();
   // await MyContract.deployed();
+  //   const provider = ethers.provider;
+
+  //   const signer = new ethers.Wallet(process.env.PRIVATE_KEY_1, provider);
   const signer = await ethers.getSigner();
   const nonce = await signer.getTransactionCount();
   const MyContract = new ethers.Contract(
@@ -40,7 +43,7 @@ async function main() {
   );
   console.log({ allowanceBefore: ethers.utils.formatEther(allowance) });
 
-  if (+ethers.utils.formatEther(allowance) >= 0) {
+  if (+ethers.utils.formatEther(allowance) == 0) {
     console.log("Calling the ERC20 approve function...");
     const approve = await ERC20_WITHSIGNER.approve(
       MyContract.address,
