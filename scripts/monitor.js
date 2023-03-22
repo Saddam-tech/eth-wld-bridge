@@ -1,101 +1,81 @@
-require("dotenv").config();
 const { ethers } = require("hardhat");
+require("dotenv").config();
 
-const ethereumRpcUrl = process.env.ETHEREUM_RPC_URL;
-const bscRpcUrl = process.env.BSC_RPC_URL;
-const ethereumPrivateKey = process.env.ETHEREUM_PRIVATE_KEY;
-const bscPrivateKey = process.env.BSC_PRIVATE_KEY;
-
-const ethereumProvider = new ethers.providers.JsonRpcProvider(ethereumRpcUrl);
-const bscProvider = new ethers.providers.JsonRpcProvider(bscRpcUrl);
-
-const ethereumWallet = new ethers.Wallet(ethereumPrivateKey, ethereumProvider);
-const bscWallet = new ethers.Wallet(bscPrivateKey, bscProvider);
-
-// Bridge contract addresses and ABI
-const ethereumBridgeAddress = "0x...";
-const bscBridgeAddress = "0x...";
-const bridgeAbi = [
-  // ABI JSON here
+// Specify the lock contract addresses and ABIs for both chains
+const chain1LockAddress = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
+const chain1LockABI = [
+  "event Transfer(address indexed from, address indexed to, uint256 indexed amount, address token, string tokenType, uint256 nonce)",
+];
+const chain2LockAddress = "0x2345678901234567890123456789012345678901";
+const chain2LockABI = [
+  "event Transfer(address indexed from, address indexed to, uint256 indexed amount, address token, string tokenType, uint256 nonce)",
 ];
 
-const ethereumBridge = new ethers.Contract(
-  ethereumBridgeAddress,
-  bridgeAbi,
-  ethereumWallet
-);
-const bscBridge = new ethers.Contract(bscBridgeAddress, bridgeAbi, bscWallet);
+// Specify the mint contract addresses and ABIs for both chains
+const chain1MintAddress = process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+const chain1MintABI = [
+  "function mint(address to, uint256 amount, address token, string calldata tokenType, uint256 otherChainNonce) external",
+];
+const chain2MintAddress = process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+const chain2MintABI = [
+  "function mint(address to, uint256 amount, address token, string calldata tokenType, uint256 otherChainNonce) external",
+];
 
-const sleep = (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
+// Specify the admin private key
+const privateKey = process.env.PRIVATE_KEY;
 
-const monitor = async () => {
-  const ethFilter = ethereumBridge.filters.Transfer();
-  const bscFilter = bscBridge.filters.Transfer();
+async function monitorLockEvents() {
+  // Connect to both chains using the JsonRpcProvider class
+  const chain1Provider = new ethers.providers.JsonRpcProvider(
+    "http://localhost:8545"
+  );
+  const chain2Provider = new ethers.providers.JsonRpcProvider(
+    "http://localhost:8546"
+  );
 
-  let ethLatestBlock = await ethereumProvider.getBlockNumber();
-  let bscLatestBlock = await bscProvider.getBlockNumber();
+  // Create Contract instances for the lock contracts on both chains
+  const chain1LockContract = new ethers.Contract(
+    chain1LockAddress,
+    chain1LockABI,
+    chain1Provider
+  );
+  const chain2LockContract = new ethers.Contract(
+    chain2LockAddress,
+    chain2LockABI,
+    chain2Provider
+  );
 
-  while (true) {
-    const currentEthBlock = await ethereumProvider.getBlockNumber();
-    const currentBscBlock = await bscProvider.getBlockNumber();
+  // Create Contract instances for the mint contracts on both chains
+  const chain1MintContract = new ethers.Contract(
+    chain1MintAddress,
+    chain1MintABI,
+    chain1Provider
+  );
+  const chain2MintContract = new ethers.Contract(
+    chain2MintAddress,
+    chain2MintABI,
+    chain2Provider
+  );
 
-    if (currentEthBlock > ethLatestBlock) {
-      const logs = await ethereumProvider.getLogs({
-        ...ethFilter,
-        fromBlock: ethLatestBlock + 1,
-        toBlock: currentEthBlock,
-      });
+  // Get a wallet using the admin private key
+  const wallet = new ethers.Wallet(privateKey, chain1Provider);
+  console.log("Started monitoring Ethereum chain for Lock transactions...");
+  // Listen for the Lock event on the chain1LockContract
+  chain1LockContract.on(
+    "Transfer",
+    async (from, to, amount, token, tokenType, nonce) => {
+      console.log(
+        `Lock event detected on Ethereum chain: from ${from}, to ${to}, amount ${amount} of token ${token}(${tokenType}. Number of txs are ${nonce})`
+      );
 
-      for (const log of logs) {
-        const event = ethereumBridge.interface.parseLog(log);
-        console.log("Detected Ethereum Transfer event:", event.args);
-
-        const tx = await bscBridge.unlockTokens(
-          event.args.from,
-          event.args.to,
-          event.args.amount,
-          event.args.nonce,
-          { gasLimit: 200000 }
-        );
-        await tx.wait();
-        console.log("Tokens unlocked on BSC");
-      }
-
-      ethLatestBlock = currentEthBlock;
+      // Mint the same amount of tokens on chain 2 using the admin private key
+      const tx = await chain2MintContract
+        .connect(wallet)
+        .mint(to, amount, token, tokenType, nonce);
+      console.log({ tx });
+      console.log(`Mint transaction sent to chain 2: ${tx.hash}`);
     }
+  );
+}
 
-    if (currentBscBlock > bscLatestBlock) {
-      const logs = await bscProvider.getLogs({
-        ...bscFilter,
-        fromBlock: bscLatestBlock + 1,
-        toBlock: currentBscBlock,
-      });
-
-      for (const log of logs) {
-        const event = bscBridge.interface.parseLog(log);
-        console.log("Detected BSC Transfer event:", event.args);
-
-        const tx = await ethereumBridge.unlockTokens(
-          event.args.from,
-          event.args.to,
-          event.args.amount,
-          event.args.nonce,
-          { gasLimit: 200000 }
-        );
-        await tx.wait();
-        console.log("Tokens unlocked on Ethereum");
-      }
-
-      bscLatestBlock = currentBscBlock;
-    }
-
-    await sleep(15000);
-  }
-};
-
-monitor().catch((err) => {
-  console.error("Error:", err);
-  process.exit(1);
-});
+monitorLockEvents();
