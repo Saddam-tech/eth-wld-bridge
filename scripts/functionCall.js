@@ -12,10 +12,10 @@ const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
 const RECEIVER_ADDRRESS = process.env.RECEIVER_ADDRESS;
 
 async function main() {
-  const provider = ethers.provider;
+  // const provider = ethers.provider;
 
-  const signer = new ethers.Wallet(process.env.PRIVATE_KEY_1, provider);
-  // const signer = await ethers.getSigner();
+  // const signer = new ethers.Wallet(process.env.PRIVATE_KEY_1, provider);
+  const signer = await ethers.getSigner();
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
@@ -25,9 +25,9 @@ async function main() {
   console.log({ MyContractAddress: MyContract.address });
 
   const tx = await MyContract.lockTokens(
-    RECEIVER_ADDRRESS,
+    await signer.getAddress(),
     ethers.utils.parseUnits("24", 18),
-    "TANGA",
+    "Tanga",
     TANGA_TOKEN_ADDRESS_ETHEREUM
   );
   tx.wait();
@@ -47,11 +47,11 @@ async function main() {
   //   console.log({ approve });
 
   //   const allowance = await ERC20_WITHSIGNER.allowance(
-  //     signer.getAddress(),
+  //     await signer.getAddress(),
   //     ETHEREUM_BRIDGE_CONTRACT_ADDRESS
   //   );
 
-  //   const balanceOf_admin = await ERC20_WITHSIGNER.balanceOf(signer.getAddress());
+  //   const balanceOf_admin = await ERC20_WITHSIGNER.balanceOf(await signer.getAddress());
   //   const balanceOf_contract = await ERC20_WITHSIGNER.balanceOf(
   //     MyContract.address
   //   );

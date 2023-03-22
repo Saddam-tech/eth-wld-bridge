@@ -24,6 +24,8 @@ const chain2MintABI = [
 // Specify the admin private key
 const privateKey = process.env.PRIVATE_KEY;
 
+const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
+
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
   const chain1Provider = new ethers.providers.JsonRpcProvider(
@@ -76,8 +78,12 @@ async function monitorLockEvents() {
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain2MintContract
         .connect(wallet)
-        .mint(to, amount, token, tokenType, nonce);
-      console.log("Txhash: ", tx.hash);
+        .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce);
+      console.log(
+        `Minted equivalent amount of ${tokenType} to ${to} on Mumbai Testnet`
+      );
+      console.log({ tx });
+      console.log(`Txhash: ${tx.hash}`);
     }
   );
 }
