@@ -39,7 +39,8 @@ async function monitorLockEvents() {
   const chain1LockContract = new ethers.Contract(
     chain1LockAddress,
     chain1LockABI,
-    chain1Provider
+    chain1Provider,
+    { gasLimit: 100000 }
   );
   const chain2LockContract = new ethers.Contract(
     chain2LockAddress,
@@ -78,7 +79,9 @@ async function monitorLockEvents() {
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain2MintContract
         .connect(wallet)
-        .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce);
+        .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce, {
+          gasLimit: 100000,
+        });
       tx.wait();
       console.log(
         `Minted equivalent amount of ${tokenType} to ${to} on Mumbai Testnet`

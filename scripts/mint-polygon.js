@@ -18,33 +18,21 @@ async function main() {
   const MyContract = new ethers.Contract(
     POLYGON_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
-    signer,
-    { gasLimit: 100000 }
+    signer
   );
 
   console.log({ MyContractAddress: MyContract.address });
 
-  console.log({
-    signer: await signer.getAddress(),
-    amount: ethers.utils.parseUnits("24", 18),
+  const tx = await MyContract.mint(
+    await signer.getAddress(),
+    ethers.utils.parseUnits("24", 18),
     TANGA_TOKEN_ADDRESS_POLYGON,
-    tokenType: "Tanga",
-    nonce,
-  });
+    "Tanga",
+    nonce
+  );
+  tx.wait();
 
-  console.log({ ADMIN: await MyContract.owner() });
-
-  //   const tx = await MyContract.mint(
-  //     await signer.getAddress(),
-  //     ethers.utils.parseUnits("24", 18),
-  //     TANGA_TOKEN_ADDRESS_POLYGON,
-  //     "Tanga",
-  //     nonce,
-  //     { gasLimit: 100000 }
-  //   );
-  //   tx.wait();
-
-  //   console.log({ tx });
+  // console.log({ tx });
 }
 
 main()

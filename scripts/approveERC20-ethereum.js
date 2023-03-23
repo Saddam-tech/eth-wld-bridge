@@ -37,7 +37,9 @@ async function main() {
 
   const ERC20_WITHSIGNER = ERC20.connect(signer);
 
-  const allowance = await ERC20_WITHSIGNER.allowance(
+  let allowance;
+
+  allowance = await ERC20_WITHSIGNER.allowance(
     await signer.getAddress(),
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS
   );
@@ -52,6 +54,10 @@ async function main() {
     approve.wait();
     console.log({ approve });
   }
+  allowance = await ERC20_WITHSIGNER.allowance(
+    await signer.getAddress(),
+    ETHEREUM_BRIDGE_CONTRACT_ADDRESS
+  );
   console.log({ allowanceAfter: ethers.utils.formatEther(allowance) });
   const balanceOf_admin = await ERC20_WITHSIGNER.balanceOf(
     await signer.getAddress()
