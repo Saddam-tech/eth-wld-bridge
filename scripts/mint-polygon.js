@@ -32,17 +32,19 @@ async function main() {
     nonce,
   });
 
-  const tx = await MyContract.mint(
-    await signer.getAddress(),
-    ethers.utils.parseUnits("24", 18),
-    TANGA_TOKEN_ADDRESS_POLYGON,
-    "Tanga",
-    nonce,
-    { gasLimit: 100000 }
-  );
-  tx.wait();
+  console.log({ ADMIN: await MyContract.owner() });
 
-  console.log({ tx });
+  //   const tx = await MyContract.mint(
+  //     await signer.getAddress(),
+  //     ethers.utils.parseUnits("24", 18),
+  //     TANGA_TOKEN_ADDRESS_POLYGON,
+  //     "Tanga",
+  //     nonce,
+  //     { gasLimit: 100000 }
+  //   );
+  //   tx.wait();
+
+  //   console.log({ tx });
 }
 
 main()
