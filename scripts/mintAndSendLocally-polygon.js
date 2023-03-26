@@ -17,7 +17,7 @@ async function mintAndSendToken() {
   const amount = ethers.utils.parseEther("1000");
 
   const provider = new ethers.providers.JsonRpcProvider(
-    "http://127.0.0.1:8546/"
+    "http://127.0.0.1:8545/"
   );
   const wallet = new ethers.Wallet(privateKey, provider);
   const erc20Contract = new ethers.Contract(contractAddress, erc20ABI, wallet);
