@@ -31,7 +31,6 @@ contract EthereumBridge {
             revert("Allowance is 0!");
         }
         require(
-            // token.transferFrom(msg.sender, address(this), amount),
             IERC20(token).transferFrom(msg.sender, address(this), amount),
             "Transfer failed"
         );
@@ -49,6 +48,5 @@ contract EthereumBridge {
         require(!processedNonces[otherChainNonce], "Already processed!");
         processedNonces[otherChainNonce] = true;
         IERC20(token).transfer(to, amount);
-        // token.transfer(to, amount);
     }
 }

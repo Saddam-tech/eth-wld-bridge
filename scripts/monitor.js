@@ -23,7 +23,7 @@ async function monitorLockEvents() {
     "http://127.0.0.1:8545/"
   );
   const chain2Provider = new ethers.providers.JsonRpcProvider(
-    "http://127.0.0.1:7545"
+    "http://127.0.0.1:8546"
   );
 
   // Create Contract instances for the lock contracts on both chains
@@ -40,10 +40,7 @@ async function monitorLockEvents() {
     chain2Provider
   );
   // Get a wallet using the admin private key
-  const wallet = new ethers.Wallet(
-    "0x68ee40c579c2ae1a0d54889853da398e2811995840125c9d211e4d2f5651c6cd",
-    chain2Provider
-  );
+  const wallet = new ethers.Wallet(privateKey, chain2Provider);
   console.log("Started monitoring Ethereum chain for Lock transactions...");
   // Listen for the Lock event on the chain1LockContract
   chain1LockContract.on(
@@ -63,7 +60,7 @@ async function monitorLockEvents() {
       const tx = await chain2MintContract
         .connect(wallet)
         .mint(
-          "0xF2Cf18c2Dd718D06f30D0Bfa646bDF4099ed548e",
+          wallet.address,
           amount,
           TANGA_TOKEN_ADDRESS_POLYGON,
           tokenType,
