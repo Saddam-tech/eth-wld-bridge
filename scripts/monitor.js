@@ -47,7 +47,7 @@ async function monitorLockEvents() {
     "Transfer",
     async (from, to, amount, token, tokenType, nonce) => {
       console.log(
-        "<<<<<<<<<< Lock event detected on Ethereum chain >>>>>>>>>>>"
+        `<<<<<<<<<< Lock event detected on http://127.0.0.1:8545 >>>>>>>>>>>`
       );
       console.log("from: ", from);
       console.log("to: ", to);
@@ -68,10 +68,8 @@ async function monitorLockEvents() {
         );
       await tx.wait();
       console.log(
-        `Minted equivalent amount of ${tokenType} to ${to} on Mumbai Testnet`
+        `Minted equivalent amount of ${tokenType} to ${to} on http://127.0.0.1:8546`
       );
-
-      console.log({ tx });
       console.log(`Txhash: ${tx.hash}`);
     }
   );
