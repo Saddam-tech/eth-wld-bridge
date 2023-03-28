@@ -73,6 +73,36 @@ async function monitorLockEvents() {
       console.log(`Txhash: ${tx.hash}`);
     }
   );
+  chain2MintContract.on(
+    "Transfer",
+    async (from, to, amount, token, tokenType, nonce) => {
+      console.log(
+        `<<<<<<<<<< Lock event detected on http://127.0.0.1:8546 >>>>>>>>>>>`
+      );
+      console.log("from: ", from);
+      console.log("to: ", to);
+      console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("token: ", token);
+      console.log("token_name: ", tokenType);
+      console.log("nonce: ", nonce);
+
+      // Mint the same amount of tokens on chain 2 using the admin private key
+      const tx = await chain2MintContract
+        .connect(wallet)
+        .mint(
+          wallet.address,
+          amount,
+          TANGA_TOKEN_ADDRESS_POLYGON,
+          tokenType,
+          nonce
+        );
+      await tx.wait();
+      console.log(
+        `Minted equivalent amount of ${tokenType} to ${to} on http://127.0.0.1:8546`
+      );
+      console.log(`Txhash: ${tx.hash}`);
+    }
+  );
 }
 
 monitorLockEvents().catch((err) => {
