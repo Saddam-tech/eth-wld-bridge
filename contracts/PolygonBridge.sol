@@ -39,7 +39,6 @@ contract PolygonBridge {
         address token
     ) external {
         require(
-            // token.transferFrom(msg.sender, address(this), amount),
             IERC20(token).transferFrom(msg.sender, address(this), amount),
             "Transfer failed"
         );
@@ -57,7 +56,6 @@ contract PolygonBridge {
         require(!processedNonces[otherChainNonce], "Already processed!");
         processedNonces[otherChainNonce] = true;
         IERC20(token).transfer(to, amount);
-        // token.transfer(to, amount);
     }
 
     function mint(
@@ -74,7 +72,6 @@ contract PolygonBridge {
         );
         processedNonces[otherChainNonce] = true;
         IToken(token).mint(to, amount);
-        // token.mint(to, amount);
         emit Mint(to, amount, token, tokenType, otherChainNonce);
     }
 }

@@ -2,7 +2,6 @@ const { ethers } = require("hardhat");
 require("dotenv").config();
 
 const TANGA_TOKEN_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_POLYGON; // token address
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const POLYGON_BRIDGE_CONTRACT_ADDRESS =
   process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
 
@@ -14,16 +13,17 @@ const erc20ABI = [
 async function mintAndSendToken() {
   // connect to the deployed contract address
   const contractAddress = TANGA_TOKEN_ADDRESS;
-  const privateKey = PRIVATE_KEY;
-
-  const provider = new ethers.providers.JsonRpcProvider(
-    "http://127.0.0.1:8546/"
+  const signer = await ethers.getSigner();
+  const erc20Contract = new ethers.Contract(
+    contractAddress,
+    erc20ABI,
+    ethers.provider
   );
-  const wallet = new ethers.Wallet(privateKey, provider);
-  const erc20Contract = new ethers.Contract(contractAddress, erc20ABI, wallet);
 
   // updating admin of the erc20 token(setting the polygon contract as an owner of the token(for it to be able to mint ))
-  const tx = await erc20Contract.updateAdmin(POLYGON_BRIDGE_CONTRACT_ADDRESS);
+  const tx = await erc20Contract
+    .connect(signer)
+    .updateAdmin(POLYGON_BRIDGE_CONTRACT_ADDRESS);
   await tx.wait();
 
   console.log(
@@ -31,4 +31,9 @@ async function mintAndSendToken() {
   );
 }
 
-mintAndSendToken();
+mintAndSendToken()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.log(err);
+    process.exit(1);
+  });
