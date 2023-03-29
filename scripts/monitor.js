@@ -83,7 +83,7 @@ async function monitorLockEvents() {
           gasLimit: 100000,
         });
       tx.wait();
-      console.log(
+      console.log(†
         `Minted equivalent amount of ${tokenType} to ${to} on Mumbai Testnet`
       );
 
