@@ -28,14 +28,14 @@ async function monitorLockEvents() {
   );
 
   // Create Contract instances for the lock contracts on both chains
-  const chain1LockContract = new ethers.Contract(
+  const chain_1_contract = new ethers.Contract(
     chain1LockAddress,
     chain1LockABI,
     chain1Provider,
     { gasLimit: 100000 }
   );
 
-  const chain2MintContract = new ethers.Contract(
+  const chain_2_contract = new ethers.Contract(
     chain2MintAddress,
     chain2MintABI,
     chain2Provider
@@ -44,8 +44,8 @@ async function monitorLockEvents() {
   const wallet_chain_1 = new ethers.Wallet(privateKey, chain1Provider);
   const wallet_chain_2 = new ethers.Wallet(privateKey, chain2Provider);
   console.log("Started monitoring Ethereum chain for Lock transactions...");
-  // Listen for the Lock event on the chain1LockContract
-  chain1LockContract.on(
+  // Listen for the Lock event on the chain_1_contract
+  chain_1_contract.on(
     "Transfer",
     async (from, to, amount, token, tokenType, nonce) => {
       console.log(
@@ -59,7 +59,7 @@ async function monitorLockEvents() {
       console.log("nonce: ", nonce);
 
       // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain2MintContract
+      const tx = await chain_2_contract
         .connect(wallet_chain_2)
         .mint(
           wallet_chain_2.address,
@@ -75,7 +75,7 @@ async function monitorLockEvents() {
       console.log(`Txhash: ${tx.hash}`);
     }
   );
-  chain2MintContract.on(
+  chain_2_contract.on(
     "Transfer",
     async (from, to, amount, token, tokenType, nonce) => {
       console.log(
@@ -89,7 +89,7 @@ async function monitorLockEvents() {
       console.log("nonce: ", nonce);
 
       // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain1LockContract
+      const tx = await chain_1_contract
         .connect(wallet_chain_1)
         .unlock(
           wallet_chain_1.address,
@@ -121,7 +121,7 @@ monitorLockEvents().catch((err) => {
 //   try {
 //     const wallet = new ethers.Wallet(privateKey, chain1Provider);
 //     // Mint the same amount of tokens on chain 2 using the admin private key
-//     const tx = await chain2MintContract
+//     const tx = await chain_2_contract
 //       .connect(wallet)
 //       .mint(to, amount, token, tokenType, nonce);
 //     tx.wait();
@@ -133,7 +133,7 @@ monitorLockEvents().catch((err) => {
 // }
 
 // async function main() {
-//   chain1LockContract.on("Transfer", handleTransferEvent);
+//   chain_1_contract.on("Transfer", handleTransferEvent);
 //   console.log("Started listening for Transfer events on Ethereum chain...");
 // }
 
