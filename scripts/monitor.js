@@ -16,8 +16,10 @@ const chain_2_bridge_contract_address =
   process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
 
 // Specify the admin private key
-const privateKey_1 = process.env.PRIVATE_KEY;
-const privateKey_2 = process.env.PRIVATE_KEY_2;
+// const privateKey_1 = process.env.PRIVATE_KEY;
+// const privateKey_2 = process.env.PRIVATE_KEY_2;
+
+const privateKey = process.env.PRIVATE_KEY;
 
 const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
 const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
@@ -46,9 +48,9 @@ async function monitorLockEvents() {
     { gasLimit: 100000 }
   );
   // Get a wallet using the admin private key
-  const wallet_chain_1 = new ethers.Wallet(privateKey_1, chain1Provider);
-  const wallet_chain_2 = new ethers.Wallet(privateKey_2, chain2Provider);
-  console.log("Started monitoring chain 1 for Lock transactions...");
+  const wallet_chain_1 = new ethers.Wallet(privateKey, chain1Provider);
+  const wallet_chain_2 = new ethers.Wallet(privateKey, chain2Provider);
+  console.log("Started monitoring chains [1, 2] for Lock transactions...");
   // Listen for the Lock event on the chain_1_contract
   chain_1_contract.on(
     "Transfer",

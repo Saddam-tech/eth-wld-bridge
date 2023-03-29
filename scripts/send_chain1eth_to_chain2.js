@@ -21,7 +21,7 @@ async function main() {
   console.log({ MyContractAddress: MyContract.address });
 
   const tx = await MyContract.lockTokens(
-    "0xE0429608F2f5Ee05a50aeDAbFC99e2f885793D88",
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     ethers.utils.parseUnits("1", 18),
     "Tanga",
     TANGA_TOKEN_ADDRESS_ETHEREUM
