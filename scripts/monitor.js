@@ -16,6 +16,7 @@ const chain2MintABI = [
 const privateKey = process.env.PRIVATE_KEY;
 
 const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
+const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
 
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
@@ -40,7 +41,8 @@ async function monitorLockEvents() {
     chain2Provider
   );
   // Get a wallet using the admin private key
-  const wallet = new ethers.Wallet(privateKey, chain2Provider);
+  const wallet_chain_1 = new ethers.Wallet(privateKey, chain1Provider);
+  const wallet_chain_2 = new ethers.Wallet(privateKey, chain2Provider);
   console.log("Started monitoring Ethereum chain for Lock transactions...");
   // Listen for the Lock event on the chain1LockContract
   chain1LockContract.on(
@@ -58,9 +60,9 @@ async function monitorLockEvents() {
 
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain2MintContract
-        .connect(wallet)
+        .connect(wallet_chain_2)
         .mint(
-          wallet.address,
+          wallet_chain_2.address,
           amount,
           TANGA_TOKEN_ADDRESS_POLYGON,
           tokenType,
@@ -87,18 +89,18 @@ async function monitorLockEvents() {
       console.log("nonce: ", nonce);
 
       // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain2MintContract
-        .connect(wallet)
-        .mint(
-          wallet.address,
+      const tx = await chain1LockContract
+        .connect(wallet_chain_1)
+        .unlock(
+          wallet_chain_1.address,
           amount,
-          TANGA_TOKEN_ADDRESS_POLYGON,
+          TANGA_TOKEN_ADDRESS_ETHEREUM,
           tokenType,
           nonce
         );
       await tx.wait();
       console.log(
-        `Minted equivalent amount of ${tokenType} to ${to} on http://127.0.0.1:8546`
+        `Unlocked equivalent amount of ${tokenType} to ${to} on http://127.0.0.1:8545`
       );
       console.log(`Txhash: ${tx.hash}`);
     }
