@@ -26,7 +26,7 @@ async function main() {
 
   const tx = await MyContract.lockTokens(
     await signer.getAddress(),
-    ethers.utils.parseUnits("24", 18),
+    ethers.utils.parseUnits("1", 18),
     "Tanga",
     TANGA_TOKEN_ADDRESS_ETHEREUM
   );

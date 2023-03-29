@@ -25,7 +25,7 @@ module.exports = {
       gas: 100000,
     },
     localhost_2: {
-      url: "http://127.0.0.1:8546/",
+      url: "http://127.0.0.1:8546",
       accounts: [PRIVATE_KEY],
       chainId: 31337,
       gas: 100000,

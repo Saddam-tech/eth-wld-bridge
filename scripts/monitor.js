@@ -6,33 +6,25 @@ const chain1LockAddress = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const chain1LockABI = [
   "event Transfer(address indexed from, address indexed to, uint256 indexed amount, address token, string tokenType, uint256 nonce)",
 ];
-const chain2LockAddress = "0x2345678901234567890123456789012345678901";
-const chain2LockABI = [
-  "event Transfer(address indexed from, address indexed to, uint256 indexed amount, address token, string tokenType, uint256 nonce)",
-];
 
-// Specify the mint contract addresses and ABIs for both chains
-const chain1MintAddress = process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
-const chain1MintABI = [
-  "function mint(address to, uint256 amount, address token, string calldata tokenType, uint256 otherChainNonce) external",
-];
 const chain2MintAddress = process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
 const chain2MintABI = [
-  "function mint(address to, uint256 amount, address token, string calldata tokenType, uint256 otherChainNonce) external",
+  "function mint( address to, uint256 amount, address token, string calldata tokenType, uint256 otherChainNonce) external",
 ];
 
 // Specify the admin private key
 const privateKey = process.env.PRIVATE_KEY;
 
 const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
+const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
 
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
   const chain1Provider = new ethers.providers.JsonRpcProvider(
-    "http://localhost:8545"
+    "http://127.0.0.1:8545/"
   );
   const chain2Provider = new ethers.providers.JsonRpcProvider(
-    "http://localhost:8546"
+    "http://127.0.0.1:8546"
   );
 
   // Create Contract instances for the lock contracts on both chains
@@ -42,32 +34,22 @@ async function monitorLockEvents() {
     chain1Provider,
     { gasLimit: 100000 }
   );
-  const chain2LockContract = new ethers.Contract(
-    chain2LockAddress,
-    chain2LockABI,
-    chain2Provider
-  );
 
-  // Create Contract instances for the mint contracts on both chains
-  const chain1MintContract = new ethers.Contract(
-    chain1MintAddress,
-    chain1MintABI,
-    chain1Provider
-  );
   const chain2MintContract = new ethers.Contract(
     chain2MintAddress,
     chain2MintABI,
     chain2Provider
   );
   // Get a wallet using the admin private key
-  const wallet = new ethers.Wallet(privateKey, chain1Provider);
+  const wallet_chain_1 = new ethers.Wallet(privateKey, chain1Provider);
+  const wallet_chain_2 = new ethers.Wallet(privateKey, chain2Provider);
   console.log("Started monitoring Ethereum chain for Lock transactions...");
   // Listen for the Lock event on the chain1LockContract
   chain1LockContract.on(
     "Transfer",
     async (from, to, amount, token, tokenType, nonce) => {
       console.log(
-        "<<<<<<<<<< Lock event detected on Ethereum chain >>>>>>>>>>> "
+        `<<<<<<<<<< Lock event detected on http://127.0.0.1:8545 >>>>>>>>>>>`
       );
       console.log("from: ", from);
       console.log("to: ", to);
@@ -78,16 +60,48 @@ async function monitorLockEvents() {
 
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain2MintContract
-        .connect(wallet)
-        .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce, {
-          gasLimit: 100000,
-        });
-      tx.wait();
-      console.log(†
-        `Minted equivalent amount of ${tokenType} to ${to} on Mumbai Testnet`
+        .connect(wallet_chain_2)
+        .mint(
+          wallet_chain_2.address,
+          amount,
+          TANGA_TOKEN_ADDRESS_POLYGON,
+          tokenType,
+          nonce
+        );
+      await tx.wait();
+      console.log(
+        `Minted equivalent amount of ${tokenType} to ${to} on http://127.0.0.1:8546`
       );
+      console.log(`Txhash: ${tx.hash}`);
+    }
+  );
+  chain2MintContract.on(
+    "Transfer",
+    async (from, to, amount, token, tokenType, nonce) => {
+      console.log(
+        `<<<<<<<<<< Lock event detected on http://127.0.0.1:8546 >>>>>>>>>>>`
+      );
+      console.log("from: ", from);
+      console.log("to: ", to);
+      console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("token: ", token);
+      console.log("token_name: ", tokenType);
+      console.log("nonce: ", nonce);
 
-      console.log({ tx });
+      // Mint the same amount of tokens on chain 2 using the admin private key
+      const tx = await chain1LockContract
+        .connect(wallet_chain_1)
+        .unlock(
+          wallet_chain_1.address,
+          amount,
+          TANGA_TOKEN_ADDRESS_ETHEREUM,
+          tokenType,
+          nonce
+        );
+      await tx.wait();
+      console.log(
+        `Unlocked equivalent amount of ${tokenType} to ${to} on http://127.0.0.1:8545`
+      );
       console.log(`Txhash: ${tx.hash}`);
     }
   );
