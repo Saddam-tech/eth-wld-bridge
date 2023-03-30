@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const {
   abi: polygon_bridge_abi,
-} = require("../artifacts/contracts/EthereumBridge.sol/PolygonBridge.json");
+} = require("../artifacts/contracts/PolygonBridge.sol/PolygonBridge.json");
 
 const POLYGON_BRIDGE_CONTRACT_ADDRESS =
   process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;

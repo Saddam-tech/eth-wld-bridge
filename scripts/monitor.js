@@ -8,6 +8,9 @@ const {
   abi: polygon_bridge_abi,
 } = require("../artifacts/contracts/PolygonBridge.sol/PolygonBridge.json");
 
+const {
+  abi: erc20_abi,
+} = require("../artifacts/contracts/TokenBase.sol/TokenBase.json");
 // Specify the lock contract addresses and ABIs for both chains
 const chain_1_bridge_contract_address =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
@@ -15,14 +18,10 @@ const chain_1_bridge_contract_address =
 const chain_2_bridge_contract_address =
   process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
 
-// Specify the admin private key
-// const privateKey_1 = process.env.PRIVATE_KEY;
-// const privateKey_2 = process.env.PRIVATE_KEY_2;
-
 const privateKey = process.env.PRIVATE_KEY;
 
-const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
 const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
+const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
 
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
@@ -96,12 +95,35 @@ async function monitorLockEvents() {
       console.log("token_name: ", tokenType);
       console.log("nonce: ", nonce);
 
+      // ERC20 Contract Instance (chain_1)
+      const ERC20_chain_1 = new ethers.Contract(
+        token,
+        erc20_abi,
+        wallet_chain_1
+      );
+
       // Check if the same transaction is being executed the second time
 
       if (await chain_1_contract.processedNonces(nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
+        return;
+      }
+
+      // Check if the balance of the contract
+      const chain1_contract_balance = +ethers.utils.formatEther(
+        await ERC20_chain_1.balanceOf(chain_1_bridge_contract_address)
+      );
+      const _amount = +ethers.utils.formatEther(amount);
+
+      console.log({ chain1_contract_balance, _amount });
+
+      if (chain1_contract_balance < _amount) {
+        console.log(
+          `Balance of the contract is less than the requested amount. Requested amount: ${_amount}, Contract balance: ${chain1_contract_balance}`
+        );
+        console.log("Reverting the action...");
         return;
       }
 
