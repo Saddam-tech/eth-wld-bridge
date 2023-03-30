@@ -1,10 +1,10 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const ABI_ETHEREUM_BRIDGE = [
-  "function lockTokens(address to, uint256 amount, string calldata tokenType, address token) external returns (void)",
-  "function unlockTokens(address to, uint256 amount, address token, uint256 otherChainNonce) external returns (void)",
-];
+const {
+  abi: polygon_bridge_abi,
+} = require("../artifacts/contracts/EthereumBridge.sol/PolygonBridge.json");
+
 const POLYGON_BRIDGE_CONTRACT_ADDRESS =
   process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
 
@@ -14,7 +14,7 @@ async function main() {
   const signer = await ethers.getSigner();
   const MyContract = new ethers.Contract(
     POLYGON_BRIDGE_CONTRACT_ADDRESS,
-    ABI_ETHEREUM_BRIDGE,
+    polygon_bridge_abi,
     signer
   );
 
