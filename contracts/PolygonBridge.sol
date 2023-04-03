@@ -38,6 +38,9 @@ contract PolygonBridge {
         string calldata tokenType,
         address token
     ) external {
+        if (IERC20(token).allowance(msg.sender, address(this)) == 0) {
+            revert("Allowance is 0!");
+        }
         require(
             IERC20(token).transferFrom(msg.sender, address(this), amount),
             "Transfer failed"

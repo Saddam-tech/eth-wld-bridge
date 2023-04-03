@@ -22,7 +22,7 @@ async function main() {
 
   const tx = await MyContract.lockTokens(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    ethers.utils.parseUnits("1", 18),
+    ethers.utils.parseUnits("10", 18),
     "Tanga",
     TANGA_TOKEN_ADDRESS_POLYGON
   );
