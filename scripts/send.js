@@ -1,9 +1,10 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const TANGA_TOKEN_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM; // token address
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const provider_ethereum = process.env.provider_chain_1;
+const TANGA_TOKEN_ADDRESS = "0x2f251755c4C4BC73A2C3C002f09D19f11b98485C"; // token address
+const PRIVATE_KEY =
+  "36ce51e7722a9dadedf6dedc8210f4949db2f7aa031d2d10190e8ea5312189d9";
+const provider_ethereum = "https://rpc.lvscan.io";
 
 const erc20ABI = [
   "function balanceOf(address account) view returns (uint256)",
