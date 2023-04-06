@@ -1,10 +1,9 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const TANGA_TOKEN_ADDRESS = "0x2f251755c4C4BC73A2C3C002f09D19f11b98485C"; // token address
-const PRIVATE_KEY =
-  "36ce51e7722a9dadedf6dedc8210f4949db2f7aa031d2d10190e8ea5312189d9";
-const provider_ethereum = "https://rpc.lvscan.io";
+const TANGA_TOKEN_ADDRESS = "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"; // token address
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const provider_ethereum = "http://127.0.0.1:8545/";
 
 const erc20ABI = [
   "function balanceOf(address account) view returns (uint256)",
@@ -16,7 +15,7 @@ async function mintAndSendToken() {
   // connect to the deployed contract address
   const contractAddress = TANGA_TOKEN_ADDRESS;
   const privateKey = PRIVATE_KEY;
-  const amount = ethers.utils.parseEther("1000");
+  const amount = ethers.utils.parseEther("1000000");
 
   const provider = new ethers.providers.JsonRpcProvider(provider_ethereum);
   const wallet = new ethers.Wallet(privateKey, provider);
