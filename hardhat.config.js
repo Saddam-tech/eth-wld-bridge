@@ -2,7 +2,6 @@ require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("./tasks/get-accounts");
 /** @type import('hardhat/config').HardhatUserConfig */
-const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL;
 const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -15,12 +14,6 @@ module.exports = {
         "36ce51e7722a9dadedf6dedc8210f4949db2f7aa031d2d10190e8ea5312189d9",
       ],
       chainId: 12345,
-      gas: 100000,
-    },
-    goerli: {
-      url: GOERLI_RPC_URL,
-      accounts: [PRIVATE_KEY],
-      chainId: 5,
       gas: 100000,
     },
     sepolia: {
@@ -36,13 +29,13 @@ module.exports = {
       gas: 100000,
     },
     localhost_1: {
-      url: "http://127.0.0.1:8545/",
+      url: process.env.provider_chain_1,
       accounts: [PRIVATE_KEY],
       chainId: 31337,
       gas: 100000,
     },
     localhost_2: {
-      url: "http://127.0.0.1:8546",
+      url: process.env.provider_chain_2,
       accounts: [PRIVATE_KEY],
       chainId: 31337,
       gas: 100000,
