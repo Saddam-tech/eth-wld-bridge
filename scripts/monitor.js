@@ -11,6 +11,7 @@ const {
 const {
   abi: erc20_abi,
 } = require("../artifacts/contracts/TokenBase.sol/TokenBase.json");
+const { map_chain_2_tokenAddr_to_chain_1_tokenAddr } = require("./util");
 // Specify the lock contract addresses and ABIs for both chains
 const chain_1_bridge_contract_address =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
@@ -97,7 +98,8 @@ async function monitorLockEvents() {
 
       // ERC20 Contract Instance (chain_1)
       const ERC20_chain_1 = new ethers.Contract(
-        token,
+        // map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
+        TANGA_TOKEN_ADDRESS_ETHEREUM,
         erc20_abi,
         wallet_chain_1
       );
@@ -128,9 +130,13 @@ async function monitorLockEvents() {
       }
 
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_contract
-        .connect(wallet_chain_1)
-        .unlockTokens(to, amount, TANGA_TOKEN_ADDRESS_ETHEREUM, nonce);
+      const tx = await chain_1_contract.connect(wallet_chain_1).unlockTokens(
+        to,
+        amount,
+        //   map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
+        TANGA_TOKEN_ADDRESS_ETHEREUM,
+        nonce
+      );
       await tx.wait();
       console.log(
         `Unlocked equivalent amount of ${tokenType} to ${to} on CHAIN1`
