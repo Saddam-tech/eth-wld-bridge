@@ -76,6 +76,7 @@ async function monitorLockEvents() {
       const tx = await chain_2_contract
         .connect(wallet_chain_2)
         .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce);
+      console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(
         `Minted equivalent amount of ${tokenType} to ${to} on CHAIN2`
@@ -137,6 +138,7 @@ async function monitorLockEvents() {
         TANGA_TOKEN_ADDRESS_ETHEREUM,
         nonce
       );
+      console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(
         `Unlocked equivalent amount of ${tokenType} to ${to} on CHAIN1`
