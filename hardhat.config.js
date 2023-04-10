@@ -14,18 +14,16 @@ module.exports = {
       chainId: 11155111,
       gas: 100000,
     },
+    worldland: {
+      url: "https://rpc.lvscan.io",
+      accounts: [PRIVATE_KEY],
+      chainId: 12345,
+      gas: 100000,
+    },
     mumbai: {
       url: MUMBAI_RPC_URL,
       accounts: [PRIVATE_KEY],
       chainId: 80001,
-      gas: 100000,
-    },
-    worldland: {
-      url: "https://rpc.lvscan.io",
-      accounts: [
-        "36ce51e7722a9dadedf6dedc8210f4949db2f7aa031d2d10190e8ea5312189d9",
-      ],
-      chainId: 12345,
       gas: 100000,
     },
     localhost_1: {
