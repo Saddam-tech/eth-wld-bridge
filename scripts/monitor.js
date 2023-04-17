@@ -1,4 +1,5 @@
 const { ethers } = require("hardhat");
+const fs = require("fs-extra");
 require("dotenv").config();
 
 const {
@@ -12,6 +13,7 @@ const {
   abi: erc20_abi,
 } = require("../artifacts/contracts/TokenBase.sol/TokenBase.json");
 const { map_chain_2_tokenAddr_to_chain_1_tokenAddr } = require("./util");
+
 // Specify the lock contract addresses and ABIs for both chains
 const chain_1_bridge_contract_address =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
@@ -19,7 +21,11 @@ const chain_1_bridge_contract_address =
 const chain_2_bridge_contract_address =
   process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
 
-const privateKey = process.env.PRIVATE_KEY;
+const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
+  encryptedJson,
+  process.env.PRIVATE_KEY_PW
+);
 
 const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
 const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
@@ -48,8 +54,8 @@ async function monitorLockEvents() {
     { gasLimit: 100000 }
   );
   // Get a wallet using the admin private key
-  const wallet_chain_1 = new ethers.Wallet(privateKey, chain1Provider);
-  const wallet_chain_2 = new ethers.Wallet(privateKey, chain2Provider);
+  const wallet_chain_1 = new ethers.Wallet(encryptedPk, chain1Provider);
+  const wallet_chain_2 = new ethers.Wallet(encryptedPk, chain2Provider);
   console.log("Started monitoring chains [1, 2] for Lock transactions...");
   // Listen for the Lock event on the chain_1_contract
   chain_1_contract.on(

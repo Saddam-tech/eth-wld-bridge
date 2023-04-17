@@ -15,7 +15,7 @@ async function mintAndSendToken() {
   // connect to the deployed contract address
   const contractAddress = TANGA_TOKEN_ADDRESS;
   const privateKey = PRIVATE_KEY;
-  const amount = ethers.utils.parseEther("1000");
+  const amount = ethers.utils.parseEther("1000000000000");
 
   const provider = new ethers.providers.JsonRpcProvider(provider_ethereum);
   const wallet = new ethers.Wallet(privateKey, provider);
