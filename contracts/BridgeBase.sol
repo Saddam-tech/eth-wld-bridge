@@ -50,7 +50,7 @@ contract BridgeBase {
         );
         processedNonces[msg.sender][nonce] = true;
         IToken(token).mint(to, amount);
-        userBalances[msg.sender][token] += amount;
+        userBalances[to][token] += amount;
     }
 
     function burn(
@@ -124,9 +124,13 @@ contract BridgeBase {
             !processedNonces[msg.sender][nonce],
             "Transfer already processed!"
         );
+        require(
+            userBalances[to][token] >= amount,
+            "Balance of the user at the contract is less than the amount requested!"
+        );
         processedNonces[msg.sender][nonce] = true;
         IERC20(token).transfer(to, amount);
-        userBalances[msg.sender][token] -= amount;
+        userBalances[to][token] -= amount;
     }
 
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
