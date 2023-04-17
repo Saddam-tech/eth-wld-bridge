@@ -78,7 +78,7 @@ contract BridgeBase {
         userBalances[msg.sender][token] -= amount;
     }
 
-    function lockTokens(
+    function lock(
         address to,
         uint256 amount,
         string calldata tokenType,
@@ -107,7 +107,7 @@ contract BridgeBase {
         userBalances[msg.sender][token] += amount;
     }
 
-    function unlockTokens(
+    function unlock(
         address from,
         address to,
         uint256 amount,
