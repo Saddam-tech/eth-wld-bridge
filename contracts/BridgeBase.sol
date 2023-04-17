@@ -16,9 +16,7 @@ contract BridgeBase {
 
     enum Step {
         Burn,
-        Mint,
-        Lock,
-        Unlock
+        Lock
     }
 
     event Transfer(
