@@ -32,7 +32,6 @@ contract BridgeBase {
     );
 
     function mint(
-        address from,
         address to,
         uint256 amount,
         address token,
@@ -41,9 +40,12 @@ contract BridgeBase {
     ) external {
         require(msg.sender == owner, "Not authorized!");
         bytes32 message = prefixed(
-            keccak256(abi.encodePacked(from, to, amount, nonce))
+            keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
         );
-        require(recoverSigner(message, signature) == from, "Wrong signature!");
+        require(
+            recoverSigner(message, signature) == msg.sender,
+            "Wrong signature!"
+        );
         require(
             processedNonces[msg.sender][nonce] == false,
             "Transfer already processed!"
@@ -108,7 +110,6 @@ contract BridgeBase {
     }
 
     function unlock(
-        address from,
         address to,
         uint256 amount,
         address token,
@@ -117,9 +118,12 @@ contract BridgeBase {
     ) external {
         require(msg.sender == owner, "Not authorized!");
         bytes32 message = prefixed(
-            keccak256(abi.encodePacked(from, to, amount, nonce))
+            keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
         );
-        require(recoverSigner(message, signature) == from, "Wrong signature!");
+        require(
+            recoverSigner(message, signature) == msg.sender,
+            "Wrong signature!"
+        );
         require(
             !processedNonces[msg.sender][nonce],
             "Transfer already processed!"
