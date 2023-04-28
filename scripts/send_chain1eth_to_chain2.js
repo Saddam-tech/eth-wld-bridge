@@ -8,7 +8,7 @@ const {
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
-const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
+const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
 
 async function main() {
   const signer = await ethers.getSigner();
@@ -24,7 +24,7 @@ async function main() {
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     ethers.utils.parseUnits("1", 18),
     "Tanga",
-    TANGA_TOKEN_ADDRESS_ETHEREUM
+    TOKEN_ADDRESS_ETHEREUM
   );
   tx.wait();
 

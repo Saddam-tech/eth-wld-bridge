@@ -1,12 +1,12 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  const MyToken = await ethers.getContractFactory("TokenBase");
-  const LVE = await MyToken.deploy("LVT", "LVT");
+  const TokenBase = await ethers.getContractFactory("TokenBase");
+  const MyToken = await TokenBase.deploy("wlLVT", "wlLVT");
 
-  await LVE.deployed();
+  await MyToken.deployed();
 
-  console.log(`Token deployed to: ${LVE.address}`);
+  console.log(`Token deployed to: ${MyToken.address}`);
 }
 
 main()

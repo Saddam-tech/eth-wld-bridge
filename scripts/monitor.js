@@ -19,7 +19,7 @@ const chain_1_bridge_contract_address =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
 const chain_2_bridge_contract_address =
-  process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+  process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 
 const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
 const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
@@ -27,8 +27,8 @@ const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
   process.env.PRIVATE_KEY_PW
 );
 
-const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
-const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
+const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
+const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
 
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
@@ -81,7 +81,7 @@ async function monitorLockEvents() {
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain_2_contract
         .connect(wallet_chain_2)
-        .mint(to, amount, TANGA_TOKEN_ADDRESS_POLYGON, tokenType, nonce);
+        .mint(to, amount, TOKEN_ADDRESS_WORLDLAND, tokenType, nonce);
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(
@@ -106,7 +106,7 @@ async function monitorLockEvents() {
       // ERC20 Contract Instance (chain_1)
       const ERC20_chain_1 = new ethers.Contract(
         // map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
-        TANGA_TOKEN_ADDRESS_ETHEREUM,
+        TOKEN_ADDRESS_ETHEREUM,
         erc20_abi,
         wallet_chain_1
       );
@@ -137,11 +137,11 @@ async function monitorLockEvents() {
       }
 
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_contract.connect(wallet_chain_1).unlockTokens(
+      const tx = await chain_1_contract.connect(wallet_chain_1).unlock(
         to,
         amount,
         //   map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
-        TANGA_TOKEN_ADDRESS_ETHEREUM,
+        TOKEN_ADDRESS_ETHEREUM,
         nonce
       );
       console.log("Waiting for the transaction result...");

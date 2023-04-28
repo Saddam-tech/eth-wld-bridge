@@ -11,7 +11,7 @@ const ABI_ETHEREUM_BRIDGE = [
   "function unlockTokens(address to, uint256 amount, address token, uint256 otherChainNonce) external returns (void)",
 ];
 
-const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
+const ERC20_ADDRESS = process.env.TOKEN_ADDRESS_ETHEREUM;
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
