@@ -17,7 +17,9 @@ module.exports = {
     // },
     // worldland: {
     //   url: process.env.provider_chain_2,
-    //   accounts: [encryptedPk],
+    //   accounts: [
+    //     accounts: [encryptedPk],
+    //   ],
     //   chainId: 12345,
     //   gas: 100000,
     // },
