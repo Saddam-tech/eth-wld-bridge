@@ -6,15 +6,15 @@ const abi = [
 ];
 const ABI_ETHEREUM_BRIDGE = [];
 
-const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
-const POLYGON_BRIDGE_CONTRACT_ADDRESS =
-  process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+const ERC20_ADDRESS = process.env.TOKEN_ADDRESS_WORLDLAND;
+const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
+  process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 
 async function main() {
   const signer = await ethers.getSigner();
   const nonce = await signer.getTransactionCount();
   const MyContract = new ethers.Contract(
-    POLYGON_BRIDGE_CONTRACT_ADDRESS,
+    WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
     signer
   );

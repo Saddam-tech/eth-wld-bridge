@@ -4,10 +4,10 @@ require("dotenv").config();
 const ABI_ETHEREUM_BRIDGE = [
   "function mint(address to, uint256 amount, address token, string calldata tokenType, uint256 otherChainNonce) external",
 ];
-const POLYGON_BRIDGE_CONTRACT_ADDRESS =
-  process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
+  process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 
-const TANGA_TOKEN_ADDRESS_POLYGON = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
+const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
 
 async function main() {
   // const provider = ethers.provider;
@@ -16,7 +16,7 @@ async function main() {
   const signer = await ethers.getSigner();
   const nonce = await signer.getTransactionCount();
   const MyContract = new ethers.Contract(
-    POLYGON_BRIDGE_CONTRACT_ADDRESS,
+    WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
     signer
   );
@@ -26,7 +26,7 @@ async function main() {
   const tx = await MyContract.mint(
     await signer.getAddress(),
     ethers.utils.parseUnits("24", 18),
-    TANGA_TOKEN_ADDRESS_POLYGON,
+    TOKEN_ADDRESS_WORLDLAND,
     "Tanga",
     nonce
   );

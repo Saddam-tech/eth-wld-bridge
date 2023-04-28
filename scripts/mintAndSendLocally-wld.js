@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const TANGA_TOKEN_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_POLYGON; // token address
+const TANGA_TOKEN_ADDRESS = process.env.TOKEN_ADDRESS_WORLDLAND; // token address
 
 const erc20ABI = [
   "function balanceOf(address account) view returns (uint256)",
@@ -13,7 +13,7 @@ const erc20ABI = [
 async function mintAndSendToken() {
   // connect to the deployed contract address
   const contractAddress = TANGA_TOKEN_ADDRESS;
-  const amount = ethers.utils.parseEther("1000");
+  const amount = ethers.utils.parseEther("100000000");
 
   const signer = await ethers.getSigner();
   const wallet_address = await signer.getAddress();

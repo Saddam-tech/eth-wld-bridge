@@ -11,9 +11,9 @@ const ABI_ETHEREUM_BRIDGE = [
   "function unlockTokens(address to, uint256 amount, address token, uint256 otherChainNonce) external returns (void)",
 ];
 
-const ERC20_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_POLYGON;
-const POLYGON_BRIDGE_CONTRACT_ADDRESS =
-  process.env.POLYGON_BRIDGE_CONTRACT_ADDRESS;
+const ERC20_ADDRESS = process.env.TOKEN_ADDRESS_WORLDLAND;
+const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
+  process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 
 async function main() {
   // const MyContractFactory = await ethers.getContractFactory(contract);
@@ -26,7 +26,7 @@ async function main() {
   const signer = await ethers.getSigner();
   const nonce = await signer.getTransactionCount();
   const MyContract = new ethers.Contract(
-    POLYGON_BRIDGE_CONTRACT_ADDRESS,
+    WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
     ABI_ETHEREUM_BRIDGE,
     signer
   );
@@ -41,7 +41,7 @@ async function main() {
 
   allowance = await ERC20_WITHSIGNER.allowance(
     await signer.getAddress(),
-    POLYGON_BRIDGE_CONTRACT_ADDRESS
+    WORLDLAND_BRIDGE_CONTRACT_ADDRESS
   );
   console.log({ allowanceBefore: ethers.utils.formatEther(allowance) });
 
@@ -56,7 +56,7 @@ async function main() {
   }
   allowance = await ERC20_WITHSIGNER.allowance(
     await signer.getAddress(),
-    POLYGON_BRIDGE_CONTRACT_ADDRESS
+    WORLDLAND_BRIDGE_CONTRACT_ADDRESS
   );
   console.log({ allowanceAfter: ethers.utils.formatEther(allowance) });
   const balanceOf_admin = await ERC20_WITHSIGNER.balanceOf(

@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const TANGA_TOKEN_ADDRESS = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM; // token address
+const TANGA_TOKEN_ADDRESS = process.env.TOKEN_ADDRESS_ETHEREUM; // token address
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const provider_ethereum = process.env.provider_chain_1;
 

@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const contract = "PolygonBridge";
+const contract = "WorldlandBridge";
 
 async function main() {
   const MyContractFactory = await ethers.getContractFactory(contract);

@@ -6,7 +6,7 @@ const bridge_abi = require("../artifacts/contracts/EthereumBridge.sol/EthereumBr
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
-const TANGA_TOKEN_ADDRESS_ETHEREUM = process.env.TANGA_TOKEN_ADDRESS_ETHEREUM;
+const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
 
 async function main() {
   const signer = await ethers.getSigner();
