@@ -6,6 +6,8 @@ version 1.0
 
 2023.04.17
 
+The google doc version is here: `https://docs.google.com/document/d/1AWtjq7ZMWP_RDh5lCfaCgGZuqERGmGWff6iy-XNva_U/edit`
+
 Contents
 
 BridgeBase Contract
