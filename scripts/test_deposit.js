@@ -9,6 +9,7 @@ const wlETH_localhost_1 = process.env.wlETH_localhost_1;
 
 async function main() {
   const amount_to_send = ethers.utils.parseEther("10");
+  console.log({ amount_to_send });
   const signer = await ethers.getSigner();
   const MyContract = new ethers.Contract(
     wlETH_localhost_1,
