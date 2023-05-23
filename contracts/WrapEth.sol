@@ -2,9 +2,10 @@
 
 pragma solidity =0.8.0;
 
-contract wWLC {
-    string public name = "Wrapped WLC";
-    string public symbol = "WLC";
+contract WrapETH {
+    address owner;
+    string public name;
+    string public symbol;
     uint8 public decimals = 18;
 
     event Approval(
@@ -19,14 +20,23 @@ contract wWLC {
 
     uint256 public totalSupply;
 
-    constructor() {
+    constructor(string memory _name, string memory _symbol) {
+        name = _name;
+        symbol = _symbol;
         totalSupply = 0;
+        owner = msg.sender;
     }
 
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         totalSupply += msg.value;
         emit Transfer(address(0), msg.sender, msg.value);
+    }
+
+    function mint(uint256 amount, address sender) public {
+        require(msg.sender == owner, "Only admin!");
+        balanceOf[sender] += amount;
+        totalSupply += amount;
     }
 
     function withdraw(uint256 amount) public {
