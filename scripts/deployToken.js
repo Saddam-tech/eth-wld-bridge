@@ -1,8 +1,8 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  const TokenBase = await ethers.getContractFactory("TokenBase");
-  const MyToken = await TokenBase.deploy("wlLVT", "wlLVT");
+  const TokenBase = await ethers.getContractFactory("WrapETH");
+  const MyToken = await TokenBase.deploy("wETH", "wETH");
 
   await MyToken.deployed();
 

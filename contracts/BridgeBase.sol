@@ -27,7 +27,6 @@ contract BridgeBase {
         uint date,
         string tokenType,
         uint256 nonce,
-        bytes signature,
         Step indexed step
     );
 
@@ -60,8 +59,7 @@ contract BridgeBase {
         uint256 amount,
         address token,
         uint256 nonce,
-        string calldata tokenType,
-        bytes calldata signature
+        string calldata tokenType
     ) external {
         require(!processedNonces[msg.sender][nonce], "Already processed!");
         processedNonces[msg.sender][nonce] = true;
@@ -74,7 +72,6 @@ contract BridgeBase {
             block.timestamp,
             tokenType,
             nonce,
-            signature,
             Step.Burn
         );
         userBalances[msg.sender][token] -= amount;
@@ -85,8 +82,7 @@ contract BridgeBase {
         uint256 amount,
         string calldata tokenType,
         address token,
-        uint256 nonce,
-        bytes calldata signature
+        uint256 nonce
     ) external {
         if (IERC20(token).allowance(msg.sender, address(this)) == 0) {
             revert("Allowance is 0!");
@@ -103,7 +99,6 @@ contract BridgeBase {
             block.timestamp,
             tokenType,
             nonce,
-            signature,
             Step.Lock
         );
         userBalances[msg.sender][token] += amount;

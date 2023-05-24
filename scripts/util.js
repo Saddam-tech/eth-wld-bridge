@@ -1,12 +1,13 @@
+const { ethers } = require("hardhat");
 require("dotenv").config();
-const map_chain_1_tokenAddr_to_chain_2_tokenAddr = {
+const map_token_address_to_token_address = {
   [process.env.TOKEN_ADDRESS_ETHEREUM]: [process.env.TOKEN_ADDRESS_WORLDLAND],
-};
-const map_chain_2_tokenAddr_to_chain_1_tokenAddr = {
   [process.env.TOKEN_ADDRESS_WORLDLAND]: [process.env.TOKEN_ADDRESS_ETHEREUM],
 };
 
-module.exports = {
-  map_chain_1_tokenAddr_to_chain_2_tokenAddr,
-  map_chain_2_tokenAddr_to_chain_1_tokenAddr,
-};
+async function createSignature(message) {
+  const signer = ethers.getSigners();
+  return signer.signMessage(message);
+}
+
+module.exports = { map_token_address_to_token_address, createSignature };

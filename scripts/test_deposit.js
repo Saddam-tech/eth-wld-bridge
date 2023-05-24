@@ -1,0 +1,34 @@
+const { ethers } = require("hardhat");
+require("dotenv").config();
+
+const {
+  abi: wrappedETH_contract_abi,
+} = require("../artifacts/contracts/WrapEth.sol/WrapETH.json");
+
+const wETH_localhost_1 = process.env.wETH_localhost_1;
+
+async function main() {
+  const signer = await ethers.getSigner();
+  const amount_to_send = ethers.utils.parseEther("10");
+  const nonce = signer.getTransactionCount();
+  console.log({ amount_to_send });
+  const MyContract = new ethers.Contract(
+    wETH_localhost_1,
+    wrappedETH_contract_abi,
+    signer
+  );
+
+  console.log({ MyContractAddress: MyContract.address });
+
+  const tx = await MyContract.deposit(nonce, { value: amount_to_send });
+  tx.wait();
+
+  console.log({ tx });
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.log(err);
+    process.exit(1);
+  });
