@@ -6,37 +6,41 @@ const {
   abi: ethereum_bridge_abi,
 } = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
 const {
-  abi: polygon_bridge_abi,
-} = require("../artifacts/contracts/PolygonBridge.sol/PolygonBridge.json");
+  abi: wld_bridge_abi,
+} = require("../artifacts/contracts/WorldlandBridge.sol/WorldlandBridge.json");
+const {
+  abi: wrappedeth_contract_abi,
+} = require("../artifacts/contracts/WrapEth.sol/WrapETH.json");
 
 const {
   abi: erc20_abi,
 } = require("../artifacts/contracts/TokenBase.sol/TokenBase.json");
-const { map_chain_2_tokenAddr_to_chain_1_tokenAddr } = require("./util");
+const {
+  map_token_address_to_token_address,
+  createSignature,
+} = require("./util");
+
+// const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+// const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
+//   encryptedJson,
+//   process.env.PRIVATE_KEY_PW
+// );
 
 // Specify the lock contract addresses and ABIs for both chains
 const chain_1_bridge_contract_address =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
-
 const chain_2_bridge_contract_address =
   process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
-
-const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
-const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
-  encryptedJson,
-  process.env.PRIVATE_KEY_PW
-);
-
-const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
-const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
+const WRAPPED_ETH_CONTRACT_CHAIN1 = process.env.wETH_localhost_1;
+const WRAPPED_ETH_CONTRACT_CHAIN2 = process.env.wETH_localhost_2;
 
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
   const chain1Provider = new ethers.providers.JsonRpcProvider(
-    process.env.provider_chain_1
+    process.env.local_provider_chain_1
   );
   const chain2Provider = new ethers.providers.JsonRpcProvider(
-    process.env.provider_chain_2
+    process.env.local_provider_chain_2
   );
 
   // Create Contract instances for the lock contracts on both chains
@@ -49,41 +53,49 @@ async function monitorLockEvents() {
 
   const chain_2_contract = new ethers.Contract(
     chain_2_bridge_contract_address,
-    polygon_bridge_abi,
+    wld_bridge_abi,
     chain2Provider,
     { gasLimit: 100000 }
   );
   const chain_1_wrappedETH_contract = new ethers.Contract(
-    chain_1_bridge_contract_address,
-    ethereum_bridge_abi,
+    WRAPPED_ETH_CONTRACT_CHAIN1,
+    wrappedeth_contract_abi,
     chain1Provider,
     { gasLimit: 100000 }
   );
 
   const chain_2_wrappedETH_contract = new ethers.Contract(
-    chain_2_bridge_contract_address,
-    polygon_bridge_abi,
+    WRAPPED_ETH_CONTRACT_CHAIN2,
+    wrappedeth_contract_abi,
     chain2Provider,
     { gasLimit: 100000 }
   );
   // Get a wallet using the admin private key
-  const wallet_chain_1 = new ethers.Wallet(encryptedPk, chain1Provider);
-  const wallet_chain_2 = new ethers.Wallet(encryptedPk, chain2Provider);
+  const wallet_chain_1 = new ethers.Wallet(
+    process.env.PRIVATE_KEY,
+    chain1Provider
+  );
+  const wallet_chain_2 = new ethers.Wallet(
+    process.env.PRIVATE_KEY,
+    chain2Provider
+  );
   console.log("Started monitoring chains [1, 2] for Lock transactions...");
   // Listen for the Lock event on the chain_1_contract
   chain_1_contract.on(
     "Transfer",
-    async (from, to, amount, token, tokenType, nonce) => {
+    async (from, to, amount, token, timestamp, tokenType, nonce) => {
       console.log(`<<<<<<<<<< Lock event detected on CHAIN_1 >>>>>>>>>>>`);
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("token: ", token);
       console.log("token_name: ", tokenType);
+      console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
 
-      // Check if the same transaction is being executed the second time
+      let admin_signature = createSignature(`${to} ${token}, ${timestamp}`);
 
+      // Check if the same transaction is being executed the second time
       if (await chain_2_contract.processedNonces(nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
@@ -94,11 +106,17 @@ async function monitorLockEvents() {
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain_2_contract
         .connect(wallet_chain_2)
-        .mint(to, amount, TOKEN_ADDRESS_WORLDLAND, tokenType, nonce);
+        .mint(
+          to,
+          amount,
+          map_token_address_to_token_address[token],
+          nonce,
+          admin_signature
+        );
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(
-        `Minted equivalent amount of ${tokenType} to ${to} on CHAIN2`
+        `Minted equivalent amount of ${map_token_address_to_token_address[token]} to ${to} on CHAIN2`
       );
       console.log(`Txhash: ${tx.hash}`);
     }
@@ -107,7 +125,7 @@ async function monitorLockEvents() {
   // Listen for the Lock event on the chain_2_contract
   chain_2_contract.on(
     "Transfer",
-    async (from, to, amount, token, tokenType, nonce) => {
+    async (from, to, amount, token, timestamp, tokenType, nonce) => {
       console.log(`<<<<<<<<<< Lock event detected on CHAIN_2 >>>>>>>>>>>`);
       console.log("from: ", from);
       console.log("to: ", to);
@@ -116,10 +134,11 @@ async function monitorLockEvents() {
       console.log("token_name: ", tokenType);
       console.log("nonce: ", nonce);
 
+      let admin_signature = createSignature(`${to} ${token}, ${timestamp}`);
+
       // ERC20 Contract Instance (chain_1)
       const ERC20_chain_1 = new ethers.Contract(
-        // map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
-        TOKEN_ADDRESS_ETHEREUM,
+        map_token_address_to_token_address[token],
         erc20_abi,
         wallet_chain_1
       );
@@ -133,34 +152,36 @@ async function monitorLockEvents() {
         return;
       }
 
-      // Check if the balance of the contract
-      const chain1_contract_balance = +ethers.utils.formatEther(
-        await ERC20_chain_1.balanceOf(chain_1_bridge_contract_address)
+      // Check if the balance of user is enough
+      const chain1_user_balance = +ethers.utils.formatEther(
+        await ERC20_chain_1.balanceOf(to)
       );
       const _amount = +ethers.utils.formatEther(amount);
 
-      console.log({ chain1_contract_balance, _amount });
+      console.log({ chain1_user_balance, _amount });
 
-      if (chain1_contract_balance < _amount) {
+      if (parseFloat(chain1_user_balance) < parseFloat(_amount)) {
         console.log(
-          `Balance of the contract is less than the requested amount. Requested amount: ${_amount}, Contract balance: ${chain1_contract_balance}`
+          `Balance is not enough on chain_1. Requested amount: ${_amount}, User balance: ${chain1_user_balance}`
         );
         console.log("Reverting the action...");
         return;
       }
 
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_contract.connect(wallet_chain_1).unlock(
-        to,
-        amount,
-        //   map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
-        TOKEN_ADDRESS_ETHEREUM,
-        nonce
-      );
+      const tx = await chain_1_contract
+        .connect(wallet_chain_1)
+        .unlock(
+          to,
+          amount,
+          map_token_address_to_token_address[token],
+          nonce,
+          admin_signature
+        );
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(
-        `Unlocked equivalent amount of ${tokenType} to ${to} on CHAIN1`
+        `Unlocked equivalent amount of ${map_token_address_to_token_address[token]} to ${to} on CHAIN1`
       );
       console.log(`Txhash: ${tx.hash}`);
     }
@@ -171,19 +192,19 @@ async function monitorLockEvents() {
   // Listen for the Transfer (Deposit) event on the chain_1_contract
 
   chain_1_wrappedETH_contract.on("Transfer", async (from, to, amount) => {
-    console.log(`<<<<<<<<<< Deposit ETH event detected on CHAIN_1 >>>>>>>>>>>`);
+    console.log(`<<<<<<<<<< Deposit event detected on CHAIN_1 >>>>>>>>>>>`);
     console.log("from: ", from);
     console.log("to: ", to);
     console.log("amount: ", ethers.utils.formatEther(amount));
 
     // Check if the same transaction is being executed the second time
 
-    if (await chain_2_contract.processedNonces(nonce)) {
-      console.log(
-        "Skipping already processed transaction... Waiting for upcoming transactions..."
-      );
-      return;
-    }
+    // if (await chain_2_contract.processedNonces(nonce)) {
+    //   console.log(
+    //     "Skipping already processed transaction... Waiting for upcoming transactions..."
+    //   );
+    //   return;
+    // }
 
     // Mint the same amount of tokens on chain 2 using the admin private key
     const tx = await chain_2_wrappedETH_contract
@@ -197,41 +218,15 @@ async function monitorLockEvents() {
 
   // Listen for the Transfer (Deposit) event on the chain_2_contract
   chain_2_wrappedETH_contract.on("Transfer", async (from, to, amount) => {
-    console.log(`<<<<<<<<<< Lock event detected on CHAIN_2 >>>>>>>>>>>`);
+    console.log(`<<<<<<<<<< Deposit event detected on CHAIN_2 >>>>>>>>>>>`);
     console.log("from: ", from);
     console.log("to: ", to);
     console.log("amount: ", ethers.utils.formatEther(amount));
-
-    // // ERC20 Contract Instance (chain_1)
-    // const ERC20_chain_1 = new ethers.Contract(
-    //   // map_chain_2_tokenAddr_to_chain_1_tokenAddr[token],
-    //   TOKEN_ADDRESS_ETHEREUM,
-    //   erc20_abi,
-    //   wallet_chain_1
-    // );
-
-    // // Check if the same transaction is being executed the second time
 
     // if (await chain_1_contract.processedNonces(nonce)) {
     //   console.log(
     //     "Skipping already processed transaction... Waiting for upcoming transactions..."
     //   );
-    //   return;
-    // }
-
-    // // Check if the balance of the contract
-    // const chain1_contract_balance = +ethers.utils.formatEther(
-    //   await ERC20_chain_1.balanceOf(chain_1_bridge_contract_address)
-    // );
-    // const _amount = +ethers.utils.formatEther(amount);
-
-    // console.log({ chain1_contract_balance, _amount });
-
-    // if (chain1_contract_balance < _amount) {
-    //   console.log(
-    //     `Balance of the contract is less than the requested amount. Requested amount: ${_amount}, Contract balance: ${chain1_contract_balance}`
-    //   );
-    //   console.log("Reverting the action...");
     //   return;
     // }
 
