@@ -8,9 +8,10 @@ const {
 const wETH_localhost_1 = process.env.wETH_localhost_1;
 
 async function main() {
-  const amount_to_send = ethers.utils.parseEther("10");
-  console.log({ amount_to_send });
   const signer = await ethers.getSigner();
+  const amount_to_send = ethers.utils.parseEther("10");
+  const nonce = signer.getTransactionCount();
+  console.log({ amount_to_send });
   const MyContract = new ethers.Contract(
     wETH_localhost_1,
     wrappedETH_contract_abi,
@@ -19,7 +20,7 @@ async function main() {
 
   console.log({ MyContractAddress: MyContract.address });
 
-  const tx = await MyContract.deposit({ value: amount_to_send });
+  const tx = await MyContract.deposit(nonce, { value: amount_to_send });
   tx.wait();
 
   console.log({ tx });
