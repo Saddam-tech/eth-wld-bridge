@@ -18,7 +18,7 @@ Worldland Bridge (inherited)
 
 TokenBase(inherits ERC20)
 
-IToken(interface)
+IToken(interface)`
 
 Sequence of the contracts and tokens to be deployed
 
