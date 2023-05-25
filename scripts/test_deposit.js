@@ -10,19 +10,16 @@ const wETH_localhost_1 = process.env.wETH_localhost_1;
 async function main() {
   const signer = await ethers.getSigner();
   const amount_to_send = ethers.utils.parseEther("10");
-  const nonce = signer.getTransactionCount();
-  console.log({ amount_to_send });
+  const nonce = await signer.getTransactionCount();
+  console.log({ amount_to_send, nonce });
   const MyContract = new ethers.Contract(
     wETH_localhost_1,
     wrappedETH_contract_abi,
     signer
   );
-
-  console.log({ MyContractAddress: MyContract.address });
-
-  const tx = await MyContract.deposit(nonce, { value: amount_to_send });
-  tx.wait();
-
+  // const tx = await MyContract.deposit(nonce, { value: amount_to_send });
+  const tx = await MyContract.feeToOwner();
+  // tx.wait();
   console.log({ tx });
 }
 
