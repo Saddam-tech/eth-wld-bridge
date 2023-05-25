@@ -7,7 +7,7 @@ contract WrapETH {
     string public name;
     string public symbol;
     uint8 public decimals = 18;
-    uint public feeToOwner = 0;
+    uint256 public feeToOwner = 1;
     mapping(address => mapping(uint256 => bool)) public processedNonces;
 
     event Approval(
@@ -34,20 +34,23 @@ contract WrapETH {
         owner = msg.sender;
     }
 
-    function setFee(uint amount) public {
+    function setFee(uint256 numerator, uint256 denominator) public {
         require(msg.sender == owner, "Only owner!");
-        feeToOwner = amount / 100;
+        feeToOwner = (numerator * 100) / denominator;
     }
 
     function deposit(uint256 nonce) public payable {
-        balanceOf[msg.sender] += msg.value;
-        totalSupply += msg.value;
         require(
             processedNonces[msg.sender][nonce] == false,
             "Transfer already processed!"
         );
         processedNonces[msg.sender][nonce] = true;
-        emit Transfer(address(0), msg.sender, msg.value, nonce);
+        uint256 _feeToOwner = msg.value * feeToOwner;
+        uint256 _amount = msg.value - _feeToOwner;
+        balanceOf[msg.sender] += _amount;
+        totalSupply += _amount;
+        transfer(owner, _feeToOwner, nonce);
+        emit Transfer(address(0), msg.sender, _amount, nonce);
     }
 
     function mint(uint256 amount, address sender, uint256 nonce) public {

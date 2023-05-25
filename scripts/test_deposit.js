@@ -18,8 +18,11 @@ async function main() {
     signer
   );
   // const tx = await MyContract.deposit(nonce, { value: amount_to_send });
-  const tx = await MyContract.feeToOwner();
+  // const tx = await MyContract.setFee(5, 2000);
   // tx.wait();
+  // console.log({ tx });
+
+  const tx = await MyContract.feeToOwner();
   console.log({ tx });
 }
 
