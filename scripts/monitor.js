@@ -146,11 +146,16 @@ async function monitorLockEvents() {
       }
       // THIS HAS TO BE COMPLETED
       // Check if the balance of user is enough
-      require(userBalances[to][token] >=
-        amount, "Balance of the user at the contract is less than the amount requested!");
+      let _amount = ethers.utils.formatEther(amount);
+      let chain1_user_balance = ethers.utils.formatEther(
+        chain_1_contract.userBalances(to)
+      );
+
+      console.log({ _amount, chain1_user_balance });
+
       if (parseFloat(chain1_user_balance) < parseFloat(_amount)) {
         console.log(
-          `Balance is not enough on chain_1. Requested amount: ${_amount}, User balance: ${chain1_user_balance}`
+          `Requested more than the existing balance on chain_1. Requested amount: ${_amount}, User balance: ${chain1_user_balance}`
         );
         console.log("Reverting the action...");
         return;
@@ -190,7 +195,7 @@ async function monitorLockEvents() {
 
       // Check if the same transaction is being executed the second time
 
-      if (await chain_2_wrappedETH_contract.processedNonces(nonce)) {
+      if (await chain_2_wrappedETH_contract.processedNonces(to, nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
@@ -200,7 +205,7 @@ async function monitorLockEvents() {
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain_2_wrappedETH_contract
         .connect(wallet_chain_2)
-        .mint(amount, to);
+        .mint(amount, to, nonce);
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN2`);
@@ -218,7 +223,7 @@ async function monitorLockEvents() {
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("nonce: ", nonce);
 
-      if (await chain_1_wrappedETH_contract.processedNonces(nonce)) {
+      if (await chain_1_wrappedETH_contract.processedNonces(to, nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
@@ -228,7 +233,7 @@ async function monitorLockEvents() {
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = await chain_1_wrappedETH_contract
         .connect(wallet_chain_1)
-        .mint(amount, to);
+        .mint(amount, to, nonce);
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN1`);

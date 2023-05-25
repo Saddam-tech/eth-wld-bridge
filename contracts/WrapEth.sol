@@ -3,10 +3,11 @@
 pragma solidity =0.8.0;
 
 contract WrapETH {
-    address owner;
+    address public owner;
     string public name;
     string public symbol;
     uint8 public decimals = 18;
+    uint public feeToOwner = 0;
     mapping(address => mapping(uint256 => bool)) public processedNonces;
 
     event Approval(
@@ -31,6 +32,11 @@ contract WrapETH {
         symbol = _symbol;
         totalSupply = 0;
         owner = msg.sender;
+    }
+
+    function setFee(uint amount) public {
+        require(msg.sender == owner, "Only owner!");
+        feeToOwner = amount / 100;
     }
 
     function deposit(uint256 nonce) public payable {
