@@ -26,6 +26,9 @@ async function main() {
     "0x403746C0D8e91aB0ad15008ab2488036dFb27d3F"
   );
   console.log({ tx });
+  // const tx = await MyContract.setFee(5, 2000);
+  // const tx = await MyContract.feeToOwner();
+  // console.log({ tx });
 }
 
 main()
