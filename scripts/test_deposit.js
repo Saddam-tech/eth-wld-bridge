@@ -22,7 +22,9 @@ async function main() {
   // tx.wait();
   // console.log({ tx });
 
-  const tx = await MyContract.feeToOwner();
+  const tx = await MyContract.balanceOf(
+    "0x403746C0D8e91aB0ad15008ab2488036dFb27d3F"
+  );
   console.log({ tx });
 }
 
