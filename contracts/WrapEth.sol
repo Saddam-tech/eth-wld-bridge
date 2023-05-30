@@ -33,14 +33,11 @@ contract WrapETH {
         owner = msg.sender;
     }
 
-<<<<<<< HEAD
-=======
     // function setFee(uint256 numerator) public {
     //     require(msg.sender == owner, "Only owner!");
     //     feeToOwner = (numerator * 100) / 200;
     // }
 
->>>>>>> 6ef194d1718a963e03fea20d25fa519431eecb30
     function deposit(uint256 nonce) public payable {
         require(
             processedNonces[msg.sender][nonce] == false,
