@@ -63,6 +63,17 @@ contract WrapETH {
         totalSupply += amount;
     }
 
+    function burn(uint256 amount, uint256 nonce) external {
+        require(
+            processedNonces[msg.sender][nonce] == false,
+            "Transfer already processed!"
+        );
+        processedNonces[msg.sender][nonce] = true;
+        balanceOf[msg.sender] -= amount;
+        totalSupply -= amount;
+        emit Transfer(msg.sender, address(0), amount, nonce);
+    }
+
     function withdraw(uint256 amount, uint256 nonce) public {
         require(balanceOf[msg.sender] >= amount, "Insufficient balance");
         require(
@@ -73,7 +84,6 @@ contract WrapETH {
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
         payable(msg.sender).transfer(amount);
-        emit Transfer(msg.sender, address(0), amount, nonce);
     }
 
     function approve(address spender, uint256 amount) public returns (bool) {
