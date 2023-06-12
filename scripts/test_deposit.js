@@ -11,21 +11,22 @@ async function main() {
   const signer = await ethers.getSigner();
   const amount_to_send = ethers.utils.parseEther("10");
   const nonce = await signer.getTransactionCount();
-  console.log({ amount_to_send, nonce });
   const MyContract = new ethers.Contract(
     wETH_localhost_1,
     wrappedETH_contract_abi,
     signer
   );
   // const tx = await MyContract.deposit(nonce, { value: amount_to_send });
+  const tx = await MyContract.burn(amount_to_send, nonce);
   // const tx = await MyContract.setFee(5, 2000);
-  // tx.wait();
-  // console.log({ tx });
-
-  const tx = await MyContract.balanceOf(
-    "0x403746C0D8e91aB0ad15008ab2488036dFb27d3F"
-  );
+  tx.wait();
   console.log({ tx });
+
+  // const balanceOf = await MyContract.balanceOf(
+  //   "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  // );
+  // console.log({ balanceOf });
+
   // const tx = await MyContract.setFee(5, 2000);
   // const tx = await MyContract.feeToOwner();
   // console.log({ tx });

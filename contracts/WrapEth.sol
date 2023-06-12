@@ -20,6 +20,7 @@ contract WrapETH {
         uint256 amount,
         uint256 nonce
     );
+    event Burn(address indexed to, uint256 amount, uint256 nonce);
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
@@ -66,24 +67,25 @@ contract WrapETH {
     function burn(uint256 amount, uint256 nonce) external {
         require(
             processedNonces[msg.sender][nonce] == false,
-            "Transfer already processed!"
+            "Burn already processed!"
         );
         processedNonces[msg.sender][nonce] = true;
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
-        emit Transfer(msg.sender, address(0), amount, nonce);
+        emit Burn(msg.sender, amount, nonce);
     }
 
-    function withdraw(uint256 amount, uint256 nonce) public {
-        require(balanceOf[msg.sender] >= amount, "Insufficient balance");
+    function withdraw(address to, uint256 amount, uint256 nonce) public {
+        require(msg.sender == owner, "Only admin!");
+        require(balanceOf[to] >= amount, "Insufficient balance");
         require(
-            processedNonces[msg.sender][nonce] == false,
+            processedNonces[to][nonce] == false,
             "Transfer already processed!"
         );
-        processedNonces[msg.sender][nonce] = true;
-        balanceOf[msg.sender] -= amount;
+        processedNonces[to][nonce] = true;
+        balanceOf[to] -= amount;
         totalSupply -= amount;
-        payable(msg.sender).transfer(amount);
+        payable(to).transfer(amount);
     }
 
     function approve(address spender, uint256 amount) public returns (bool) {

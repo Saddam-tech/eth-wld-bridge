@@ -240,6 +240,31 @@ async function monitorLockEvents() {
       console.log(`Txhash: ${tx.hash}`);
     }
   );
+  // Listen for the Transfer (Deposit) event on the chain_2_contract
+  chain_2_wrappedETH_contract.on("Burn", async (to, amount, nonce) => {
+    console.log(`<<<<<<<<<< Burn event detected on CHAIN_2 >>>>>>>>>>>`);
+    console.log("to: ", to);
+    console.log("amount: ", ethers.utils.formatEther(amount));
+    console.log("nonce: ", nonce);
+
+    if (await chain_1_wrappedETH_contract.processedNonces(to, nonce)) {
+      console.log(
+        "Skipping already processed transaction... Waiting for upcoming transactions..."
+      );
+      return;
+    }
+
+    // Unlock the same amount of tokens on chain 1 using the admin private key
+    const tx = await chain_1_wrappedETH_contract
+      .connect(wallet_chain_1)
+      .withdraw(to, amount, nonce);
+    console.log("Waiting for the transaction result...");
+    await tx.wait();
+    console.log(
+      `Withdrawn ${ethers.utils.formatEther(amount)} of ETH to ${to} on CHAIN1`
+    );
+    console.log(`Txhash: ${tx.hash}`);
+  });
 }
 
 monitorLockEvents().catch((err) => {
