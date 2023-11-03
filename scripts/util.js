@@ -6,7 +6,7 @@ const map_token_address_to_token_address = {
 };
 
 async function createSignature(message) {
-  const signer = ethers.getSigners();
+  const signer = await ethers.getSigners();
   return signer.signMessage(message);
 }
 

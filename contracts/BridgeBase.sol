@@ -41,10 +41,7 @@ contract BridgeBase {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
         );
-        require(
-            recoverSigner(message, signature) == msg.sender,
-            "Wrong signature!"
-        );
+        require(recoverSigner(message, signature) == owner, "Wrong signature!");
         require(
             processedNonces[msg.sender][nonce] == false,
             "Transfer already processed!"
@@ -115,10 +112,7 @@ contract BridgeBase {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
         );
-        require(
-            recoverSigner(message, signature) == msg.sender,
-            "Wrong signature!"
-        );
+        require(recoverSigner(message, signature) == owner, "Wrong signature!");
         require(
             !processedNonces[msg.sender][nonce],
             "Transfer already processed!"

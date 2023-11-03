@@ -37,10 +37,10 @@ const WRAPPED_ETH_CONTRACT_CHAIN2 = process.env.wETH_localhost_2;
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
   const chain1Provider = new ethers.providers.JsonRpcProvider(
-    process.env.local_provider_chain_1
+    process.env.provider_chain_1
   );
   const chain2Provider = new ethers.providers.JsonRpcProvider(
-    process.env.local_provider_chain_2
+    process.env.provider_chain_2
   );
 
   // Create Contract instances for the lock contracts on both chains
