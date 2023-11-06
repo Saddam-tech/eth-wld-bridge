@@ -8,8 +8,6 @@ const {
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 
-const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
-
 async function main() {
   const signer = await ethers.getSigner();
   const MyContract = new ethers.Contract(
@@ -17,14 +15,17 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
+  const nonce = await signer.getTransactionCount();
 
-  console.log({ MyContractAddress: MyContract.address });
+  console.log({ NONCE: nonce });
 
-  const tx = await MyContract.lockTokens(
+  const tx = await MyContract.lockETH(
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    ethers.utils.parseUnits("1", 18),
-    "Tanga",
-    TOKEN_ADDRESS_ETHEREUM
+    "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    nonce,
+    {
+      value: ethers.utils.parseUnits("1", 18),
+    }
   );
   tx.wait();
 

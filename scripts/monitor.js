@@ -9,13 +9,6 @@ const {
   abi: wld_bridge_abi,
 } = require("../artifacts/contracts/WorldlandBridge.sol/WorldlandBridge.json");
 const {
-  abi: wrappedeth_contract_abi,
-} = require("../artifacts/contracts/WrapEth.sol/WrapETH.json");
-
-const {
-  abi: erc20_abi,
-} = require("../artifacts/contracts/TokenBase.sol/TokenBase.json");
-const {
   map_token_address_to_token_address,
   createSignature,
 } = require("./util");
@@ -31,16 +24,14 @@ const chain_1_bridge_contract_address =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const chain_2_bridge_contract_address =
   process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
-const WRAPPED_ETH_CONTRACT_CHAIN1 = process.env.wETH_localhost_1;
-const WRAPPED_ETH_CONTRACT_CHAIN2 = process.env.wETH_localhost_2;
 
 async function monitorLockEvents() {
   // Connect to both chains using the JsonRpcProvider class
   const chain1Provider = new ethers.providers.JsonRpcProvider(
-    process.env.provider_chain_1
+    process.env.local_provider_chain_1
   );
   const chain2Provider = new ethers.providers.JsonRpcProvider(
-    process.env.provider_chain_2
+    process.env.local_provider_chain_2
   );
 
   // Create Contract instances for the lock contracts on both chains
@@ -57,19 +48,6 @@ async function monitorLockEvents() {
     chain2Provider,
     { gasLimit: 100000 }
   );
-  const chain_1_wrappedETH_contract = new ethers.Contract(
-    WRAPPED_ETH_CONTRACT_CHAIN1,
-    wrappedeth_contract_abi,
-    chain1Provider,
-    { gasLimit: 100000 }
-  );
-
-  const chain_2_wrappedETH_contract = new ethers.Contract(
-    WRAPPED_ETH_CONTRACT_CHAIN2,
-    wrappedeth_contract_abi,
-    chain2Provider,
-    { gasLimit: 100000 }
-  );
   // Get a wallet using the admin private key
   const wallet_chain_1 = new ethers.Wallet(
     process.env.PRIVATE_KEY,
@@ -82,7 +60,7 @@ async function monitorLockEvents() {
   console.log("Started monitoring chains [1, 2] for Lock transactions...");
   // Listen for the Lock event on the chain_1_contract
   chain_1_contract.on(
-    "Transfer",
+    "TransferToken",
     async (from, to, amount, token, timestamp, tokenType, nonce) => {
       console.log(`<<<<<<<<<< Lock event detected on CHAIN_1 >>>>>>>>>>>`);
       console.log("from: ", from);
@@ -93,7 +71,9 @@ async function monitorLockEvents() {
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
 
-      let admin_signature = createSignature(`${to} ${token}, ${timestamp}`);
+      let admin_signature = await createSignature(
+        `${to} ${token}, ${timestamp}`
+      );
 
       // Check if the same transaction is being executed the second time
       if (await chain_2_contract.processedNonces(nonce)) {
@@ -124,7 +104,7 @@ async function monitorLockEvents() {
 
   // Listen for the Lock event on the chain_2_contract
   chain_2_contract.on(
-    "Transfer",
+    "TransferToken",
     async (from, to, amount, token, timestamp, tokenType, nonce) => {
       console.log(`<<<<<<<<<< Lock event detected on CHAIN_2 >>>>>>>>>>>`);
       console.log("from: ", from);
@@ -134,7 +114,9 @@ async function monitorLockEvents() {
       console.log("token_name: ", tokenType);
       console.log("nonce: ", nonce);
 
-      let admin_signature = createSignature(`${to} ${token}, ${timestamp}`);
+      let admin_signature = await createSignature(
+        `${to} ${token}, ${timestamp}`
+      );
 
       // Check if the same transaction is being executed the second time
 
@@ -180,32 +162,37 @@ async function monitorLockEvents() {
     }
   );
 
-  // WRAPPED ETH CONTRACT
+  // BRIDGING WETH
 
-  // Listen for the Transfer (Deposit) event on the chain_1_contract
+  // Listen for the (LockETH) event on the chain_1_contract
 
-  chain_1_wrappedETH_contract.on(
-    "Transfer",
-    async (from, to, amount, nonce) => {
-      console.log(`<<<<<<<<<< Deposit event detected on CHAIN_1 >>>>>>>>>>>`);
+  chain_1_contract.on(
+    "LockETH",
+    async (from, to, amount, token, date, nonce) => {
+      console.log(`<<<<<<<<<< ETH LOCK event detected on CHAIN_1 >>>>>>>>>>>`);
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("date: ", date);
       console.log("nonce: ", nonce);
 
       // Check if the same transaction is being executed the second time
 
-      if (await chain_2_wrappedETH_contract.processedNonces(to, nonce)) {
+      if (await chain_2_contract.processedNonces(to, nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
         return;
       }
 
+      let admin_signature = await createSignature("Hello World");
+
+      console.log({ admin_signature });
+
       // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain_2_wrappedETH_contract
+      const tx = await chain_2_contract
         .connect(wallet_chain_2)
-        .mint(amount, to, nonce);
+        .mintWETH(to, amount, token, nonce, admin_signature);
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN2`);
@@ -213,58 +200,71 @@ async function monitorLockEvents() {
     }
   );
 
-  // Listen for the Transfer (Deposit) event on the chain_2_contract
-  chain_2_wrappedETH_contract.on(
-    "Transfer",
-    async (from, to, amount, nonce) => {
-      console.log(`<<<<<<<<<< Deposit event detected on CHAIN_2 >>>>>>>>>>>`);
+  // Listen for (LockETH) event on chain_2_contract
+  chain_2_contract.on(
+    "LockETH",
+    async (from, to, amount, token, date, nonce) => {
+      console.log(`<<<<<<<<<< ETH LOCK event detected on CHAIN_2 >>>>>>>>>>>`);
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("date: ", date);
       console.log("nonce: ", nonce);
 
-      if (await chain_1_wrappedETH_contract.processedNonces(to, nonce)) {
+      if (await chain_1_contract.processedNonces(to, nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
         return;
       }
 
+      let admin_signature = await createSignature(nonce);
+
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_wrappedETH_contract
+      const tx = await chain_1_contract
         .connect(wallet_chain_1)
-        .mint(amount, to, nonce);
+        .mintWETH(to, amount, token, nonce, admin_signature);
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN1`);
       console.log(`Txhash: ${tx.hash}`);
     }
   );
-  // Listen for the Transfer (Deposit) event on the chain_2_contract
-  chain_2_wrappedETH_contract.on("Burn", async (to, amount, nonce) => {
-    console.log(`<<<<<<<<<< Burn event detected on CHAIN_2 >>>>>>>>>>>`);
-    console.log("to: ", to);
-    console.log("amount: ", ethers.utils.formatEther(amount));
-    console.log("nonce: ", nonce);
 
-    if (await chain_1_wrappedETH_contract.processedNonces(to, nonce)) {
+  // Listen for (BurnWETH) event on chain_2_contract
+  chain_2_contract.on(
+    "BurnWETH",
+    async (from, to, amount, token, date, nonce) => {
+      console.log(`<<<<<<<<<< BurnWETH event detected on CHAIN_2 >>>>>>>>>>>`);
+      console.log("to: ", to);
+      console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("token: ", token);
+      console.log("date: ", date);
+      console.log("nonce: ", nonce);
+
+      if (await chain_1_contract.processedNonces(to, nonce)) {
+        console.log(
+          "Skipping already processed transaction... Waiting for upcoming transactions..."
+        );
+        return;
+      }
+
+      let admin_signature = await createSignature(nonce);
+
+      // Unlock the same amount of tokens on chain 1 using the admin private key
+      const tx = await chain_1_contract
+        .connect(wallet_chain_1)
+        .unLockETH(to, amount, token, nonce, admin_signature);
+      console.log("Waiting for the transaction result...");
+      await tx.wait();
       console.log(
-        "Skipping already processed transaction... Waiting for upcoming transactions..."
+        `Withdrawn ${ethers.utils.formatEther(
+          amount
+        )} of ETH to ${to} on CHAIN1`
       );
-      return;
+      console.log(`Txhash: ${tx.hash}`);
     }
-
-    // Unlock the same amount of tokens on chain 1 using the admin private key
-    const tx = await chain_1_wrappedETH_contract
-      .connect(wallet_chain_1)
-      .withdraw(to, amount, nonce);
-    console.log("Waiting for the transaction result...");
-    await tx.wait();
-    console.log(
-      `Withdrawn ${ethers.utils.formatEther(amount)} of ETH to ${to} on CHAIN1`
-    );
-    console.log(`Txhash: ${tx.hash}`);
-  });
+  );
 }
 
 monitorLockEvents().catch((err) => {

@@ -3,23 +3,21 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./WETH.sol";
+import "./IWETH.sol";
 import "./IToken.sol";
 
-contract BridgeBase {
-    address public owner;
+contract BridgeBase is Ownable {
     mapping(address => mapping(uint256 => bool)) public processedNonces;
     mapping(address => mapping(address => uint256)) public userBalances;
-
-    constructor() {
-        owner = msg.sender;
-    }
 
     enum Step {
         Burn,
         Lock
     }
 
-    event Transfer(
+    event TransferToken(
         address from,
         address to,
         uint256 amount,
@@ -30,28 +28,49 @@ contract BridgeBase {
         Step indexed step
     );
 
-    function mint(
+    event LockETH(
+        address from,
+        address to,
+        uint256 amount,
+        address token,
+        uint date,
+        uint256 nonce
+    );
+    event BurnWETH(
+        address from,
+        address to,
+        uint256 amount,
+        address token,
+        uint date,
+        uint256 nonce
+    );
+
+    // TOKEN
+
+    function mintToken(
         address to,
         uint256 amount,
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external {
-        require(msg.sender == owner, "Not authorized!");
+    ) external onlyOwner {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
         );
-        require(recoverSigner(message, signature) == owner, "Wrong signature!");
+        require(
+            recoverSigner(message, signature) == owner(),
+            "Wrong signature!"
+        );
         require(
             processedNonces[msg.sender][nonce] == false,
-            "Transfer already processed!"
+            "TransferToken already processed!"
         );
         processedNonces[msg.sender][nonce] = true;
         IToken(token).mint(to, amount);
         userBalances[to][token] += amount;
     }
 
-    function burn(
+    function burnToken(
         address to,
         uint256 amount,
         address token,
@@ -61,7 +80,7 @@ contract BridgeBase {
         require(!processedNonces[msg.sender][nonce], "Already processed!");
         processedNonces[msg.sender][nonce] = true;
         IToken(token).burn(msg.sender, amount);
-        emit Transfer(
+        emit TransferToken(
             msg.sender,
             to,
             amount,
@@ -74,7 +93,7 @@ contract BridgeBase {
         userBalances[msg.sender][token] -= amount;
     }
 
-    function lock(
+    function lockToken(
         address to,
         uint256 amount,
         string calldata tokenType,
@@ -86,9 +105,9 @@ contract BridgeBase {
         }
         require(
             IERC20(token).transferFrom(msg.sender, address(this), amount),
-            "Transfer failed"
+            "TransferToken failed"
         );
-        emit Transfer(
+        emit TransferToken(
             msg.sender,
             to,
             amount,
@@ -101,21 +120,23 @@ contract BridgeBase {
         userBalances[msg.sender][token] += amount;
     }
 
-    function unlock(
+    function unlockToken(
         address to,
         uint256 amount,
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external {
-        require(msg.sender == owner, "Not authorized!");
+    ) external onlyOwner {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
         );
-        require(recoverSigner(message, signature) == owner, "Wrong signature!");
+        require(
+            recoverSigner(message, signature) == owner(),
+            "Wrong signature!"
+        );
         require(
             !processedNonces[msg.sender][nonce],
-            "Transfer already processed!"
+            "TransferToken already processed!"
         );
         require(
             userBalances[to][token] >= amount,
@@ -125,6 +146,69 @@ contract BridgeBase {
         IERC20(token).transfer(to, amount);
         userBalances[to][token] -= amount;
     }
+
+    // WRAPPED ETHER
+
+    function lockETH(
+        address to,
+        address token,
+        uint256 nonce
+    ) external payable {
+        require(!processedNonces[msg.sender][nonce], "Lock already processed!");
+        processedNonces[msg.sender][nonce] = true;
+        IWETH(token).deposit(msg.sender, msg.value);
+        emit LockETH(msg.sender, to, msg.value, token, block.timestamp, nonce);
+    }
+
+    function unLockETH(
+        address to,
+        uint256 amount,
+        address token,
+        uint256 nonce,
+        bytes calldata signature
+    ) external onlyOwner {
+        // bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
+        // require(
+        //     recoverSigner(message, signature) == owner(),
+        //     "Wrong signature!"
+        // );
+        require(!processedNonces[msg.sender][nonce], "Mint already processed!");
+        processedNonces[msg.sender][nonce] = true;
+        IWETH(token).withdraw(to, amount);
+    }
+
+    function mintWETH(
+        address to,
+        uint256 amount,
+        address token,
+        uint256 nonce,
+        bytes calldata signature
+    ) external onlyOwner {
+        // bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
+        // require(
+        //     recoverSigner(message, signature) == owner(),
+        //     "Wrong signature!"
+        // );
+        require(!processedNonces[msg.sender][nonce], "Mint already processed!");
+        processedNonces[msg.sender][nonce] = true;
+        IWETH(token).mint(to, amount);
+    }
+
+    function burnWETH(uint256 amount, address token, uint256 nonce) external {
+        require(!processedNonces[msg.sender][nonce], "Burn already processed!");
+        processedNonces[msg.sender][nonce] = true;
+        IWETH(token).burn(msg.sender, amount);
+        emit BurnWETH(
+            msg.sender,
+            msg.sender,
+            amount,
+            token,
+            block.timestamp,
+            nonce
+        );
+    }
+
+    // utils
 
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
         return
