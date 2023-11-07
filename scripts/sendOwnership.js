@@ -1,41 +1,39 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-// const {
-//   abi: ethereum_bridge_abi,
-// } = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
 const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
-  // process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
-  process.env.TOKEN_ADDRESS_WORLDLAND;
+  process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
+const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
+
+const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
+  process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
+const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
 
 async function main() {
   const signer = await ethers.getSigner();
-  const MyContract = new ethers.Contract(
-    ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
-    // ethereum_bridge_abi,
+  // const MyContract = new ethers.Contract(
+  //   TOKEN_ADDRESS_ETHEREUM,
+  //   weth_abi,
+  //   signer
+  // );
+  const MyContract2 = new ethers.Contract(
+    TOKEN_ADDRESS_WORLDLAND,
     weth_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-
-  console.log({ NONCE: nonce });
-
-  // const tx = await MyContract.lockETH(
-  //   "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-  //   "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  //   nonce,
-  //   {
-  //     value: ethers.utils.parseUnits("1", 18),
-  //   }
+  // const tx = await MyContract.transferOwnership(
+  //   ETHEREUM_BRIDGE_CONTRACT_ADDRESS
   // );
-  const tx = await MyContract.transferOwnership(
-    "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+  const tx2 = await MyContract2.transferOwnership(
+    WORLDLAND_BRIDGE_CONTRACT_ADDRESS
   );
-  tx.wait();
+  // tx.wait();
+  tx2.wait();
 
-  console.log({ tx });
+  // console.log({ tx });
+  console.log({ tx2 });
 }
 
 main()
