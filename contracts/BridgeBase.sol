@@ -55,7 +55,7 @@ contract BridgeBase is Ownable {
         bytes calldata signature
     ) external onlyOwner {
         bytes32 message = prefixed(
-            keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
+            keccak256(abi.encodePacked(to, amount, token, nonce))
         );
         require(
             recoverSigner(message, signature) == owner(),
@@ -128,7 +128,7 @@ contract BridgeBase is Ownable {
         bytes calldata signature
     ) external onlyOwner {
         bytes32 message = prefixed(
-            keccak256(abi.encodePacked(msg.sender, to, amount, nonce))
+            keccak256(abi.encodePacked(to, amount, token, nonce))
         );
         require(
             recoverSigner(message, signature) == owner(),
@@ -167,7 +167,9 @@ contract BridgeBase is Ownable {
         uint256 nonce,
         bytes calldata signature
     ) external onlyOwner {
-        bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
+        bytes32 message = prefixed(
+            keccak256(abi.encodePacked(to, amount, token, nonce))
+        );
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
@@ -184,7 +186,9 @@ contract BridgeBase is Ownable {
         uint256 nonce,
         bytes calldata signature
     ) external onlyOwner {
-        bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
+        bytes32 message = prefixed(
+            keccak256(abi.encodePacked(to, amount, token, nonce))
+        );
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
