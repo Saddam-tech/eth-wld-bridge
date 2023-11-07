@@ -167,11 +167,11 @@ contract BridgeBase is Ownable {
         uint256 nonce,
         bytes calldata signature
     ) external onlyOwner {
-        // bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
-        // require(
-        //     recoverSigner(message, signature) == owner(),
-        //     "Wrong signature!"
-        // );
+        bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
+        require(
+            recoverSigner(message, signature) == owner(),
+            "Wrong signature!"
+        );
         require(!processedNonces[msg.sender][nonce], "Mint already processed!");
         processedNonces[msg.sender][nonce] = true;
         IWETH(token).withdraw(to, amount);
@@ -184,11 +184,11 @@ contract BridgeBase is Ownable {
         uint256 nonce,
         bytes calldata signature
     ) external onlyOwner {
-        // bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
-        // require(
-        //     recoverSigner(message, signature) == owner(),
-        //     "Wrong signature!"
-        // );
+        bytes32 message = prefixed(keccak256(abi.encodePacked(nonce)));
+        require(
+            recoverSigner(message, signature) == owner(),
+            "Wrong signature!"
+        );
         require(!processedNonces[msg.sender][nonce], "Mint already processed!");
         processedNonces[msg.sender][nonce] = true;
         IWETH(token).mint(to, amount);
