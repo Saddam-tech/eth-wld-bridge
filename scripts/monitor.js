@@ -172,6 +172,8 @@ async function monitorLockEvents() {
       console.log(`<<<<<<<<<< ETH LOCK event detected on CHAIN_1 >>>>>>>>>>>`);
       console.log("from: ", from);
       console.log("to: ", to);
+      console.log("chain1token: ", token);
+      console.log("chain2token: ", map_token_address_to_token_address[token]);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("date: ", date);
       console.log("nonce: ", nonce);
@@ -185,19 +187,10 @@ async function monitorLockEvents() {
         return;
       }
 
-      console.log({ TOACCOUNT: to });
-
       let admin_signature = await createSignature(
         ["address", "uint256", "address", "uint256"],
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
-
-      console.log({ admin_signature });
-
-      console.log({
-        TOKEN: token,
-        converted: map_token_address_to_token_address[token],
-      });
 
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain_2_contract
@@ -223,6 +216,8 @@ async function monitorLockEvents() {
       console.log(`<<<<<<<<<< ETH LOCK event detected on CHAIN_2 >>>>>>>>>>>`);
       console.log("from: ", from);
       console.log("to: ", to);
+      console.log("chain1token: ", map_token_address_to_token_address[token]);
+      console.log("chain2token: ", token);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("date: ", date);
       console.log("nonce: ", nonce);
@@ -236,13 +231,19 @@ async function monitorLockEvents() {
 
       let admin_signature = await createSignature(
         ["address", "uint256", "address", "uint256"],
-        [to, amount, token, nonce]
+        [to, amount, map_token_address_to_token_address[token], nonce]
       );
 
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = await chain_1_contract
         .connect(wallet_chain_1)
-        .mintWETH(to, amount, token, nonce, admin_signature);
+        .mintWETH(
+          to,
+          amount,
+          map_token_address_to_token_address[token],
+          nonce,
+          admin_signature
+        );
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN1`);
@@ -257,7 +258,8 @@ async function monitorLockEvents() {
       console.log(`<<<<<<<<<< BurnWETH event detected on CHAIN_2 >>>>>>>>>>>`);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("token: ", token);
+      console.log("chain1token: ", map_token_address_to_token_address[token]);
+      console.log("chain2token: ", token);
       console.log("date: ", date);
       console.log("nonce: ", nonce);
 
@@ -270,13 +272,19 @@ async function monitorLockEvents() {
 
       let admin_signature = await createSignature(
         ["address", "uint256", "address", "uint256"],
-        [to, amount, token, nonce]
+        [to, amount, map_token_address_to_token_address[token], nonce]
       );
 
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = await chain_1_contract
         .connect(wallet_chain_1)
-        .unLockETH(to, amount, token, nonce, admin_signature);
+        .unLockETH(
+          to,
+          amount,
+          map_token_address_to_token_address[token],
+          nonce,
+          admin_signature
+        );
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(

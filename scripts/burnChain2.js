@@ -2,8 +2,8 @@ const { ethers } = require("hardhat");
 require("dotenv").config();
 
 const {
-  abi: ethereum_bridge_abi,
-} = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
+  abi: worldland_bridge_abi,
+} = require("../artifacts/contracts/WorldlandBridge.sol/WorldlandBridge.json");
 
 const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
   process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
@@ -11,21 +11,19 @@ const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
 
 async function main() {
   const signer = await ethers.getSigner();
+
   const MyContract = new ethers.Contract(
     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
-    ethereum_bridge_abi,
+    worldland_bridge_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-  const tx = await MyContract.lockETH(
-    signer.address,
+
+  const tx = await MyContract.burnETH(
+    ethers.utils.parseUnits("1", 18),
     TOKEN_ADDRESS_WORLDLAND,
-    nonce,
-    {
-      value: ethers.utils.parseUnits("1", 18),
-    }
+    nonce
   );
-  tx.wait();
+
   console.log({ tx });
 }
 

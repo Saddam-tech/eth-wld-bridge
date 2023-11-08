@@ -1,24 +1,28 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const bridge_abi = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
+const {
+  abi: ethereum_bridge_abi,
+} = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
 
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
-
 const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
 
 async function main() {
   const signer = await ethers.getSigner();
+
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
-    bridge_abi.abi,
+    ethereum_bridge_abi,
     signer
   );
 
-  console.log({ MyContractAddress: MyContract.address });
-
-  const tx = await MyContract.processedNonces(9);
+  const tx = await MyContract.burnETH(
+    ethers.utils.parseUnits("1", 18),
+    TOKEN_ADDRESS_ETHEREUM,
+    nonce
+  );
 
   console.log({ tx });
 }

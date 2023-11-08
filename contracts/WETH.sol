@@ -32,7 +32,6 @@ contract WETH is Ownable {
     }
 
     function deposit(address sender, uint256 amount) public payable {
-        balanceOf[sender] += amount;
         emit Deposit(sender, amount);
     }
 
