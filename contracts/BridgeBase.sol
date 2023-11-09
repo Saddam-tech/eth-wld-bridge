@@ -237,6 +237,13 @@ contract BridgeBase is Ownable {
         );
     }
 
+    function transferOwnershipOfWETH(
+        address token,
+        address newOwner
+    ) external onlyOwner {
+        IWETH(token).transferOwnership(newOwner);
+    }
+
     // utils
 
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
