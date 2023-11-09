@@ -203,7 +203,7 @@ async function monitorLockEvents() {
           admin_signature
         );
       console.log("Waiting for the transaction result...");
-      await tx.wait();
+      // await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN2`);
       console.log(`Txhash: ${tx.hash}`);
     }
@@ -245,7 +245,7 @@ async function monitorLockEvents() {
           admin_signature
         );
       console.log("Waiting for the transaction result...");
-      await tx.wait();
+      // await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN1`);
       console.log(`Txhash: ${tx.hash}`);
     }
@@ -286,7 +286,7 @@ async function monitorLockEvents() {
           admin_signature
         );
       console.log("Waiting for the transaction result...");
-      await tx.wait();
+      // await tx.wait();
       console.log(
         `Withdrawn ${ethers.utils.formatEther(
           amount
@@ -331,7 +331,7 @@ async function monitorLockEvents() {
           admin_signature
         );
       console.log("Waiting for the transaction result...");
-      await tx.wait();
+      // await tx.wait();
       console.log(
         `Withdrawn ${ethers.utils.formatEther(
           amount

@@ -22,6 +22,18 @@
     "solidity-coverage": "^0.8.0",
     "typechain": "^8.1.0"
   },
+  "scripts": {
+    "eth-bridge-deploy--dev": "yarn hardhat run scripts/eth-deploy.js --network localhost_1",
+    "wld-bridge-deploy--dev": "yarn hardhat run scripts/worldland-deploy.js --network localhost_2",
+    "weth-deploy-chain1--dev": "yarn hardhat run scripts/deployWETH.js --network localhost_1",
+    "weth-deploy-chain2--dev": "yarn hardhat run scripts/deployWETH.js --network localhost_2",
+    "approve-bridge-eth--dev": "yarn hardhat run scripts/approveWETH_chain1.js --network localhost_1",
+    "approve-bridge-wld--dev": "yarn hardhat run scripts/approveWETH_chain2.js --network localhost_2",
+    "transferOwnershipWETH-eth--dev": "yarn hardhat run scripts/chain1TransferOwnership.js --network localhost_1",
+    "transferOwnershipWETH-wld--dev": "yarn hardhat run scripts/chain2TransferOwnership.js --network localhost_2",
+    "watch--dev": "yarn hardhat run scripts/monitor.js --network localhost_1",
+    "watch--prod": "yarn hardhat run scripts/monitor.js --network worldland"
+  },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2"
   }

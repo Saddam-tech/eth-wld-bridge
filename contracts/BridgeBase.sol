@@ -118,11 +118,11 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce
     ) external notInEmergency {
-        if (IERC20(token).allowance(msg.sender, address(this)) == 0) {
+        if (IToken(token).allowance(msg.sender, address(this)) == 0) {
             revert("Allowance is 0!");
         }
         require(
-            IERC20(token).transferFrom(msg.sender, address(this), amount),
+            IToken(token).transferFrom(msg.sender, address(this), amount),
             "Lock failed"
         );
         emit TransferToken(
@@ -161,7 +161,7 @@ contract BridgeBase is Ownable {
             "Balance of the user at the contract is less than the amount requested!"
         );
         processedNonces[msg.sender][nonce] = true;
-        IERC20(token).transfer(to, amount);
+        IToken(token).transfer(to, amount);
         userBalances[to][token] -= amount;
     }
 
@@ -238,6 +238,13 @@ contract BridgeBase is Ownable {
     }
 
     function transferOwnershipOfWETH(
+        address token,
+        address newOwner
+    ) external onlyOwner {
+        IToken(token).transferOwnership(newOwner);
+    }
+
+    function transferOwnershipOfERC20Custom(
         address token,
         address newOwner
     ) external onlyOwner {

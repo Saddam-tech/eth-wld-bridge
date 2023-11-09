@@ -8,7 +8,6 @@ const map_token_address_to_token_address = {
 async function createSignature(types, messages) {
   const hash = ethers.utils.solidityKeccak256(types, messages);
   const signer = await ethers.getSigner();
-  console.log({ SIGNER: signer.address });
   return signer.signMessage(ethers.utils.arrayify(hash));
 }
 // }

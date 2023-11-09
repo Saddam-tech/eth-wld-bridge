@@ -20,7 +20,7 @@ async function main() {
   const nonce = await signer.getTransactionCount();
   console.log({ nonce });
   const tx = await MyContract.burnWETH(
-    ethers.utils.parseUnits("1", 18),
+    ethers.utils.parseUnits("0.99", 18),
     TOKEN_ADDRESS_WORLDLAND,
     nonce
   );

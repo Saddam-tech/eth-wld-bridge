@@ -18,13 +18,21 @@ const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
 async function main() {
   const signer = await ethers.getSigner();
 
+  // const nonce = await signer.getTransactionCount();
+  // console.log({ nonce });
+
   const contract = new ethers.Contract(
-    TOKEN_ADDRESS_ETHEREUM,
-    weth_abi,
+    ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
+    ethereum_bridge_abi,
     signer
   );
-  const balanceOf = await contract.balanceOf(ETHEREUM_BRIDGE_CONTRACT_ADDRESS);
-  console.log({ balanceOf });
+
+  const stop = await contract.resume();
+
+  console.log({ stop });
+
+  // const balanceOf = await contract.balanceOf(signer.address);
+  // console.log({ balanceOf: ethers.utils.formatEther(balanceOf) });
 }
 
 main()

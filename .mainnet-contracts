@@ -1,0 +1,24 @@
+#0xd67c40b6488032BAC40C781c52E55e2593345689 real account
+PRIVATE_KEY=36ce51e7722a9dadedf6dedc8210f4949db2f7aa031d2d10190e8ea5312189d9
+
+#Token addresses
+#Deployed localhost_1
+#Deployed localhost_2
+TOKEN_ADDRESS_ETHEREUM=0x98f59aF3Df7AFAa9C653571501D4C96CDF4A3e2b
+TOKEN_ADDRESS_WORLDLAND=0x374bF87245094A8e4632ee11330e03D2d1D26466
+
+#Bridge contracts
+ETHEREUM_BRIDGE_CONTRACT_ADDRESS=0xF001FC82F515E81344F10f7F94d28Eb2262B6D40
+WORLDLAND_BRIDGE_CONTRACT_ADDRESS=0x59D6647Ea91adba183Cd24D827062e176a67EbD0
+
+# local_provider_chain_1=http://127.0.0.1:8545/
+
+# local_provider_chain_2=http://127.0.0.1:8546/
+
+local_provider_chain_1=https://sepolia.infura.io/v3/dc27bac5100c48f3a5ddea331f2d6e3f
+local_provider_chain_2=https://seoul.worldland.foundation
+
+provider_chain_1=https://sepolia.infura.io/v3/dc27bac5100c48f3a5ddea331f2d6e3f
+provider_chain_2=https://seoul.worldland.foundation
+
+ETHERSCAN_API_KEY=SVXDEB2I1V2ZJNH57EKYIQ3VF1Y73EV8MK
