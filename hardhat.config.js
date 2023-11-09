@@ -20,7 +20,7 @@ module.exports = {
       url: process.env.provider_chain_2,
       // accounts: [encryptedPk],
       accounts: [PRIVATE_KEY],
-      chainId: 12345,
+      chainId: 103,
       gas: 100000,
     },
     localhost_1: {

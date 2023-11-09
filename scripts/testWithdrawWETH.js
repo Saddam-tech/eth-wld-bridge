@@ -1,33 +1,30 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
+const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 const {
   abi: ethereum_bridge_abi,
 } = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
 
+const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
+const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
+
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
-const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
+
+const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
+  process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 
 async function main() {
   const signer = await ethers.getSigner();
 
-  const MyContract = new ethers.Contract(
-    ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
-    ethereum_bridge_abi,
+  const contract = new ethers.Contract(
+    TOKEN_ADDRESS_ETHEREUM,
+    weth_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-  const tx = await MyContract.lockETH(
-    signer.address,
-    TOKEN_ADDRESS_ETHEREUM,
-    nonce,
-    {
-      value: ethers.utils.parseUnits("10", 18),
-    }
-  );
-
-  console.log({ tx });
+  const balanceOf = await contract.balanceOf(ETHEREUM_BRIDGE_CONTRACT_ADDRESS);
+  console.log({ balanceOf });
 }
 
 main()

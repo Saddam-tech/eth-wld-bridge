@@ -17,8 +17,9 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
-
-  const tx = await MyContract.burnETH(
+  const nonce = await signer.getTransactionCount();
+  console.log({ nonce });
+  const tx = await MyContract.burnWETH(
     ethers.utils.parseUnits("1", 18),
     TOKEN_ADDRESS_ETHEREUM,
     nonce

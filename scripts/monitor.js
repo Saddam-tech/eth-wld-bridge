@@ -1,5 +1,4 @@
 const { ethers } = require("hardhat");
-const fs = require("fs-extra");
 require("dotenv").config();
 
 const {
@@ -57,6 +56,7 @@ async function monitorLockEvents() {
     process.env.PRIVATE_KEY,
     chain2Provider
   );
+
   console.log("Started monitoring chains [1, 2] for Lock transactions...");
   // Listen for the Lock event on the chain_1_contract
   chain_1_contract.on(
@@ -247,6 +247,51 @@ async function monitorLockEvents() {
       console.log("Waiting for the transaction result...");
       await tx.wait();
       console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN1`);
+      console.log(`Txhash: ${tx.hash}`);
+    }
+  );
+
+  // Listen for (BurnWETH) event on chain_1_contract
+  chain_1_contract.on(
+    "BurnWETH",
+    async (from, to, amount, token, date, nonce) => {
+      console.log(`<<<<<<<<<< BurnWETH event detected on CHAIN_1 >>>>>>>>>>>`);
+      console.log("to: ", to);
+      console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("chain1token: ", token);
+      console.log("chain2token: ", map_token_address_to_token_address[token]);
+      console.log("date: ", date);
+      console.log("nonce: ", nonce);
+
+      if (await chain_2_contract.processedNonces(to, nonce)) {
+        console.log(
+          "Skipping already processed transaction... Waiting for upcoming transactions..."
+        );
+        return;
+      }
+
+      let admin_signature = await createSignature(
+        ["address", "uint256", "address", "uint256"],
+        [to, amount, map_token_address_to_token_address[token], nonce]
+      );
+
+      // Unlock the same amount of tokens on chain 2 using the admin private key
+      const tx = await chain_2_contract
+        .connect(wallet_chain_2)
+        .unLockETH(
+          to,
+          amount,
+          map_token_address_to_token_address[token],
+          nonce,
+          admin_signature
+        );
+      console.log("Waiting for the transaction result...");
+      await tx.wait();
+      console.log(
+        `Withdrawn ${ethers.utils.formatEther(
+          amount
+        )} of ETH to ${to} on CHAIN2`
+      );
       console.log(`Txhash: ${tx.hash}`);
     }
   );

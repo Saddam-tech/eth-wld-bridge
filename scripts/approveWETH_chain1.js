@@ -1,9 +1,7 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const {
-  abi: ethereum_bridge_abi,
-} = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
+const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
@@ -13,18 +11,13 @@ async function main() {
   const signer = await ethers.getSigner();
 
   const MyContract = new ethers.Contract(
-    ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
-    ethereum_bridge_abi,
+    TOKEN_ADDRESS_ETHEREUM,
+    weth_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-  const tx = await MyContract.lockETH(
-    signer.address,
-    TOKEN_ADDRESS_ETHEREUM,
-    nonce,
-    {
-      value: ethers.utils.parseUnits("10", 18),
-    }
+  const tx = await MyContract.approve(
+    ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
+    ethers.utils.parseUnits("10000000000", 18)
   );
 
   console.log({ tx });

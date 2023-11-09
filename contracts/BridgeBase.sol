@@ -105,7 +105,7 @@ contract BridgeBase is Ownable {
         }
         require(
             IERC20(token).transferFrom(msg.sender, address(this), amount),
-            "TransferToken failed"
+            "Lock failed"
         );
         emit TransferToken(
             msg.sender,
@@ -136,7 +136,7 @@ contract BridgeBase is Ownable {
         );
         require(
             !processedNonces[msg.sender][nonce],
-            "TransferToken already processed!"
+            "UnLock already processed!"
         );
         require(
             userBalances[to][token] >= amount,
@@ -156,7 +156,7 @@ contract BridgeBase is Ownable {
     ) external payable {
         require(!processedNonces[msg.sender][nonce], "Lock already processed!");
         processedNonces[msg.sender][nonce] = true;
-        IWETH(token).deposit(msg.sender, msg.value);
+        IWETH(token).deposit{value: msg.value}(msg.sender);
         emit LockETH(msg.sender, to, msg.value, token, block.timestamp, nonce);
     }
 
@@ -174,7 +174,10 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(!processedNonces[msg.sender][nonce], "Mint already processed!");
+        require(
+            !processedNonces[msg.sender][nonce],
+            "UnLock already processed!"
+        );
         processedNonces[msg.sender][nonce] = true;
         IWETH(token).withdraw(to, amount);
     }
@@ -252,5 +255,10 @@ contract BridgeBase is Ownable {
         }
 
         return (v, r, s);
+    }
+
+    // Approve this contract to use WETH
+    function approve(address token, uint amount) external onlyOwner {
+        IWETH(token).approve(address(this), amount);
     }
 }

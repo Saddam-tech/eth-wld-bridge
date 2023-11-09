@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IWETH {
-    function deposit(address sender, uint256 amount) external payable;
+    function approve(address spender, uint amount) external returns (bool);
+
+    function deposit(address sender) external payable;
 
     function withdraw(address to, uint256 amount) external;
 

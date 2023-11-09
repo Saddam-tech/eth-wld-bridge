@@ -31,8 +31,8 @@ contract WETH is Ownable {
         return;
     }
 
-    function deposit(address sender, uint256 amount) public payable {
-        emit Deposit(sender, amount);
+    function deposit(address sender) public payable {
+        emit Deposit(sender, msg.value);
     }
 
     function mint(address to, uint256 amount) public onlyOwner {
@@ -41,14 +41,13 @@ contract WETH is Ownable {
     }
 
     function withdraw(address to, uint256 amount) public onlyOwner {
-        require(balanceOf[to] >= amount, "Balance is low!");
-        balanceOf[to] -= amount;
+        require(balanceOf[to] >= amount, "Insufficient balance");
         payable(to).transfer(amount);
         emit Withdrawal(to, amount);
     }
 
     function burn(address sender, uint256 amount) public {
-        require(balanceOf[sender] > amount, "Balance is low!");
+        require(balanceOf[sender] >= amount, "Insufficient balance");
         balanceOf[sender] -= amount;
         emit BurnWETH(sender, amount);
     }
