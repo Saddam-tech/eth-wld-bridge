@@ -27,9 +27,9 @@ async function main() {
     signer
   );
 
-  const stop = await contract.resume();
+  // const stop = await contract.resume();
 
-  console.log({ stop });
+  // console.log({ stop });
 
   // const balanceOf = await contract.balanceOf(signer.address);
   // console.log({ balanceOf: ethers.utils.formatEther(balanceOf) });

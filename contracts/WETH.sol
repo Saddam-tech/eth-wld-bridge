@@ -4,9 +4,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract WETH is Ownable {
-    string public name = "Wrapped Ether";
-    string public symbol = "WETH";
+    string public name;
+    string public symbol;
     uint8 public decimals = 18;
+
+    constructor(string memory _name, string memory _symbol) {
+        name = _name;
+        symbol = _symbol;
+    }
 
     event Approval(
         address indexed sender,
@@ -21,7 +26,7 @@ contract WETH is Ownable {
     event BurnWETH(address indexed sender, uint256 amount);
 
     mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) public allowance;
+    mapping(address => mapping(address => uint)) private _allowances;
 
     // receive() external payable {
     // deposit();
@@ -56,8 +61,15 @@ contract WETH is Ownable {
         return address(this).balance;
     }
 
+    function allowance(
+        address owner,
+        address spender
+    ) public view virtual returns (uint) {
+        return _allowances[owner][spender];
+    }
+
     function approve(address spender, uint amount) public returns (bool) {
-        allowance[msg.sender][spender] = amount;
+        _allowances[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
     }
@@ -75,13 +87,13 @@ contract WETH is Ownable {
 
         if (
             from != msg.sender &&
-            allowance[from][msg.sender] != type(uint256).max
+            _allowances[from][msg.sender] != type(uint256).max
         ) {
             require(
-                allowance[from][msg.sender] >= amount,
+                _allowances[from][msg.sender] >= amount,
                 "Allowance exceeded"
             );
-            allowance[from][msg.sender] -= amount;
+            _allowances[from][msg.sender] -= amount;
         }
 
         balanceOf[from] -= amount;

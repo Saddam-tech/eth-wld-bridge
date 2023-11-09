@@ -95,6 +95,10 @@ contract BridgeBase is Ownable {
         uint256 nonce,
         string calldata tokenType
     ) external notInEmergency {
+        require(
+            IToken(token).allowance(msg.sender, address(this)) > amount,
+            "Insufficient allowance!"
+        );
         require(!processedNonces[msg.sender][nonce], "Already processed!");
         processedNonces[msg.sender][nonce] = true;
         IToken(token).burn(msg.sender, amount);
@@ -118,9 +122,10 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce
     ) external notInEmergency {
-        if (IToken(token).allowance(msg.sender, address(this)) == 0) {
-            revert("Allowance is 0!");
-        }
+        require(
+            IToken(token).allowance(msg.sender, address(this)) > amount,
+            "Insufficient allowance!"
+        );
         require(
             IToken(token).transferFrom(msg.sender, address(this), amount),
             "Lock failed"
@@ -224,6 +229,10 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce
     ) external notInEmergency {
+        require(
+            IWETH(token).allowance(msg.sender, address(this)) > amount,
+            "Insufficient allowance!"
+        );
         require(!processedNonces[msg.sender][nonce], "Burn already processed!");
         processedNonces[msg.sender][nonce] = true;
         IWETH(token).burn(msg.sender, amount);
