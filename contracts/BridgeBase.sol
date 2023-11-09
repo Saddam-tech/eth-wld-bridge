@@ -11,6 +11,16 @@ import "./IToken.sol";
 contract BridgeBase is Ownable {
     mapping(address => mapping(uint256 => bool)) public processedNonces;
     mapping(address => mapping(address => uint256)) public userBalances;
+    bool public emergencyStopped;
+
+    constructor() {
+        emergencyStopped = false;
+    }
+
+    modifier notInEmergency() {
+        require(!emergencyStopped, "Contract is in emergency state!");
+        _;
+    }
 
     enum Step {
         Burn,
@@ -45,6 +55,14 @@ contract BridgeBase is Ownable {
         uint256 nonce
     );
 
+    function emergencyStop() external onlyOwner {
+        emergencyStopped = true;
+    }
+
+    function resume() external onlyOwner {
+        emergencyStopped = false;
+    }
+
     // TOKEN
 
     function mintToken(
@@ -53,7 +71,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner {
+    ) external onlyOwner notInEmergency {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -76,7 +94,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         string calldata tokenType
-    ) external {
+    ) external notInEmergency {
         require(!processedNonces[msg.sender][nonce], "Already processed!");
         processedNonces[msg.sender][nonce] = true;
         IToken(token).burn(msg.sender, amount);
@@ -99,7 +117,7 @@ contract BridgeBase is Ownable {
         string calldata tokenType,
         address token,
         uint256 nonce
-    ) external {
+    ) external notInEmergency {
         if (IERC20(token).allowance(msg.sender, address(this)) == 0) {
             revert("Allowance is 0!");
         }
@@ -126,7 +144,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner {
+    ) external onlyOwner notInEmergency {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -153,7 +171,7 @@ contract BridgeBase is Ownable {
         address to,
         address token,
         uint256 nonce
-    ) external payable {
+    ) external payable notInEmergency {
         require(!processedNonces[msg.sender][nonce], "Lock already processed!");
         processedNonces[msg.sender][nonce] = true;
         IWETH(token).deposit{value: msg.value}(msg.sender);
@@ -166,7 +184,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner {
+    ) external onlyOwner notInEmergency {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -188,7 +206,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner {
+    ) external onlyOwner notInEmergency {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -201,7 +219,11 @@ contract BridgeBase is Ownable {
         IWETH(token).mint(to, amount);
     }
 
-    function burnWETH(uint256 amount, address token, uint256 nonce) external {
+    function burnWETH(
+        uint256 amount,
+        address token,
+        uint256 nonce
+    ) external notInEmergency {
         require(!processedNonces[msg.sender][nonce], "Burn already processed!");
         processedNonces[msg.sender][nonce] = true;
         IWETH(token).burn(msg.sender, amount);
@@ -255,10 +277,5 @@ contract BridgeBase is Ownable {
         }
 
         return (v, r, s);
-    }
-
-    // Approve this contract to use WETH
-    function approve(address token, uint amount) external onlyOwner {
-        IWETH(token).approve(address(this), amount);
     }
 }
