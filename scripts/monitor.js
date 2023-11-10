@@ -24,41 +24,88 @@ const chain_1_bridge_contract_address =
 const chain_2_bridge_contract_address =
   process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 
+// Connect to both chains using the JsonRpcProvider class
+const chain1Provider = new ethers.providers.JsonRpcProvider(
+  process.env.local_provider_chain_1
+);
+const chain2Provider = new ethers.providers.JsonRpcProvider(
+  process.env.local_provider_chain_2
+);
+
+// Create Contract instances for the lock contracts on both chains
+const chain_1_contract = new ethers.Contract(
+  chain_1_bridge_contract_address,
+  ethereum_bridge_abi,
+  chain1Provider,
+  { gasLimit: 100000 }
+);
+
+const chain_2_contract = new ethers.Contract(
+  chain_2_bridge_contract_address,
+  wld_bridge_abi,
+  chain2Provider,
+  { gasLimit: 100000 }
+);
+// Get a wallet using the admin private key
+const wallet_chain_1 = new ethers.Wallet(
+  process.env.PRIVATE_KEY,
+  chain1Provider
+);
+const wallet_chain_2 = new ethers.Wallet(
+  process.env.PRIVATE_KEY,
+  chain2Provider
+);
+
+const batchSize = 5;
+
+const transactionQueueChain1 = [];
+const transactionQueueChain2 = [];
+
+async function processTransactionQueue() {
+  try {
+    const transactions1 = transactionQueueChain1.splice(0, batchSize);
+    const transactions2 = transactionQueueChain2.splice(0, batchSize);
+
+    // chain1 execution
+    if (transactions1.length > 0) {
+      console.log(
+        `Processing ${transactions1.length} transactions in batch...`
+      );
+      const batch1 = new ethers.utils.BatchRequest(chain1Provider);
+      transactions1.forEach((tx) => {
+        batch1.add(tx);
+        transactionQueueChain1.shift();
+      });
+      const responses_1 = await batch1.execute();
+      console.log({ responses_1 });
+      console.log(`Transactions batch executed on chain 1!`);
+    } else {
+      console.log("No transactions to process on chain 1.");
+    }
+
+    // chain2 execution
+    if (transactions2.length > 0) {
+      console.log(
+        `Processing ${transactions2.length} transactions in batch...`
+      );
+      const batch2 = new ethers.utils.BatchRequest(chain2Provider);
+      transactions2.forEach((tx) => {
+        batch2.add(tx);
+        transactionQueueChain2.shift();
+      });
+      const responses_2 = await batch2.execute();
+      console.log({ responses_2 });
+      console.log(`Transactions batch executed on chain 2!`);
+    } else {
+      console.log("No transactions to process on chain 2.");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 async function monitorLockEvents() {
-  // Connect to both chains using the JsonRpcProvider class
-  const chain1Provider = new ethers.providers.JsonRpcProvider(
-    process.env.local_provider_chain_1
-  );
-  const chain2Provider = new ethers.providers.JsonRpcProvider(
-    process.env.local_provider_chain_2
-  );
-
-  // Create Contract instances for the lock contracts on both chains
-  const chain_1_contract = new ethers.Contract(
-    chain_1_bridge_contract_address,
-    ethereum_bridge_abi,
-    chain1Provider,
-    { gasLimit: 100000 }
-  );
-
-  const chain_2_contract = new ethers.Contract(
-    chain_2_bridge_contract_address,
-    wld_bridge_abi,
-    chain2Provider,
-    { gasLimit: 100000 }
-  );
-  // Get a wallet using the admin private key
-  const wallet_chain_1 = new ethers.Wallet(
-    process.env.PRIVATE_KEY,
-    chain1Provider
-  );
-  const wallet_chain_2 = new ethers.Wallet(
-    process.env.PRIVATE_KEY,
-    chain2Provider
-  );
-
   console.log("Started monitoring chains [1, 2] for Lock transactions...");
-
   // Listen for the Lock event on the chain_1_contract
   chain_1_contract.on(
     "TransferToken",
@@ -85,7 +132,7 @@ async function monitorLockEvents() {
         return;
       }
       // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain_2_contract
+      const tx = chain_2_contract
         .connect(wallet_chain_2)
         .mintToken(
           to,
@@ -94,10 +141,12 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
-      console.log(
-        `Minted equivalent amount of ${map_token_address_to_token_address[token]} to ${to} on CHAIN2`
-      );
-      console.log(`Txhash: ${tx.hash}`);
+      transactionQueueChain2.push(tx);
+
+      // Process the queue in batches
+      if (transactionQueueChain2.length >= batchSize) {
+        await processTransactionQueue();
+      }
     }
   );
 
@@ -142,7 +191,7 @@ async function monitorLockEvents() {
         return;
       }
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_contract
+      const tx = chain_1_contract
         .connect(wallet_chain_1)
         .unlockToken(
           to,
@@ -151,10 +200,12 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
-      console.log(
-        `Unlocked equivalent amount of ${map_token_address_to_token_address[token]} to ${to} on CHAIN1`
-      );
-      console.log(`Txhash: ${tx.hash}`);
+      transactionQueueChain1.push(tx);
+
+      // Process the queue in batches
+      if (transactionQueueChain1.length >= batchSize) {
+        await processTransactionQueue();
+      }
     }
   );
 
@@ -185,7 +236,7 @@ async function monitorLockEvents() {
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
       // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain_2_contract
+      const tx = chain_2_contract
         .connect(wallet_chain_2)
         .mintWETH(
           to,
@@ -194,8 +245,12 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
-      console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN2`);
-      console.log(`Txhash: ${tx.hash}`);
+      transactionQueueChain2.push(tx);
+
+      // Process the queue in batches
+      if (transactionQueueChain2.length >= batchSize) {
+        await processTransactionQueue();
+      }
     }
   );
   // Listen for (LockETH) event on chain_2_contract
@@ -221,7 +276,7 @@ async function monitorLockEvents() {
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_contract
+      const tx = chain_1_contract
         .connect(wallet_chain_1)
         .mintWETH(
           to,
@@ -230,10 +285,12 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
-      console.log("Waiting for the transaction result...");
-      // await tx.wait();
-      console.log(`Minted equivalent amount of wrapped ETH to ${to} on CHAIN1`);
-      console.log(`Txhash: ${tx.hash}`);
+      transactionQueueChain1.push(tx);
+
+      // Process the queue in batches
+      if (transactionQueueChain1.length >= batchSize) {
+        await processTransactionQueue();
+      }
     }
   );
 
@@ -259,7 +316,7 @@ async function monitorLockEvents() {
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
       // Unlock the same amount of tokens on chain 2 using the admin private key
-      const tx = await chain_2_contract
+      const tx = chain_2_contract
         .connect(wallet_chain_2)
         .unLockETH(
           to,
@@ -268,13 +325,12 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
-      console.log("Waiting for the transaction result...");
-      console.log(
-        `Withdrawn ${ethers.utils.formatEther(
-          amount
-        )} of ETH to ${to} on CHAIN2`
-      );
-      console.log(`Txhash: ${tx.hash}`);
+      transactionQueueChain2.push(tx);
+
+      // Process the queue in batches
+      if (transactionQueueChain2.length >= batchSize) {
+        await processTransactionQueue();
+      }
     }
   );
 
@@ -300,7 +356,7 @@ async function monitorLockEvents() {
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
       // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = await chain_1_contract
+      const tx = chain_1_contract
         .connect(wallet_chain_1)
         .unLockETH(
           to,
@@ -309,13 +365,12 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
-      console.log("Waiting for the transaction result...");
-      console.log(
-        `Withdrawn ${ethers.utils.formatEther(
-          amount
-        )} of ETH to ${to} on CHAIN1`
-      );
-      console.log(`Txhash: ${tx.hash}`);
+      transactionQueueChain1.push(tx);
+
+      // Process the queue in batches
+      if (transactionQueueChain1.length >= batchSize) {
+        await processTransactionQueue();
+      }
     }
   );
 }
