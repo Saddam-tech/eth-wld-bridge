@@ -7,7 +7,7 @@ const {
 
 const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
   process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
-const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
+const WETH_ADDRESS_WORLDLAND = process.env.WETH_ADDRESS_WORLDLAND;
 
 async function main() {
   const signer = await ethers.getSigner();
@@ -20,7 +20,7 @@ async function main() {
   console.log({ nonce });
   const tx = await MyContract.lockETH(
     signer.address,
-    TOKEN_ADDRESS_WORLDLAND,
+    WETH_ADDRESS_WORLDLAND,
     nonce,
     {
       value: ethers.utils.parseUnits("10", 18),

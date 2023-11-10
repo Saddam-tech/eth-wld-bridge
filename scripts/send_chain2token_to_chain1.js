@@ -2,7 +2,7 @@ const { ethers } = require("hardhat");
 require("dotenv").config();
 
 const {
-  abi: worldland_bridge_abi,
+  abi: ethereum_bridge_abi,
 } = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 
 const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
@@ -14,13 +14,14 @@ async function main() {
 
   const MyContract = new ethers.Contract(
     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
-    worldland_bridge_abi,
+    ethereum_bridge_abi,
     signer
   );
   const nonce = await signer.getTransactionCount();
-  console.log({ nonce });
-  const tx = await MyContract.burnWETH(
-    ethers.utils.parseUnits("0.99", 18),
+  const tx = await MyContract.lockToken(
+    signer.address,
+    ethers.utils.parseUnits("10", 18),
+    "DAI",
     TOKEN_ADDRESS_WORLDLAND,
     nonce
   );

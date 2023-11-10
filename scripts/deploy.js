@@ -8,6 +8,7 @@ const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 const {
   abi: erc20_abi,
 } = require("../artifacts/contracts/ERC20Custom.sol/ERC20Custom.json");
+const { createSignature } = require("./util");
 
 async function main() {
   console.log("Deploying contracts...");
@@ -15,7 +16,7 @@ async function main() {
   const WETH = await ethers.getContractFactory("WETH");
   const ERC20Custom = await ethers.getContractFactory("ERC20Custom");
   const _bridge = await bridge.deploy();
-  const _WETH = await WETH.deploy("Wrapped Ether", "Wrapped Ether");
+  const _WETH = await WETH.deploy("Wrapped Ether", "WETH");
   const _ERC20Custom = await ERC20Custom.deploy("Dai", "DAI");
   await _bridge.deployed();
   await _WETH.deployed();
@@ -34,6 +35,20 @@ async function main() {
   await erc20_contract.approve(
     _bridge.address,
     ethers.utils.parseUnits("10000000000", 18)
+  );
+  const nonce = signer.getTransactionCount();
+  await erc20_contract.mintToken(
+    signer.address,
+    ethers.utils.parseUnits("10000000000", 18),
+    _ERC20Custom.address,
+    nonce,
+    createSignature(
+      ["address", "uint256", "address", "uint256"],
+      signer.address,
+      ethers.utils.parseUnits("10000000000", 18),
+      _ERC20Custom.address,
+      nonce
+    )
   );
   await weth_contract.transferOwnership(_bridge.address);
   await erc20_contract.transferOwnership(_bridge.address);

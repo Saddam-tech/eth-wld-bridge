@@ -18,13 +18,11 @@ async function main() {
     signer
   );
   const nonce = await signer.getTransactionCount();
-  const tx = await MyContract.lockETH(
-    signer.address,
+  console.log({ nonce });
+  const tx = await MyContract.burnWETH(
+    ethers.utils.parseUnits("1", 18),
     WETH_ADDRESS_ETHEREUM,
-    nonce,
-    {
-      value: ethers.utils.parseUnits("10", 18),
-    }
+    nonce
   );
 
   console.log({ tx });
