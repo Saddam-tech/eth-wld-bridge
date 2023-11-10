@@ -3,10 +3,10 @@ require("dotenv").config();
 
 const {
   abi: ethereum_bridge_abi,
-} = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
+} = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 const {
   abi: wld_bridge_abi,
-} = require("../artifacts/contracts/WorldlandBridge.sol/WorldlandBridge.json");
+} = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 const {
   map_token_address_to_token_address,
   createSignature,

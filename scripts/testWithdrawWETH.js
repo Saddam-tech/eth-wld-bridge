@@ -4,7 +4,7 @@ require("dotenv").config();
 const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 const {
   abi: ethereum_bridge_abi,
-} = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
+} = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 
 const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
 const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;

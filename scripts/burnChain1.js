@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const {
   abi: ethereum_bridge_abi,
-} = require("../artifacts/contracts/EthereumBridge.sol/EthereumBridge.json");
+} = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;

@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const {
   abi: worldland_bridge_abi,
-} = require("../artifacts/contracts/WorldlandBridge.sol/WorldlandBridge.json");
+} = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 
 const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
   process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
