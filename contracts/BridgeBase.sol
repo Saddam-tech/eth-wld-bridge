@@ -79,6 +79,8 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
+        require(!processedNonces[to][nonce], "Mint already processed!");
+        processedNonces[to][nonce] = true;
         IToken(token).mint(to, amount);
         userBalances[to][token] += amount;
     }
@@ -158,6 +160,8 @@ contract BridgeBase is Ownable {
             userBalances[to][token] >= amount,
             "Balance of the user at the contract is less than the amount requested!"
         );
+        require(!processedNonces[to][nonce], "UnLock already processed!");
+        processedNonces[to][nonce] = true;
         IToken(token).transfer(to, amount);
         userBalances[to][token] -= amount;
     }
@@ -189,6 +193,8 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
+        require(!processedNonces[to][nonce], "UnLock already processed!");
+        processedNonces[to][nonce] = true;
         IWETH(token).withdraw(to, amount);
     }
 
@@ -206,6 +212,8 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
+        require(!processedNonces[to][nonce], "Mint already processed!");
+        processedNonces[to][nonce] = true;
         IWETH(token).mint(to, amount);
     }
 
