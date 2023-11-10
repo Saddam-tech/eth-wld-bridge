@@ -56,6 +56,13 @@ const wallet_chain_2 = new ethers.Wallet(
   chain2Provider
 );
 
+const chain1_batchProvider = new ethers.providers.JsonRpcBatchProvider(
+  process.env.local_provider_chain_1
+);
+const chain2_batchProvider = new ethers.providers.JsonRpcBatchProvider(
+  process.env.local_provider_chain_2
+);
+
 const batchSize = 5;
 
 const transactionQueueChain1 = [];
@@ -71,13 +78,10 @@ async function processTransactionQueue() {
       console.log(
         `Processing ${transactions1.length} transactions in batch...`
       );
-      const batch1 = new ethers.utils.BatchRequest(chain1Provider);
-      transactions1.forEach((tx) => {
-        batch1.add(tx);
+      const resolved = await Promise.all(transactions1);
+      resolved.forEach(() => {
         transactionQueueChain1.shift();
       });
-      const responses_1 = await batch1.execute();
-      console.log({ responses_1 });
       console.log(`Transactions batch executed on chain 1!`);
     } else {
       console.log("No transactions to process on chain 1.");
@@ -88,13 +92,11 @@ async function processTransactionQueue() {
       console.log(
         `Processing ${transactions2.length} transactions in batch...`
       );
-      const batch2 = new ethers.utils.BatchRequest(chain2Provider);
-      transactions2.forEach((tx) => {
-        batch2.add(tx);
+      const resolved = await Promise.all(transactions2);
+      console.log({ resolved });
+      resolved.forEach(() => {
         transactionQueueChain2.shift();
       });
-      const responses_2 = await batch2.execute();
-      console.log({ responses_2 });
       console.log(`Transactions batch executed on chain 2!`);
     } else {
       console.log("No transactions to process on chain 2.");
@@ -245,6 +247,7 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
+      console.log({ tx });
       transactionQueueChain2.push(tx);
 
       // Process the queue in batches
