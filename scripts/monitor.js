@@ -64,7 +64,7 @@ async function monitorLockEvents() {
     "TransferToken",
     async (from, to, amount, token, timestamp, tokenType, nonce) => {
       console.log(
-        `<<<<<<<<<< TOKEN Lock event detected on CHAIN_1 >>>>>>>>>>>`
+        `<<<<<<<<<< TransferToken event detected on CHAIN_1 >>>>>>>>>>>`
       );
       console.log("from: ", from);
       console.log("to: ", to);
@@ -78,7 +78,7 @@ async function monitorLockEvents() {
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
       // Check if the same transaction is being executed the second time
-      if (await chain_2_contract.processedNonces(nonce)) {
+      if (await chain_2_contract.processedNonces(to, nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
@@ -87,7 +87,7 @@ async function monitorLockEvents() {
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = await chain_2_contract
         .connect(wallet_chain_2)
-        .mint(
+        .mintToken(
           to,
           amount,
           map_token_address_to_token_address[token],
@@ -106,7 +106,7 @@ async function monitorLockEvents() {
     "TransferToken",
     async (from, to, amount, token, timestamp, tokenType, nonce) => {
       console.log(
-        `<<<<<<<<<< TOKEN Lock event detected on CHAIN_2 >>>>>>>>>>>`
+        `<<<<<<<<<< TransferToken event detected on CHAIN_2 >>>>>>>>>>>`
       );
       console.log("from: ", from);
       console.log("to: ", to);
@@ -119,7 +119,7 @@ async function monitorLockEvents() {
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
       // Check if the same transaction is being executed the second time
-      if (await chain_1_contract.processedNonces(nonce)) {
+      if (await chain_1_contract.processedNonces(to, nonce)) {
         console.log(
           "Skipping already processed transaction... Waiting for upcoming transactions..."
         );
@@ -129,7 +129,10 @@ async function monitorLockEvents() {
       // Check if the balance of user is enough
       let _amount = ethers.utils.formatEther(amount);
       let chain1_user_balance = ethers.utils.formatEther(
-        chain_1_contract.userBalances(to)
+        await chain_1_contract.userBalances(
+          to,
+          map_token_address_to_token_address[token]
+        )
       );
       if (parseFloat(chain1_user_balance) < parseFloat(_amount)) {
         console.log(
@@ -141,7 +144,7 @@ async function monitorLockEvents() {
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = await chain_1_contract
         .connect(wallet_chain_1)
-        .unlock(
+        .unlockToken(
           to,
           amount,
           map_token_address_to_token_address[token],

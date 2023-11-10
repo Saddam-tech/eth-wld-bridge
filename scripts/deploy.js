@@ -36,19 +36,9 @@ async function main() {
     _bridge.address,
     ethers.utils.parseUnits("10000000000", 18)
   );
-  const nonce = signer.getTransactionCount();
-  await erc20_contract.mintToken(
+  await erc20_contract.mint(
     signer.address,
-    ethers.utils.parseUnits("10000000000", 18),
-    _ERC20Custom.address,
-    nonce,
-    createSignature(
-      ["address", "uint256", "address", "uint256"],
-      signer.address,
-      ethers.utils.parseUnits("10000000000", 18),
-      _ERC20Custom.address,
-      nonce
-    )
+    ethers.utils.parseUnits("10000000000", 18)
   );
   await weth_contract.transferOwnership(_bridge.address);
   await erc20_contract.transferOwnership(_bridge.address);
