@@ -79,11 +79,6 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(
-            processedNonces[msg.sender][nonce] == false,
-            "TransferToken already processed!"
-        );
-        processedNonces[msg.sender][nonce] = true;
         IToken(token).mint(to, amount);
         userBalances[to][token] += amount;
     }
@@ -99,7 +94,7 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        require(!processedNonces[msg.sender][nonce], "Already processed!");
+        require(!processedNonces[msg.sender][nonce], "Burn already processed!");
         processedNonces[msg.sender][nonce] = true;
         IToken(token).burn(msg.sender, amount);
         emit TransferToken(
@@ -126,6 +121,8 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
+        require(!processedNonces[msg.sender][nonce], "Lock already processed!");
+        processedNonces[msg.sender][nonce] = true;
         require(
             IToken(token).transferFrom(msg.sender, address(this), amount),
             "Lock failed"
@@ -158,14 +155,9 @@ contract BridgeBase is Ownable {
             "Wrong signature!"
         );
         require(
-            !processedNonces[msg.sender][nonce],
-            "UnLock already processed!"
-        );
-        require(
             userBalances[to][token] >= amount,
             "Balance of the user at the contract is less than the amount requested!"
         );
-        processedNonces[msg.sender][nonce] = true;
         IToken(token).transfer(to, amount);
         userBalances[to][token] -= amount;
     }
@@ -197,11 +189,6 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(
-            !processedNonces[msg.sender][nonce],
-            "UnLock already processed!"
-        );
-        processedNonces[msg.sender][nonce] = true;
         IWETH(token).withdraw(to, amount);
     }
 
@@ -219,8 +206,6 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(!processedNonces[msg.sender][nonce], "Mint already processed!");
-        processedNonces[msg.sender][nonce] = true;
         IWETH(token).mint(to, amount);
     }
 

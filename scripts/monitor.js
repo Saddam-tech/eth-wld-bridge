@@ -56,13 +56,6 @@ const wallet_chain_2 = new ethers.Wallet(
   chain2Provider
 );
 
-const chain1_batchProvider = new ethers.providers.JsonRpcBatchProvider(
-  process.env.local_provider_chain_1
-);
-const chain2_batchProvider = new ethers.providers.JsonRpcBatchProvider(
-  process.env.local_provider_chain_2
-);
-
 const batchSize = 5;
 
 const transactionQueueChain1 = [];
@@ -79,6 +72,7 @@ async function processTransactionQueue() {
         `Processing ${transactions1.length} transactions in batch...`
       );
       const resolved = await Promise.all(transactions1);
+      console.log({ resolved });
       resolved.forEach(() => {
         transactionQueueChain1.shift();
       });
@@ -144,11 +138,6 @@ async function monitorLockEvents() {
           admin_signature
         );
       transactionQueueChain2.push(tx);
-
-      // Process the queue in batches
-      if (transactionQueueChain2.length >= batchSize) {
-        await processTransactionQueue();
-      }
     }
   );
 
@@ -203,11 +192,6 @@ async function monitorLockEvents() {
           admin_signature
         );
       transactionQueueChain1.push(tx);
-
-      // Process the queue in batches
-      if (transactionQueueChain1.length >= batchSize) {
-        await processTransactionQueue();
-      }
     }
   );
 
@@ -249,11 +233,6 @@ async function monitorLockEvents() {
         );
       console.log({ tx });
       transactionQueueChain2.push(tx);
-
-      // Process the queue in batches
-      if (transactionQueueChain2.length >= batchSize) {
-        await processTransactionQueue();
-      }
     }
   );
   // Listen for (LockETH) event on chain_2_contract
@@ -289,11 +268,6 @@ async function monitorLockEvents() {
           admin_signature
         );
       transactionQueueChain1.push(tx);
-
-      // Process the queue in batches
-      if (transactionQueueChain1.length >= batchSize) {
-        await processTransactionQueue();
-      }
     }
   );
 
@@ -329,11 +303,6 @@ async function monitorLockEvents() {
           admin_signature
         );
       transactionQueueChain2.push(tx);
-
-      // Process the queue in batches
-      if (transactionQueueChain2.length >= batchSize) {
-        await processTransactionQueue();
-      }
     }
   );
 
@@ -369,13 +338,13 @@ async function monitorLockEvents() {
           admin_signature
         );
       transactionQueueChain1.push(tx);
-
-      // Process the queue in batches
-      if (transactionQueueChain1.length >= batchSize) {
-        await processTransactionQueue();
-      }
     }
   );
+
+  // Process the queue in batches every 15 secs
+  setInterval(async () => {
+    await processTransactionQueue();
+  }, 15000);
 }
 
 monitorLockEvents().catch((err) => {
