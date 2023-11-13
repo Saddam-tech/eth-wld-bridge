@@ -88,7 +88,7 @@ async function processTransactionQueue() {
         transactionQueueChain2.shift();
       });
       console.log(
-        `Processed ${resolved.length} transactions in batch on chain 1!`
+        `Processed ${resolved.length} transactions in batch on chain 2!`
       );
     } else {
       console.log("No transactions to process on chain 2.");
@@ -158,10 +158,6 @@ async function monitorLockEvents() {
         ["address", "uint256", "address", "uint256"],
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
-      console.log({
-        chain2_nonce: nonce,
-        chain1_nonce: await chain_1_contract.processedNonces(to, nonce),
-      });
       // Check if the same transaction is being executed the second time
       if (await chain_1_contract.processedNonces(to, nonce)) {
         console.log(
