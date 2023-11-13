@@ -68,9 +68,6 @@ async function processTransactionQueue() {
 
     // chain1 execution
     if (transactions1.length > 0) {
-      console.log(
-        `Processing ${transactions1.length} transactions in batch...`
-      );
       const resolved = await Promise.all(transactions1);
       console.log({ resolved });
       resolved.forEach(() => {
@@ -85,9 +82,6 @@ async function processTransactionQueue() {
 
     // chain2 execution
     if (transactions2.length > 0) {
-      console.log(
-        `Processing ${transactions2.length} transactions in batch...`
-      );
       const resolved = await Promise.all(transactions2);
       console.log({ resolved });
       resolved.forEach(() => {
@@ -116,7 +110,8 @@ async function monitorLockEvents() {
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("token: ", token);
+      console.log("chain1token: ", token);
+      console.log("chain2token: ", map_token_address_to_token_address[token]);
       console.log("token_name: ", tokenType);
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
@@ -155,7 +150,8 @@ async function monitorLockEvents() {
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("token: ", token);
+      console.log("chain1token: ", map_token_address_to_token_address[token]);
+      console.log("chain2token: ", token);
       console.log("token_name: ", tokenType);
       console.log("nonce: ", nonce);
       let admin_signature = await createSignature(
@@ -173,7 +169,6 @@ async function monitorLockEvents() {
         );
         return;
       }
-      // THIS HAS TO BE COMPLETED
       // Check if the balance of user is enough
       let _amount = ethers.utils.formatEther(amount);
       let chain1_user_balance = ethers.utils.formatEther(
