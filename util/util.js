@@ -1,5 +1,8 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
+
+const message_type = ["address", "uint256", "address", "uint256"];
+
 const map_token_address_to_token_address = {
   [process.env.TOKEN_ADDRESS_ETHEREUM]: process.env.TOKEN_ADDRESS_WORLDLAND,
   [process.env.TOKEN_ADDRESS_WORLDLAND]: process.env.TOKEN_ADDRESS_ETHEREUM,
@@ -14,4 +17,8 @@ async function createSignature(types, messages) {
 }
 // }
 
-module.exports = { map_token_address_to_token_address, createSignature };
+module.exports = {
+  map_token_address_to_token_address,
+  message_type,
+  createSignature,
+};

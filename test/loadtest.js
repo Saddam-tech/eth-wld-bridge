@@ -18,14 +18,12 @@ async function main() {
       const signer = (await ethers.getSigners())[i];
       signers.push(signer);
     }
-    let signers_log = await Promise.all(signers);
-    console.log({ signers_log });
+    await Promise.all(signers);
     for (let i = 0; i < signers.length; i++) {
       const nonce = signers[i]?.getTransactionCount();
       nonces.push(nonce);
     }
-    const nonces_log = await Promise.all(nonces);
-    console.log({ nonces_log });
+    await Promise.all(nonces);
     for (let i = 0; i < signers.length; i++) {
       const MyContract = new ethers.Contract(
         ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
