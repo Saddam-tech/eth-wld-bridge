@@ -63,8 +63,14 @@ const transactionQueueChain2 = [];
 
 async function processTransactionQueue() {
   try {
-    const transactions1 = transactionQueueChain1.splice(0, batchSize);
-    const transactions2 = transactionQueueChain2.splice(0, batchSize);
+    const transactions1 = transactionQueueChain1.splice(
+      0,
+      transactionQueueChain1.length
+    );
+    const transactions2 = transactionQueueChain2.splice(
+      0,
+      transactionQueueChain2.length
+    );
 
     // chain1 execution
     if (transactions1.length > 0) {
@@ -101,6 +107,8 @@ async function processTransactionQueue() {
 async function monitorLockEvents() {
   console.log("Started monitoring chains [1, 2] for Lock transactions...");
   // Listen for the Lock event on the chain_1_contract
+  let admin_nonce_chain1 = await wallet_chain_1.getTransactionCount();
+  let admin_nonce_chain2 = await wallet_chain_2.getTransactionCount();
   chain_1_contract.on(
     "TransferToken",
     async (from, to, amount, token, timestamp, tokenType, nonce) => {
@@ -127,6 +135,7 @@ async function monitorLockEvents() {
         return;
       }
       // Mint the same amount of tokens on chain 2 using the admin private key
+
       const tx = chain_2_contract
         .connect(wallet_chain_2)
         .mintToken(
@@ -190,6 +199,7 @@ async function monitorLockEvents() {
           nonce,
           admin_signature
         );
+
       transactionQueueChain1.push(tx);
     }
   );
@@ -220,6 +230,7 @@ async function monitorLockEvents() {
         ["address", "uint256", "address", "uint256"],
         [to, amount, map_token_address_to_token_address[token], nonce]
       );
+      console.log({ admin_nonce_chain2 });
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = chain_2_contract
         .connect(wallet_chain_2)
@@ -228,10 +239,14 @@ async function monitorLockEvents() {
           amount,
           map_token_address_to_token_address[token],
           nonce,
-          admin_signature
+          admin_signature,
+          {
+            nonce: admin_nonce_chain2,
+          }
         );
       console.log({ tx });
       transactionQueueChain2.push(tx);
+      admin_nonce_chain2 += 1;
     }
   );
   // Listen for (LockETH) event on chain_2_contract

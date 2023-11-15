@@ -25,14 +25,12 @@ module.exports = {
     localhost_1: {
       url: process.env.local_provider_chain_1,
       // accounts: [encryptedPk],
-      accounts: [PRIVATE_KEY],
       chainId: 31337,
       gas: 100000,
     },
     localhost_2: {
       url: process.env.local_provider_chain_2,
       // accounts: [encryptedPk],
-      accounts: [PRIVATE_KEY],
       chainId: 31337,
       gas: 100000,
     },
