@@ -1,14 +1,10 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const {
-  abi: bridge_abi,
-} = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 const {
   abi: erc20_abi,
 } = require("../artifacts/contracts/ERC20Custom.sol/ERC20Custom.json");
-const { createSignature } = require("../util/util");
 
 async function main() {
   console.log("Deploying contracts...");

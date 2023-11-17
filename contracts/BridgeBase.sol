@@ -9,9 +9,10 @@ import "./IWETH.sol";
 import "./IToken.sol";
 
 contract BridgeBase is Ownable {
-    mapping(address => mapping(uint256 => bool)) public processedNonces;
+    mapping(uint256 => bool) public processedNonces;
     mapping(address => mapping(address => uint256)) public userBalances;
     bool public emergencyStopped;
+    uint public _nonce;
 
     constructor() {
         emergencyStopped = false;
@@ -79,8 +80,8 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(!processedNonces[to][nonce], "Mint already processed!");
-        processedNonces[to][nonce] = true;
+        require(!processedNonces[nonce], "Mint already processed!");
+        processedNonces[nonce] = true;
         IToken(token).mint(to, amount);
         userBalances[to][token] += amount;
     }
@@ -89,15 +90,12 @@ contract BridgeBase is Ownable {
         address to,
         uint256 amount,
         address token,
-        uint256 nonce,
         string calldata tokenType
     ) external notInEmergency {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        require(!processedNonces[msg.sender][nonce], "Burn already processed!");
-        processedNonces[msg.sender][nonce] = true;
         IToken(token).burn(msg.sender, amount);
         emit TransferToken(
             msg.sender,
@@ -106,25 +104,23 @@ contract BridgeBase is Ownable {
             token,
             block.timestamp,
             tokenType,
-            nonce,
+            _nonce,
             Step.Burn
         );
         userBalances[msg.sender][token] -= amount;
+        _nonce++;
     }
 
     function lockToken(
         address to,
         uint256 amount,
         string calldata tokenType,
-        address token,
-        uint256 nonce
+        address token
     ) external notInEmergency {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        require(!processedNonces[msg.sender][nonce], "Lock already processed!");
-        processedNonces[msg.sender][nonce] = true;
         require(
             IToken(token).transferFrom(msg.sender, address(this), amount),
             "Lock failed"
@@ -136,10 +132,11 @@ contract BridgeBase is Ownable {
             token,
             block.timestamp,
             tokenType,
-            nonce,
+            _nonce,
             Step.Lock
         );
         userBalances[msg.sender][token] += amount;
+        _nonce++;
     }
 
     function unlockToken(
@@ -160,8 +157,8 @@ contract BridgeBase is Ownable {
             userBalances[to][token] >= amount,
             "Balance of the user at the contract is less than the amount requested!"
         );
-        require(!processedNonces[to][nonce], "UnLock already processed!");
-        processedNonces[to][nonce] = true;
+        require(!processedNonces[nonce], "UnLock already processed!");
+        processedNonces[nonce] = true;
         IToken(token).transfer(to, amount);
         userBalances[to][token] -= amount;
     }
@@ -170,13 +167,11 @@ contract BridgeBase is Ownable {
 
     function lockETH(
         address to,
-        address token,
-        uint256 nonce
+        address token
     ) external payable notInEmergency {
-        require(!processedNonces[msg.sender][nonce], "Lock already processed!");
-        processedNonces[msg.sender][nonce] = true;
         IWETH(token).deposit{value: msg.value}(msg.sender);
-        emit LockETH(msg.sender, to, msg.value, token, block.timestamp, nonce);
+        emit LockETH(msg.sender, to, msg.value, token, block.timestamp, _nonce);
+        _nonce++;
     }
 
     function unLockETH(
@@ -193,8 +188,8 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(!processedNonces[to][nonce], "UnLock already processed!");
-        processedNonces[to][nonce] = true;
+        require(!processedNonces[nonce], "UnLock already processed!");
+        processedNonces[nonce] = true;
         IWETH(token).withdraw(to, amount);
     }
 
@@ -212,22 +207,16 @@ contract BridgeBase is Ownable {
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(!processedNonces[to][nonce], "Mint already processed!");
-        processedNonces[to][nonce] = true;
+        require(!processedNonces[nonce], "Mint already processed!");
+        processedNonces[nonce] = true;
         IWETH(token).mint(to, amount);
     }
 
-    function burnWETH(
-        uint256 amount,
-        address token,
-        uint256 nonce
-    ) external notInEmergency {
+    function burnWETH(uint256 amount, address token) external notInEmergency {
         require(
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        require(!processedNonces[msg.sender][nonce], "Burn already processed!");
-        processedNonces[msg.sender][nonce] = true;
         IWETH(token).burn(msg.sender, amount);
         emit BurnWETH(
             msg.sender,
@@ -235,8 +224,9 @@ contract BridgeBase is Ownable {
             amount,
             token,
             block.timestamp,
-            nonce
+            _nonce
         );
+        _nonce++;
     }
 
     function transferOwnershipOfWETH(
