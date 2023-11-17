@@ -4,13 +4,16 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./WETH.sol";
 import "./IWETH.sol";
 import "./IToken.sol";
 
 contract BridgeBase is Ownable {
+    using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     mapping(address => mapping(address => uint256)) public userBalances;
+    uint256 public feeToOwner;
     bool public emergencyStopped;
     uint public _nonce;
 
@@ -56,12 +59,18 @@ contract BridgeBase is Ownable {
         uint256 nonce
     );
 
+    receive() external payable {}
+
     function emergencyStop() external onlyOwner {
         emergencyStopped = true;
     }
 
     function resume() external onlyOwner {
         emergencyStopped = false;
+    }
+
+    function setFeePercentage(uint256 percentage) external onlyOwner {
+        feeToOwner = percentage;
     }
 
     // TOKEN
@@ -96,18 +105,21 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        IToken(token).burn(msg.sender, amount);
+        uint256 fee = amount.mul(feeToOwner).div(100 ** 18);
+        uint256 afterFee = amount.sub(fee);
+        IToken(token).transferFrom(msg.sender, owner(), fee);
+        IToken(token).burn(msg.sender, afterFee);
         emit TransferToken(
             msg.sender,
             to,
-            amount,
+            afterFee,
             token,
             block.timestamp,
             tokenType,
             _nonce,
             Step.Burn
         );
-        userBalances[msg.sender][token] -= amount;
+        userBalances[msg.sender][token] -= afterFee;
         _nonce++;
     }
 
@@ -121,21 +133,24 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
+        uint256 fee = amount.mul(feeToOwner).div(100 ** 18);
+        uint256 afterFee = amount.sub(fee);
+        IToken(token).transferFrom(msg.sender, owner(), fee);
         require(
-            IToken(token).transferFrom(msg.sender, address(this), amount),
+            IToken(token).transferFrom(msg.sender, address(this), afterFee),
             "Lock failed"
         );
         emit TransferToken(
             msg.sender,
             to,
-            amount,
+            afterFee,
             token,
             block.timestamp,
             tokenType,
             _nonce,
             Step.Lock
         );
-        userBalances[msg.sender][token] += amount;
+        userBalances[msg.sender][token] += afterFee;
         _nonce++;
     }
 
@@ -169,8 +184,12 @@ contract BridgeBase is Ownable {
         address to,
         address token
     ) external payable notInEmergency {
-        IWETH(token).deposit{value: msg.value}(msg.sender);
-        emit LockETH(msg.sender, to, msg.value, token, block.timestamp, _nonce);
+        uint256 fee = msg.value.mul(feeToOwner).div(100 ** 18);
+        uint256 afterFee = msg.value.sub(fee);
+        (bool success, ) = owner().call{value: fee}("");
+        require(success, "Transfer to owner failed!");
+        IWETH(token).deposit{value: afterFee}(msg.sender);
+        emit LockETH(msg.sender, to, afterFee, token, block.timestamp, _nonce);
         _nonce++;
     }
 
@@ -217,11 +236,14 @@ contract BridgeBase is Ownable {
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        IWETH(token).burn(msg.sender, amount);
+        uint256 fee = amount.mul(feeToOwner).div(100 ** 18);
+        uint256 afterFee = amount.sub(fee);
+        IWETH(token).transferFrom(msg.sender, owner(), fee);
+        IWETH(token).burn(msg.sender, afterFee);
         emit BurnWETH(
             msg.sender,
             msg.sender,
-            amount,
+            afterFee,
             token,
             block.timestamp,
             _nonce
