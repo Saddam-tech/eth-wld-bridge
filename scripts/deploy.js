@@ -11,7 +11,7 @@ async function main() {
   const bridge = await ethers.getContractFactory("BridgeBase");
   const WETH = await ethers.getContractFactory("WETH");
   const ERC20Custom = await ethers.getContractFactory("ERC20Custom");
-  const _bridge = await bridge.deploy();
+  const _bridge = await bridge.deploy(ethers.utils.parseUnits("0.1", 18));
   const _WETH = await WETH.deploy("Wrapped Ether", "WETH");
   const _ERC20Custom = await ERC20Custom.deploy("Dai", "DAI");
   await _bridge.deployed();
