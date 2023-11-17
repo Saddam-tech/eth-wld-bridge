@@ -10,7 +10,7 @@ const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
 const WETH_ADDRESS_WORLDLAND = process.env.WETH_ADDRESS_WORLDLAND;
 
 async function main() {
-  const signer = await ethers.getSigner();
+  const signer = await ethers.getSigner(1);
   const MyContract = new ethers.Contract(
     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
     ethereum_bridge_abi,
