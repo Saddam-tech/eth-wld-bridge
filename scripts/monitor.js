@@ -104,7 +104,7 @@ async function monitorLockEvents() {
       ]);
       console.log({ admin_nonce_chain2 });
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_2_CONTRACT.processedNonces(to, nonce)) {
+      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
@@ -144,7 +144,7 @@ async function monitorLockEvents() {
       ]);
       console.log({ admin_nonce_chain1 });
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_1_CONTRACT.processedNonces(to, nonce)) {
+      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
@@ -192,7 +192,7 @@ async function monitorLockEvents() {
       console.log("date: ", date);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_2_CONTRACT.processedNonces(to, nonce)) {
+      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
@@ -214,7 +214,6 @@ async function monitorLockEvents() {
           nonce: admin_nonce_chain2,
         }
       );
-      console.log({ tx });
       transactionQueueChain2.push(tx);
       admin_nonce_chain2 += 1;
     }
@@ -231,7 +230,7 @@ async function monitorLockEvents() {
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("date: ", date);
       console.log("nonce: ", nonce);
-      if (await CHAIN_1_CONTRACT.processedNonces(to, nonce)) {
+      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
@@ -269,7 +268,7 @@ async function monitorLockEvents() {
       console.log("chain2token: ", map_token_address_to_token_address[token]);
       console.log("date: ", date);
       console.log("nonce: ", nonce);
-      if (await CHAIN_2_CONTRACT.processedNonces(to, nonce)) {
+      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
@@ -307,7 +306,7 @@ async function monitorLockEvents() {
       console.log("chain2token: ", token);
       console.log("date: ", date);
       console.log("nonce: ", nonce);
-      if (await CHAIN_1_CONTRACT.processedNonces(to, nonce)) {
+      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }

@@ -17,13 +17,10 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-  console.log({ nonce });
   const tx = await MyContract.burnToken(
     signer.address,
     ethers.utils.parseUnits("1", 18),
     TOKEN_ADDRESS_WORLDLAND,
-    nonce,
     "DAI"
   );
 

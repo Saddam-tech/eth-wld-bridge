@@ -12,18 +12,12 @@ const WETH_ADDRESS_ETHEREUM = process.env.WETH_ADDRESS_ETHEREUM;
 async function main() {
   try {
     let signers = [];
-    let nonces = [];
     let rawTxArr = [];
     for (let i = 0; i < 10; i++) {
       const signer = (await ethers.getSigners())[i];
       signers.push(signer);
     }
     await Promise.all(signers);
-    for (let i = 0; i < signers.length; i++) {
-      const nonce = signers[i]?.getTransactionCount();
-      nonces.push(nonce);
-    }
-    await Promise.all(nonces);
     for (let i = 0; i < signers.length; i++) {
       const MyContract = new ethers.Contract(
         ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
@@ -33,7 +27,6 @@ async function main() {
       const tx = MyContract.lockETH(
         signers[i]?.address,
         WETH_ADDRESS_ETHEREUM,
-        nonces[i],
         {
           value: ethers.utils.parseUnits("10", 18),
         }

@@ -17,15 +17,9 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-  const tx = await MyContract.lockETH(
-    signer.address,
-    WETH_ADDRESS_ETHEREUM,
-    nonce,
-    {
-      value: ethers.utils.parseUnits("10", 18),
-    }
-  );
+  const tx = await MyContract.lockETH(signer.address, WETH_ADDRESS_ETHEREUM, {
+    value: ethers.utils.parseUnits("10", 18),
+  });
 
   console.log({ tx });
 }

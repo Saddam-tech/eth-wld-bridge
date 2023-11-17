@@ -17,13 +17,11 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
   const tx = await MyContract.lockToken(
     signer.address,
     ethers.utils.parseUnits("10", 18),
     "DAI",
-    TOKEN_ADDRESS_WORLDLAND,
-    nonce
+    TOKEN_ADDRESS_WORLDLAND
   );
 
   console.log({ tx });

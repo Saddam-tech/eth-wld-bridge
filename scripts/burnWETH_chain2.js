@@ -17,12 +17,9 @@ async function main() {
     worldland_bridge_abi,
     signer
   );
-  const nonce = await signer.getTransactionCount();
-  console.log({ nonce });
   const tx = await MyContract.burnWETH(
     ethers.utils.parseUnits("1", 18),
-    WETH_ADDRESS_WORLDLAND,
-    nonce
+    WETH_ADDRESS_WORLDLAND
   );
 
   console.log({ tx });
