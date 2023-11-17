@@ -13,12 +13,13 @@ contract BridgeBase is Ownable {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     mapping(address => mapping(address => uint256)) public userBalances;
-    uint256 public feeToOwner;
+    uint256 public feeRate;
     bool public emergencyStopped;
     uint public _nonce;
 
-    constructor() {
+    constructor(uint256 _feeRate) {
         emergencyStopped = false;
+        feeRate = _feeRate;
     }
 
     modifier notInEmergency() {
@@ -69,8 +70,8 @@ contract BridgeBase is Ownable {
         emergencyStopped = false;
     }
 
-    function setFeePercentage(uint256 percentage) external onlyOwner {
-        feeToOwner = percentage;
+    function setFeeRate(uint256 rate) external onlyOwner {
+        feeRate = rate;
     }
 
     // TOKEN
@@ -105,7 +106,7 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(feeToOwner).div(100 ** 18);
+        uint256 fee = amount.mul(feeRate).div(100 ** 18);
         uint256 afterFee = amount.sub(fee);
         IToken(token).transferFrom(msg.sender, owner(), fee);
         IToken(token).burn(msg.sender, afterFee);
@@ -133,7 +134,7 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(feeToOwner).div(100 ** 18);
+        uint256 fee = amount.mul(feeRate).div(100 ** 18);
         uint256 afterFee = amount.sub(fee);
         IToken(token).transferFrom(msg.sender, owner(), fee);
         require(
@@ -184,7 +185,7 @@ contract BridgeBase is Ownable {
         address to,
         address token
     ) external payable notInEmergency {
-        uint256 fee = msg.value.mul(feeToOwner).div(100 ** 18);
+        uint256 fee = msg.value.mul(feeRate).div(100 ** 18);
         uint256 afterFee = msg.value.sub(fee);
         (bool success, ) = owner().call{value: fee}("");
         require(success, "Transfer to owner failed!");
@@ -236,7 +237,7 @@ contract BridgeBase is Ownable {
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(feeToOwner).div(100 ** 18);
+        uint256 fee = amount.mul(feeRate).div(100 ** 18);
         uint256 afterFee = amount.sub(fee);
         IWETH(token).transferFrom(msg.sender, owner(), fee);
         IWETH(token).burn(msg.sender, afterFee);
