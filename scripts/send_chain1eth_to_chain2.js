@@ -10,7 +10,7 @@ const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
 const WETH_ADDRESS_ETHEREUM = process.env.WETH_ADDRESS_ETHEREUM;
 
 async function main() {
-  const signer = await ethers.getSigner(1);
+  const signer = await ethers.getSigner();
 
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
@@ -18,7 +18,7 @@ async function main() {
     signer
   );
   const tx = await MyContract.lockETH(signer.address, WETH_ADDRESS_ETHEREUM, {
-    value: ethers.utils.parseUnits("10", 18),
+    value: ethers.utils.parseUnits("0.01", 18),
   });
 
   console.log({ tx });
