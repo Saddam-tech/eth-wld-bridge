@@ -185,8 +185,9 @@ contract BridgeBase is Ownable {
         address to,
         address token
     ) external payable notInEmergency {
-        uint256 fee = msg.value.mul(feeRate).div(100 ** 18);
+        uint256 fee = msg.value.mul(feeRate).div(100000000000000000000);
         uint256 afterFee = msg.value.sub(fee);
+        require(fee > 0, "Fee should be greater than zero!");
         (bool success, ) = owner().call{value: fee}("");
         require(success, "Transfer to owner failed!");
         IWETH(token).deposit{value: afterFee}(msg.sender);

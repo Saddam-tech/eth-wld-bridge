@@ -10,14 +10,14 @@ const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
 const WETH_ADDRESS_WORLDLAND = process.env.WETH_ADDRESS_WORLDLAND;
 
 async function main() {
-  const signer = await ethers.getSigner();
+  const signer = await ethers.getSigner(1);
   const MyContract = new ethers.Contract(
     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
     ethereum_bridge_abi,
     signer
   );
   const tx = await MyContract.lockETH(signer.address, WETH_ADDRESS_WORLDLAND, {
-    value: ethers.utils.parseUnits("0.01", 18),
+    value: ethers.utils.parseUnits("1", 18),
   });
   tx.wait();
   console.log({ tx });

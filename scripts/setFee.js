@@ -17,9 +17,7 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
-  const tx = await MyContract.setFeePercentage(
-    ethers.utils.parseUnits("0.1", 18)
-  );
+  const tx = await MyContract.setFeeRate(ethers.utils.parseUnits("10", 18));
   //   const tx = await MyContract.feeToOwner();
 
   //   console.log({ tx: ethers.utils.formatUnits(tx, 18) });
