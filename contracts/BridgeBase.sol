@@ -16,6 +16,8 @@ contract BridgeBase is Ownable {
     uint256 public feeRate;
     bool public emergencyStopped;
     uint public _nonce;
+    //prettier-ignore
+    uint256 percentage = 10**18;
 
     constructor(uint256 _feeRate) {
         emergencyStopped = false;
@@ -106,8 +108,9 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(feeRate).div(100 ** 18);
+        uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
+        require(fee > 0, "Fee should be greater than zero!");
         IToken(token).transferFrom(msg.sender, owner(), fee);
         IToken(token).burn(msg.sender, afterFee);
         emit TransferToken(
@@ -134,8 +137,9 @@ contract BridgeBase is Ownable {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(feeRate).div(100 ** 18);
+        uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
+        require(fee > 0, "Fee should be greater than zero!");
         IToken(token).transferFrom(msg.sender, owner(), fee);
         require(
             IToken(token).transferFrom(msg.sender, address(this), afterFee),
@@ -185,7 +189,7 @@ contract BridgeBase is Ownable {
         address to,
         address token
     ) external payable notInEmergency {
-        uint256 fee = msg.value.mul(feeRate).div(100000000000000000000);
+        uint256 fee = msg.value.mul(feeRate).div(percentage);
         uint256 afterFee = msg.value.sub(fee);
         require(fee > 0, "Fee should be greater than zero!");
         (bool success, ) = owner().call{value: fee}("");
@@ -238,8 +242,9 @@ contract BridgeBase is Ownable {
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(feeRate).div(100 ** 18);
+        uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
+        require(fee > 0, "Fee should be greater than zero!");
         IWETH(token).transferFrom(msg.sender, owner(), fee);
         IWETH(token).burn(msg.sender, afterFee);
         emit BurnWETH(
