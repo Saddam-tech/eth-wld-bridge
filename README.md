@@ -1,6 +1,9 @@
-# Technical Documentation 
+# Technical Documentation
+
 ## Worldland-Ethereum Bridge
+
 ### version 2.0
+
 ### 2023.11.20
 
 ## BridgeBase
@@ -29,11 +32,44 @@ Encrypted owner private key is stored on the server and script execution is impl
 
 ### BridgeBase :
 
-![lock-eth-png](assets/lock-eth.png)
+```javascript
+    function lockETH(
+        address to,
+        address token
+    ) external payable notInEmergency nonReentrant {
+        uint256 fee = msg.value.mul(feeRate).div(percentage);
+        uint256 afterFee = msg.value.sub(fee);
+        require(fee > 0, "Fee should be greater than zero!");
+        (bool success, ) = owner().call{value: fee}("");
+        require(success, "Transfer to owner failed!");
+        IWETH(token).deposit{value: afterFee}(msg.sender);
+        emit LockETH(msg.sender, to, afterFee, token, block.timestamp, _nonce);
+        _nonce++;
+    }
+```
 
 lockETH => does pretty much the same thing as sendToCosmos function, it first checks the reentrancy state to prevent the reentrancy attacks and if the contract is not in emergency state then the admin fee is calculated and sent to the owner of the contract which is bridge signer (node), after which the remaining amount is transferred to the contract and event is emitted.
 
-![mint-weth-png](assets/mint-weth.png)
+```javascript
+        function mintWETH(
+            address to,
+            uint256 amount,
+            address token,
+            uint256 nonce,
+            bytes calldata signature
+        ) external onlyOwner notInEmergency nonReentrant {
+            bytes32 message = prefixed(
+                keccak256(abi.encodePacked(to, amount, token, nonce))
+            );
+            require(
+                recoverSigner(message, signature) == owner(),
+                "Wrong signature!"
+            );
+            require(!processedNonces[nonce], "Mint already processed!");
+            processedNonces[nonce] = true;
+            IWETH(token).mint(to, amount);
+    }
+```
 
 mintWETH => function is called by node after listening to a lockETH event on Ethereum to mint the same amount on Worldland. It checks if the caller is the owner which is the node in our case and if the contract is not in an emergency state, after the reentrancy check is made to prevent the nested stack call to the function. It receives the sender's signature as an argument to verify the signer, the signer’s address is recovered from the signature along with the corresponding arguments and if the result equals the owner's address the function proceeds to the next step. Next, the other chain nonce (transaction order number) is checked to prevent the same transactions accidentally being executed twice or more. If the above conditions are met the contract mints tokens to the user address.
 
