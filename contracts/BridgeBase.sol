@@ -4,12 +4,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./WETH.sol";
 import "./IWETH.sol";
 import "./IToken.sol";
 
-contract BridgeBase is Ownable {
+contract BridgeBase is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     mapping(address => mapping(address => uint256)) public userBalances;
@@ -84,7 +85,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner notInEmergency {
+    ) external onlyOwner notInEmergency nonReentrant {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -103,7 +104,7 @@ contract BridgeBase is Ownable {
         uint256 amount,
         address token,
         string calldata tokenType
-    ) external notInEmergency {
+    ) external notInEmergency nonReentrant {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
@@ -132,7 +133,7 @@ contract BridgeBase is Ownable {
         uint256 amount,
         string calldata tokenType,
         address token
-    ) external notInEmergency {
+    ) external notInEmergency nonReentrant {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
@@ -165,7 +166,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner notInEmergency {
+    ) external onlyOwner notInEmergency nonReentrant {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -188,7 +189,7 @@ contract BridgeBase is Ownable {
     function lockETH(
         address to,
         address token
-    ) external payable notInEmergency {
+    ) external payable notInEmergency nonReentrant {
         uint256 fee = msg.value.mul(feeRate).div(percentage);
         uint256 afterFee = msg.value.sub(fee);
         require(fee > 0, "Fee should be greater than zero!");
@@ -205,7 +206,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner notInEmergency {
+    ) external onlyOwner notInEmergency nonReentrant {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -224,7 +225,7 @@ contract BridgeBase is Ownable {
         address token,
         uint256 nonce,
         bytes calldata signature
-    ) external onlyOwner notInEmergency {
+    ) external onlyOwner notInEmergency nonReentrant {
         bytes32 message = prefixed(
             keccak256(abi.encodePacked(to, amount, token, nonce))
         );
@@ -237,7 +238,10 @@ contract BridgeBase is Ownable {
         IWETH(token).mint(to, amount);
     }
 
-    function burnWETH(uint256 amount, address token) external notInEmergency {
+    function burnWETH(
+        uint256 amount,
+        address token
+    ) external notInEmergency nonReentrant {
         require(
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
@@ -261,14 +265,14 @@ contract BridgeBase is Ownable {
     function transferOwnershipOfWETH(
         address token,
         address newOwner
-    ) external onlyOwner {
+    ) external onlyOwner nonReentrant {
         IToken(token).transferOwnership(newOwner);
     }
 
     function transferOwnershipOfERC20Custom(
         address token,
         address newOwner
-    ) external onlyOwner {
+    ) external onlyOwner nonReentrant {
         IWETH(token).transferOwnership(newOwner);
     }
 
