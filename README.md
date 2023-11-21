@@ -122,7 +122,7 @@ Result should be:
 - Send 1 eth from Worldland to Sepolia:
 
 ```
-yarn hardhat run scripts/send_chain1eth_to_chain2.js --network worldland
+yarn hardhat run scripts/send_chain2eth_to_chain1.js --network worldland
 ```
 
 Result should be:
@@ -163,10 +163,10 @@ yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_1
 - Send 1 eth from localhost_2 to localhost_1:
 
 ```
-yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_2
+yarn hardhat run scripts/send_chain2eth_to_chain1.js --network localhost_2
 ```
 
-#### For a bridge transaction load test
+#### For the bridge transaction load test
 
 To test the bridge capacity with a high volume of transactions on localhost_1 run:
 
@@ -179,7 +179,3 @@ To test the bridge capacity with a high volume of transactions on localhost_2 ru
 ```
 yarn hardhat run test/loadtest.js --network localhost_2
 ```
-
-##### version 2.0
-
-##### 2023.11.20
