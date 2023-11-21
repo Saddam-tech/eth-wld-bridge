@@ -1,4 +1,5 @@
 # Technical Documentation
+
 ## Worldland-Ethereum Bridge
 
 ## BridgeBase
@@ -76,6 +77,6 @@ submitBatch => When a quorum of validators agrees that tokens have been locked o
 
 verifySig => Utility function to verify geth style signatures. [Link to the code](https://github.com/Gravity-Bridge/Gravity-Bridge/blob/main/solidity/contracts/Gravity.sol)
 
-
 ##### version 2.0
+
 ##### 2023.11.20
