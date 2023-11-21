@@ -9,3 +9,7 @@ typechain-types
 cache
 artifacts
 
+# encrypted key
+
+.encryptedKey.json
+
