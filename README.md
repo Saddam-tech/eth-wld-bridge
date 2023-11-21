@@ -75,6 +75,109 @@ submitBatch => When a quorum of validators agrees that tokens have been locked o
 
 verifySig => Utility function to verify geth style signatures. [Link to the code](https://github.com/Gravity-Bridge/Gravity-Bridge/blob/main/solidity/contracts/Gravity.sol)
 
+## Testing
+
+#### Steps:
+
+1. Deploy BridgeBase contract on both chains.
+2. Start the monitoring node on a separate machine with the BridgeBase owner wallet address.
+3. Change the PRIVATE_KEY from .env to a different address for testing
+4. Start transfering funds from Ethereum to Worldland!
+
+### Contract deployment on testnet
+
+```yarn deploy --network sepolia
+   yarn deploy --network worldland
+```
+
+These scripts do the following:
+
+1. Deploy the BridgeBase contract
+2. Deploy the Wrapped Ether contract
+3. Deploy ERC20 token contract
+4. The Ownership of Wrapped Ether and ERC20 token contracts is transfered to BridgeBase contract on both chains.
+
+#### For testnet event monitoring run:
+
+```yarn watch--prod
+
+```
+
+#### Transfer Ether/Token
+
+To test the bridge on testnet (currently sepolia) run:
+
+- Send 1 eth from Sepolia testnet to Worldland:
+
+```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network sepolia
+
+```
+
+Result should be:
+
+- Your balance of Sepolia Ether decreases by 1
+- Your balance of Wrapped Ether in Worldland increases by 1 (the amount will vary relative to the transaction fee sent to the bridge)
+
+- Send 1 eth from Worldland to Sepolia:
+
+```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network worldland
+
+```
+
+Result should be:
+
+- Your balance of Worldland Ether decreases by 1
+- Your balance of Wrapped Ether in Sepolia increases by 1 (the amount will vary relative to the transaction fee sent to the bridge)
+
+### Contract deployment on local hardhat network
+
+```yarn deploy --network localhost_1
+   yarn deploy --network localhost_2
+```
+
+These scripts do the following:
+
+1. Deploy the BridgeBase contract
+2. Deploy the Wrapped Ether contract
+3. Deploy ERC20 token contract
+4. The Ownership of Wrapped Ether and ERC20 token contracts is transfered to BridgeBase contract on both chains.
+
+#### For localhost event monitoring run:
+
+```yarn watch--dev
+
+```
+
+#### Transfer Ether/Token
+
+To test the bridge on locahost run:
+
+- Send 1 eth from localhost_1 to localhost_2:
+
+```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_1
+
+```
+
+- Send 1 eth from localhost_2 to localhost_1:
+
+```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_2
+
+```
+
+#### For a bridge transaction load test
+
+To test the bridge capacity with a high volume of transactions on localhost_1 run:
+
+```yarn hardhat run test/loadtest.js --network localhost_1
+
+```
+
+To test the bridge capacity with a high volume of transactions on localhost_2 run:
+
+```yarn hardhat run test/loadtest.js --network localhost_2
+
+```
+
 ##### version 2.0
 
 ##### 2023.11.20
