@@ -18,7 +18,7 @@ async function main() {
     signer
   );
   const tx = await MyContract.lockETH(signer.address, WETH_ADDRESS_ETHEREUM, {
-    value: ethers.utils.parseUnits("10", 18),
+    value: ethers.utils.parseUnits("1", 18),
   });
 
   console.log({ tx });
