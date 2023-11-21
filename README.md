@@ -1,7 +1,5 @@
-# Technical Documentation
 ## Worldland-Ethereum Bridge
-
-## BridgeBase
+## Technical Documentation
 
 The BridgeBase is a major contract forked from Cosmos Gravity Bridge that holds the main functions and stores the users' funds.
 
