@@ -86,8 +86,9 @@ verifySig => Utility function to verify geth style signatures. [Link to the code
 
 ### Contract deployment on testnet
 
-```yarn deploy --network sepolia
-   yarn deploy --network worldland
+```
+yarn deploy --network sepolia
+yarn deploy --network worldland
 ```
 
 These scripts do the following:
@@ -99,8 +100,8 @@ These scripts do the following:
 
 #### For testnet event monitoring run:
 
-```yarn watch--prod
-
+```
+yarn watch--prod
 ```
 
 #### Transfer Ether/Token
@@ -109,8 +110,8 @@ To test the bridge on testnet (currently sepolia) run:
 
 - Send 1 eth from Sepolia testnet to Worldland:
 
-```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network sepolia
-
+```
+yarn hardhat run scripts/send_chain1eth_to_chain2.js --network sepolia
 ```
 
 Result should be:
@@ -120,8 +121,8 @@ Result should be:
 
 - Send 1 eth from Worldland to Sepolia:
 
-```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network worldland
-
+```
+yarn hardhat run scripts/send_chain1eth_to_chain2.js --network worldland
 ```
 
 Result should be:
@@ -131,8 +132,9 @@ Result should be:
 
 ### Contract deployment on local hardhat network
 
-```yarn deploy --network localhost_1
-   yarn deploy --network localhost_2
+```
+yarn deploy --network localhost_1
+yarn deploy --network localhost_2
 ```
 
 These scripts do the following:
@@ -144,8 +146,8 @@ These scripts do the following:
 
 #### For localhost event monitoring run:
 
-```yarn watch--dev
-
+```
+yarn watch--dev
 ```
 
 #### Transfer Ether/Token
@@ -154,28 +156,28 @@ To test the bridge on locahost run:
 
 - Send 1 eth from localhost_1 to localhost_2:
 
-```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_1
-
+```
+yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_1
 ```
 
 - Send 1 eth from localhost_2 to localhost_1:
 
-```yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_2
-
+```
+yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_2
 ```
 
 #### For a bridge transaction load test
 
 To test the bridge capacity with a high volume of transactions on localhost_1 run:
 
-```yarn hardhat run test/loadtest.js --network localhost_1
-
+```
+yarn hardhat run test/loadtest.js --network localhost_1
 ```
 
 To test the bridge capacity with a high volume of transactions on localhost_2 run:
 
-```yarn hardhat run test/loadtest.js --network localhost_2
-
+```
+yarn hardhat run test/loadtest.js --network localhost_2
 ```
 
 ##### version 2.0
