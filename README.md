@@ -14,7 +14,7 @@ The logic is quite simple, a user calls the lockETH function on Ethereum and sen
 
 ### - Token to Token transfer:
 
-![graph_1](assets/graph_2.png)
+![graph_2](assets/graph_2.png)
 
 The logic is pretty much similar to ETH to WETH transfer. The original tokens are locked in Ethereum and the same amount is minted on the tendermint chain (Worldland). If a user wants their tokens back on Ethereum they burn a specific amount on the Worldland and node(signer) will transfer the amount from the contract to the user on Ethereum.
 

@@ -175,8 +175,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             "Wrong signature!"
         );
         require(
-            userBalances[to][token] >= amount,
-            "Balance of the user at the contract is less than the amount requested!"
+            IToken(token).balanceOf(address(this)) >= amount,
+            "Insufficient contract balance!"
         );
         require(!processedNonces[nonce], "UnLock already processed!");
         processedNonces[nonce] = true;
