@@ -100,7 +100,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
-      let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
+      const admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
       console.log({ admin_nonce_chain2 });
       // Check if the same transaction is being executed the second time
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
@@ -194,7 +194,7 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      let admin_signature = await createSignature(message_type, [
+      const admin_signature = await createSignature(message_type, [
         to,
         amount,
         map_token_address_to_token_address[token],
@@ -238,7 +238,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
-      let admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
+      const admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
       console.log({ admin_nonce_chain1 });
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintWETH(
@@ -276,7 +276,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
-      let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
+      const admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
       console.log({ admin_nonce_chain2 });
       // Unlock the same amount of tokens on chain 2 using the admin private key
       const tx = CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).unLockETH(
