@@ -82,8 +82,6 @@ async function processTransactionQueue() {
 async function monitorLockEvents() {
   console.log(MESSAGES.INIT);
   // Listen for the Lock event on the CHAIN_1_CONTRACT
-  let admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
-  let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
   CHAIN_1_CONTRACT.on(
     EVENTS.TRANSFER_TOKEN,
     async (from, to, amount, token, timestamp, tokenType, nonce) => {
@@ -102,6 +100,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
+      let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
       console.log({ admin_nonce_chain2 });
       // Check if the same transaction is being executed the second time
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
@@ -120,7 +119,6 @@ async function monitorLockEvents() {
         }
       );
       transactionQueueChain2.push(tx);
-      admin_nonce_chain2 += 1;
     }
   );
 
@@ -142,6 +140,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
+      const admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
       console.log({ admin_nonce_chain1 });
       // Check if the same transaction is being executed the second time
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
@@ -173,7 +172,6 @@ async function monitorLockEvents() {
         }
       );
       transactionQueueChain1.push(tx);
-      admin_nonce_chain1 += 1;
     }
   );
 
@@ -202,6 +200,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
+      let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
       console.log({ admin_nonce_chain2 });
       // Mint the same amount of tokens on chain 2 using the admin private key
       const tx = CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintWETH(
@@ -215,7 +214,6 @@ async function monitorLockEvents() {
         }
       );
       transactionQueueChain2.push(tx);
-      admin_nonce_chain2 += 1;
     }
   );
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
@@ -240,6 +238,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
+      let admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
       console.log({ admin_nonce_chain1 });
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintWETH(
@@ -253,7 +252,6 @@ async function monitorLockEvents() {
         }
       );
       transactionQueueChain1.push(tx);
-      admin_nonce_chain1 += 1;
     }
   );
 
@@ -278,6 +276,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
+      let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
       console.log({ admin_nonce_chain2 });
       // Unlock the same amount of tokens on chain 2 using the admin private key
       const tx = CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).unLockETH(
@@ -291,7 +290,6 @@ async function monitorLockEvents() {
         }
       );
       transactionQueueChain2.push(tx);
-      admin_nonce_chain2 += 1;
     }
   );
 
@@ -316,6 +314,7 @@ async function monitorLockEvents() {
         map_token_address_to_token_address[token],
         nonce,
       ]);
+      const admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
       console.log({ admin_nonce_chain1 });
       // Unlock the same amount of tokens on chain 1 using the admin private key
       const tx = CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
@@ -329,7 +328,6 @@ async function monitorLockEvents() {
         }
       );
       transactionQueueChain1.push(tx);
-      admin_nonce_chain1 += 1;
     }
   );
 
