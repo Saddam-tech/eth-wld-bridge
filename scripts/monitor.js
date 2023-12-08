@@ -53,23 +53,60 @@ async function processTransactionQueue() {
   try {
     // chain1 execution
     if (transactionQueueChain1.length > 0) {
-      const resolved = await Promise.all(transactionQueueChain1);
-      console.log({ resolved });
-      resolved.forEach(() => {
-        transactionQueueChain1.shift();
-      });
-      console.log(MESSAGES.BATCH_PROCESSED(1, resolved.length));
+      const destinations = [];
+      const amounts = [];
+      const nonces = [];
+      let token;
+      for (let i = 0; i < transactionQueueChain1.length; i++) {
+        destinations.push(transactionQueueChain1[i].to);
+        amounts.push(transactionQueueChain1[i].amount);
+        nonces.push(transactionQueueChain1[i].nonce);
+        token =
+          map_token_address_to_token_address[transactionQueueChain1[i].token];
+      }
+      const admin_signature = await createSignature(message_type, [token]);
+      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintWETH(
+        destinations,
+        amounts,
+        nonces,
+        map_token_address_to_token_address[token],
+        admin_signature
+      );
+      console.log({ tx });
+      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      destinations = [];
+      amounts = [];
+      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
 
     // chain2 execution
     if (transactionQueueChain2.length > 0) {
-      const resolved = await Promise.all(transactionQueueChain2);
-      console.log({ resolved });
-      resolved.forEach(() => {
-        transactionQueueChain2.shift();
-      });
+      const destinations = [];
+      const amounts = [];
+      const nonces = [];
+      let token;
+      for (let i = 0; i < transactionQueueChain2.length; i++) {
+        destinations.push(transactionQueueChain2[i].to);
+        amounts.push(transactionQueueChain2[i].amount);
+        nonces.push(transactionQueueChain2[i].nonce);
+        token =
+          map_token_address_to_token_address[transactionQueueChain2[i].token];
+      }
+      const admin_signature = await createSignature(message_type, [token]);
+      const tx = await CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintWETH(
+        destinations,
+        amounts,
+        nonces,
+        map_token_address_to_token_address[token],
+        admin_signature
+      );
+      console.log({ tx });
+      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      destinations = [];
+      amounts = [];
+      nonces = [];
       console.log(MESSAGES.BATCH_PROCESSED(2, resolved.length));
     } else {
       console.log(MESSAGES.NO_TX(2));
@@ -194,26 +231,7 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      const admin_signature = await createSignature(message_type, [
-        to,
-        amount,
-        map_token_address_to_token_address[token],
-        nonce,
-      ]);
-      let admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
-      console.log({ admin_nonce_chain2 });
-      // Mint the same amount of tokens on chain 2 using the admin private key
-      const tx = CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintWETH(
-        to,
-        amount,
-        map_token_address_to_token_address[token],
-        nonce,
-        admin_signature,
-        {
-          nonce: admin_nonce_chain2,
-        }
-      );
-      transactionQueueChain2.push(tx);
+      transactionQueueChain2.push({ from, to, amount, nonce, token, date });
     }
   );
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
@@ -232,26 +250,7 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      let admin_signature = await createSignature(message_type, [
-        to,
-        amount,
-        map_token_address_to_token_address[token],
-        nonce,
-      ]);
-      const admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
-      console.log({ admin_nonce_chain1 });
-      // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintWETH(
-        to,
-        amount,
-        map_token_address_to_token_address[token],
-        nonce,
-        admin_signature,
-        {
-          nonce: admin_nonce_chain1,
-        }
-      );
-      transactionQueueChain1.push(tx);
+      transactionQueueChain1.push({ from, to, amount, nonce, token, date });
     }
   );
 

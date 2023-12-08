@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 require("dotenv").config();
 
-const message_type = ["address", "uint256", "address", "uint256"];
+const message_type = ["address"];
 
 const map_token_address_to_token_address = {
   [process.env.TOKEN_ADDRESS_ETHEREUM]: process.env.TOKEN_ADDRESS_WORLDLAND,
