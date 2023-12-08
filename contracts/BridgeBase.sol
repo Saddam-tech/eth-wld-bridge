@@ -29,20 +29,24 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         _;
     }
 
-    enum Step {
-        Burn,
-        Lock
-    }
-
-    event TransferToken(
+    event LockToken(
         address from,
         address to,
         uint256 amount,
         address token,
         uint date,
         string tokenType,
-        uint256 nonce,
-        Step indexed step
+        uint256 nonce
+    );
+
+    event BurnToken(
+        address from,
+        address to,
+        uint256 amount,
+        address token,
+        uint date,
+        string tokenType,
+        uint256 nonce
     );
 
     event LockETH(
@@ -113,15 +117,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(fee > 0, "Fee should be greater than zero!");
         IToken(token).transferFrom(msg.sender, owner(), fee);
         IToken(token).burn(msg.sender, afterFee);
-        emit TransferToken(
+        emit BurnToken(
             msg.sender,
             to,
             afterFee,
             token,
             block.timestamp,
             tokenType,
-            _nonce,
-            Step.Burn
+            _nonce
         );
         _nonce++;
     }
@@ -144,15 +147,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IToken(token).transferFrom(msg.sender, address(this), afterFee),
             "Lock failed"
         );
-        emit TransferToken(
+        emit LockToken(
             msg.sender,
             to,
             afterFee,
             token,
             block.timestamp,
             tokenType,
-            _nonce,
-            Step.Lock
+            _nonce
         );
         _nonce++;
     }

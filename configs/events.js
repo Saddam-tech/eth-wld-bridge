@@ -1,5 +1,6 @@
 const EVENTS = {
-  TRANSFER_TOKEN: "TransferToken",
+  LOCKTOKEN: "LockToken",
+  BURNTOKEN: "BurnToken",
   LOCK_ETH: "LockETH",
   BURN_WETH: "BurnWETH",
 };
