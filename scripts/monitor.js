@@ -192,7 +192,7 @@ async function processTransactionQueue() {
       amounts = [];
       nonces = [];
     } else {
-      console.log(MESSAGES.NO_TX(1));
+      console.log(MESSAGES.NO_TX(2));
     }
   } catch (err) {
     console.log(err);
@@ -407,7 +407,7 @@ async function monitorLockEvents() {
     }
   );
 
-  // Process the queue in batches every 15 secs
+  // Process the tx queue in batches every 15 secs
   setInterval(async () => {
     await processTransactionQueue();
   }, txProcessInterval);

@@ -13,7 +13,6 @@ import "./IToken.sol";
 contract BridgeBase is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
-    mapping(address => mapping(address => uint256)) public userBalances;
     uint256 public feeRate;
     bool public emergencyStopped;
     uint public _nonce;
@@ -80,23 +79,23 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     // TOKEN
 
     function mintToken(
-        address to,
-        uint256 amount,
+        address[] calldata destinations,
+        uint256[] calldata amounts,
+        uint256[] calldata nonces,
         address token,
-        uint256 nonce,
         bytes calldata signature
     ) external onlyOwner notInEmergency nonReentrant {
-        bytes32 message = prefixed(
-            keccak256(abi.encodePacked(to, amount, token, nonce))
-        );
+        bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(!processedNonces[nonce], "Mint already processed!");
-        processedNonces[nonce] = true;
-        IToken(token).mint(to, amount);
-        userBalances[to][token] += amount;
+        // mint transaction amounts to destinations
+        for (uint256 i = 0; i < amounts.length; i++) {
+            require(!processedNonces[nonces[i]], "Mint already processed!");
+            processedNonces[nonces[i]] = true;
+            IToken(token).mint(destinations[i], amounts[i]);
+        }
     }
 
     function burnToken(
@@ -124,7 +123,6 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             _nonce,
             Step.Burn
         );
-        userBalances[msg.sender][token] -= afterFee;
         _nonce++;
     }
 
@@ -156,32 +154,31 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             _nonce,
             Step.Lock
         );
-        userBalances[msg.sender][token] += afterFee;
         _nonce++;
     }
 
     function unlockToken(
-        address to,
-        uint256 amount,
+        address[] calldata destinations,
+        uint256[] calldata amounts,
+        uint256[] calldata nonces,
         address token,
-        uint256 nonce,
         bytes calldata signature
     ) external onlyOwner notInEmergency nonReentrant {
-        bytes32 message = prefixed(
-            keccak256(abi.encodePacked(to, amount, token, nonce))
-        );
+        bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
         );
-        require(
-            IToken(token).balanceOf(address(this)) >= amount,
-            "Insufficient contract balance!"
-        );
-        require(!processedNonces[nonce], "UnLock already processed!");
-        processedNonces[nonce] = true;
-        IToken(token).transfer(to, amount);
-        userBalances[to][token] -= amount;
+        // unlock transaction amounts to destinations
+        for (uint256 i = 0; i < amounts.length; i++) {
+            require(
+                IToken(token).balanceOf(address(this)) >= amounts[i],
+                "Insufficient contract balance!"
+            );
+            require(!processedNonces[nonces[i]], "UnLock already processed!");
+            processedNonces[nonces[i]] = true;
+            IToken(token).transfer(destinations[i], amounts[i]);
+        }
     }
 
     // WRAPPED ETHER
