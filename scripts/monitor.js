@@ -46,23 +46,29 @@ const WALLET_CHAIN_2 = new ethers.Wallet(
   process.env.PRIVATE_KEY,
   CHAIN_2_PROVIDER
 );
-const transactionQueueChain1 = [];
-const transactionQueueChain2 = [];
+let mintWETHTxQueueChain1 = [];
+let mintWETHTxQueueChain2 = [];
+let unLockETHTxQueueChain1 = [];
+let unLockETHTxQueueChain2 = [];
 
 async function processTransactionQueue() {
   try {
-    // chain1 execution
-    if (transactionQueueChain1.length > 0) {
-      const destinations = [];
-      const amounts = [];
-      const nonces = [];
+    // chain1 mintWETH batch submission
+    if (mintWETHTxQueueChain1.length > 0) {
+      let destinations = [];
+      let amounts = [];
+      let nonces = [];
       let token;
-      for (let i = 0; i < transactionQueueChain1.length; i++) {
-        destinations.push(transactionQueueChain1[i].to);
-        amounts.push(transactionQueueChain1[i].amount);
-        nonces.push(transactionQueueChain1[i].nonce);
-        token =
-          map_token_address_to_token_address[transactionQueueChain1[i].token];
+      for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
+        if (!mintWETHTxQueueChain1[i].processed) {
+          destinations.push(mintWETHTxQueueChain1[i].to);
+          amounts.push(mintWETHTxQueueChain1[i].amount);
+          nonces.push(mintWETHTxQueueChain1[i].nonce);
+          token =
+            map_token_address_to_token_address[mintWETHTxQueueChain1[i].token];
+          mintWETHTxQueueChain1[i].processed = true;
+          console.log(mintWETHTxQueueChain1[i]);
+        }
       }
       const admin_signature = await createSignature(message_type, [token]);
       const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintWETH(
@@ -74,6 +80,9 @@ async function processTransactionQueue() {
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      mintWETHTxQueueChain1 = mintWETHTxQueueChain1.filter(
+        (el) => el.processed === false
+      );
       destinations = [];
       amounts = [];
       nonces = [];
@@ -81,18 +90,20 @@ async function processTransactionQueue() {
       console.log(MESSAGES.NO_TX(1));
     }
 
-    // chain2 execution
-    if (transactionQueueChain2.length > 0) {
-      const destinations = [];
-      const amounts = [];
-      const nonces = [];
+    // chain2 mintWETH batch submission
+    if (mintWETHTxQueueChain2.length > 0) {
+      let destinations = [];
+      let amounts = [];
+      let nonces = [];
       let token;
-      for (let i = 0; i < transactionQueueChain2.length; i++) {
-        destinations.push(transactionQueueChain2[i].to);
-        amounts.push(transactionQueueChain2[i].amount);
-        nonces.push(transactionQueueChain2[i].nonce);
+      for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
+        destinations.push(mintWETHTxQueueChain2[i].to);
+        amounts.push(mintWETHTxQueueChain2[i].amount);
+        nonces.push(mintWETHTxQueueChain2[i].nonce);
         token =
-          map_token_address_to_token_address[transactionQueueChain2[i].token];
+          map_token_address_to_token_address[mintWETHTxQueueChain2[i].token];
+        mintWETHTxQueueChain2[i].processed = true;
+        console.log(mintWETHTxQueueChain2[i]);
       }
       const admin_signature = await createSignature(message_type, [token]);
       const tx = await CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintWETH(
@@ -103,13 +114,85 @@ async function processTransactionQueue() {
         admin_signature
       );
       console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      mintWETHTxQueueChain2 = mintWETHTxQueueChain2.filter(
+        (el) => el.processed === false
+      );
       destinations = [];
       amounts = [];
       nonces = [];
-      console.log(MESSAGES.BATCH_PROCESSED(2, resolved.length));
     } else {
       console.log(MESSAGES.NO_TX(2));
+    }
+
+    // chain1 unLockETH batch submission
+    if (unLockETHTxQueueChain1.length > 0) {
+      let destinations = [];
+      let amounts = [];
+      let nonces = [];
+      let token;
+      for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
+        destinations.push(unLockETHTxQueueChain1[i].to);
+        amounts.push(unLockETHTxQueueChain1[i].amount);
+        nonces.push(unLockETHTxQueueChain1[i].nonce);
+        token =
+          map_token_address_to_token_address[unLockETHTxQueueChain1[i].token];
+        unLockETHTxQueueChain1[i].processed = true;
+        console.log(unLockETHTxQueueChain1[i]);
+      }
+      const admin_signature = await createSignature(message_type, [token]);
+      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
+        destinations,
+        amounts,
+        nonces,
+        map_token_address_to_token_address[token],
+        admin_signature
+      );
+      console.log({ tx });
+      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      unLockETHTxQueueChain1 = unLockETHTxQueueChain1.filter(
+        (el) => el.processed === false
+      );
+      destinations = [];
+      amounts = [];
+      nonces = [];
+    } else {
+      console.log(MESSAGES.NO_TX(1));
+    }
+
+    // chain2 unLockETH batch submission
+    if (unLockETHTxQueueChain2.length > 0) {
+      let destinations = [];
+      let amounts = [];
+      let nonces = [];
+      let token;
+      for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
+        destinations.push(unLockETHTxQueueChain2[i].to);
+        amounts.push(unLockETHTxQueueChain2[i].amount);
+        nonces.push(unLockETHTxQueueChain2[i].nonce);
+        token =
+          map_token_address_to_token_address[unLockETHTxQueueChain2[i].token];
+        unLockETHTxQueueChain2[i].processed = true;
+        console.log(unLockETHTxQueueChain2[i]);
+      }
+      const admin_signature = await createSignature(message_type, [token]);
+      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
+        destinations,
+        amounts,
+        nonces,
+        map_token_address_to_token_address[token],
+        admin_signature
+      );
+      console.log({ tx });
+      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      unLockETHTxQueueChain2 = unLockETHTxQueueChain2.filter(
+        (el) => el.processed === false
+      );
+      destinations = [];
+      amounts = [];
+      nonces = [];
+    } else {
+      console.log(MESSAGES.NO_TX(1));
     }
   } catch (err) {
     console.log(err);
@@ -155,7 +238,7 @@ async function monitorLockEvents() {
           nonce: admin_nonce_chain2,
         }
       );
-      transactionQueueChain2.push(tx);
+      mintWETHTxQueueChain2.push(tx);
     }
   );
 
@@ -231,7 +314,15 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      transactionQueueChain2.push({ from, to, amount, nonce, token, date });
+      mintWETHTxQueueChain2.push({
+        from,
+        to,
+        amount,
+        nonce,
+        token,
+        date,
+        processed: false,
+      });
     }
   );
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
@@ -250,7 +341,15 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      transactionQueueChain1.push({ from, to, amount, nonce, token, date });
+      mintWETHTxQueueChain1.push({
+        from,
+        to,
+        amount,
+        nonce,
+        token,
+        date,
+        processed: false,
+      });
     }
   );
 
@@ -269,26 +368,15 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      let admin_signature = await createSignature(message_type, [
+      unLockETHTxQueueChain2.push({
+        from,
         to,
         amount,
-        map_token_address_to_token_address[token],
         nonce,
-      ]);
-      const admin_nonce_chain2 = await WALLET_CHAIN_2.getTransactionCount();
-      console.log({ admin_nonce_chain2 });
-      // Unlock the same amount of tokens on chain 2 using the admin private key
-      const tx = CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).unLockETH(
-        to,
-        amount,
-        map_token_address_to_token_address[token],
-        nonce,
-        admin_signature,
-        {
-          nonce: admin_nonce_chain2,
-        }
-      );
-      transactionQueueChain2.push(tx);
+        token,
+        date,
+        processed: false,
+      });
     }
   );
 
@@ -307,26 +395,15 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      let admin_signature = await createSignature(message_type, [
+      unLockETHTxQueueChain1.push({
+        from,
         to,
         amount,
-        map_token_address_to_token_address[token],
         nonce,
-      ]);
-      const admin_nonce_chain1 = await WALLET_CHAIN_1.getTransactionCount();
-      console.log({ admin_nonce_chain1 });
-      // Unlock the same amount of tokens on chain 1 using the admin private key
-      const tx = CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
-        to,
-        amount,
-        map_token_address_to_token_address[token],
-        nonce,
-        admin_signature,
-        {
-          nonce: admin_nonce_chain1,
-        }
-      );
-      transactionQueueChain1.push(tx);
+        token,
+        date,
+        processed: false,
+      });
     }
   );
 
