@@ -39,14 +39,8 @@ const CHAIN_2_CONTRACT = new ethers.Contract(
   CHAIN_2_PROVIDER,
   { gasLimit }
 );
-const WALLET_CHAIN_1 = new ethers.Wallet(
-  process.env.encryptedPk,
-  CHAIN_1_PROVIDER
-);
-const WALLET_CHAIN_2 = new ethers.Wallet(
-  process.env.encryptedPk,
-  CHAIN_2_PROVIDER
-);
+const WALLET_CHAIN_1 = new ethers.Wallet(encryptedPk, CHAIN_1_PROVIDER);
+const WALLET_CHAIN_2 = new ethers.Wallet(encryptedPk, CHAIN_2_PROVIDER);
 // ETH => WETH
 let mintWETHTxQueueChain1 = [];
 let mintWETHTxQueueChain2 = [];
