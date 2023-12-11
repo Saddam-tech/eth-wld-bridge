@@ -273,6 +273,76 @@ async function processTransactionQueue() {
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
+
+    // chain1 unlockToken batch submission
+    if (unlockTokenTxQueueChain1.length > 0) {
+      let destinations = [];
+      let amounts = [];
+      let nonces = [];
+      let token;
+      for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
+        destinations.push(unlockTokenTxQueueChain1[i].to);
+        amounts.push(unlockTokenTxQueueChain1[i].amount);
+        nonces.push(unlockTokenTxQueueChain1[i].nonce);
+        token =
+          map_token_address_to_token_address[unlockTokenTxQueueChain1[i].token];
+        unlockTokenTxQueueChain1[i].processed = true;
+        console.log(unlockTokenTxQueueChain1[i]);
+      }
+      const admin_signature = await createSignature(message_type, [token]);
+      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unlockToken(
+        destinations,
+        amounts,
+        nonces,
+        map_token_address_to_token_address[token],
+        admin_signature
+      );
+      console.log({ tx });
+      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      unlockTokenTxQueueChain1 = unlockTokenTxQueueChain1.filter(
+        (el) => el.processed === false
+      );
+      destinations = [];
+      amounts = [];
+      nonces = [];
+    } else {
+      console.log(MESSAGES.NO_TX(1));
+    }
+
+    // chain2 unlockToken batch submission
+    if (unlockTokenTxQueueChain2.length > 0) {
+      let destinations = [];
+      let amounts = [];
+      let nonces = [];
+      let token;
+      for (let i = 0; i < unlockTokenTxQueueChain2.length; i++) {
+        destinations.push(unlockTokenTxQueueChain2[i].to);
+        amounts.push(unlockTokenTxQueueChain2[i].amount);
+        nonces.push(unlockTokenTxQueueChain2[i].nonce);
+        token =
+          map_token_address_to_token_address[unlockTokenTxQueueChain2[i].token];
+        unlockTokenTxQueueChain2[i].processed = true;
+        console.log(unlockTokenTxQueueChain2[i]);
+      }
+      const admin_signature = await createSignature(message_type, [token]);
+      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unlockToken(
+        destinations,
+        amounts,
+        nonces,
+        map_token_address_to_token_address[token],
+        admin_signature
+      );
+      console.log({ tx });
+      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      unlockTokenTxQueueChain2 = unlockTokenTxQueueChain2.filter(
+        (el) => el.processed === false
+      );
+      destinations = [];
+      amounts = [];
+      nonces = [];
+    } else {
+      console.log(MESSAGES.NO_TX(2));
+    }
   } catch (err) {
     console.log(err);
   }
@@ -512,7 +582,7 @@ async function monitorLockEvents() {
     }
   );
 
-  // Process the tx queue in batches every 15 secs
+  // Process tx queue in batch every 15 secs
   setInterval(async () => {
     await processTransactionQueue();
   }, txProcessInterval);
