@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("./tasks/get-accounts");
+const fs = require("fs-extra");
 const ethers = require("ethers");
 /** @type import('hardhat/config').HardhatUserConfig */
 const gas = 100000;
