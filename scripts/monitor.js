@@ -13,11 +13,11 @@ const { gasLimit, txProcessInterval } = require("../configs/constants");
 const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
 
-// const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
-// const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
-//   encryptedJson,
-//   process.env.PRIVATE_KEY_PW
-// );
+const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
+  encryptedJson,
+  process.env.PRIVATE_KEY_PW
+);
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_1_PROVIDER = new ethers.providers.JsonRpcProvider(
@@ -39,11 +39,11 @@ const CHAIN_2_CONTRACT = new ethers.Contract(
   { gasLimit }
 );
 const WALLET_CHAIN_1 = new ethers.Wallet(
-  process.env.PRIVATE_KEY,
+  process.env.encryptedPk,
   CHAIN_1_PROVIDER
 );
 const WALLET_CHAIN_2 = new ethers.Wallet(
-  process.env.PRIVATE_KEY,
+  process.env.encryptedPk,
   CHAIN_2_PROVIDER
 );
 // ETH => WETH

@@ -1,36 +1,38 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("./tasks/get-accounts");
+const ethers = require("ethers");
 /** @type import('hardhat/config').HardhatUserConfig */
 const gas = 100000;
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+const wallet = ethers.Wallet.fromEncryptedJsonSync(
+  encryptedJson,
+  process.env.PRIVATE_KEY_PW
+);
+const PRIVATE_KEY = wallet.privateKey;
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     // current supported networks
     sepolia: {
       url: process.env.provider_chain_1,
-      // accounts: [encryptedPk],
       accounts: [PRIVATE_KEY],
       chainId: 11155111,
       gas,
     },
     worldland: {
       url: process.env.provider_chain_2,
-      // accounts: [encryptedPk],
       accounts: [PRIVATE_KEY],
       chainId: 103,
       gas,
     },
     localhost_1: {
       url: process.env.provider_chain_1,
-      // accounts: [encryptedPk],
       chainId: 31337,
       gas,
     },
     localhost_2: {
       url: process.env.provider_chain_2,
-      // accounts: [encryptedPk],
       chainId: 31337,
       gas,
     },
