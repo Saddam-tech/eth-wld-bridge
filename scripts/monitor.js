@@ -21,10 +21,10 @@ const { EVENTS } = require("../configs/events");
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_1_PROVIDER = new ethers.providers.JsonRpcProvider(
-  process.env.local_provider_chain_1
+  process.env.provider_chain_1
 );
 const CHAIN_2_PROVIDER = new ethers.providers.JsonRpcProvider(
-  process.env.local_provider_chain_2
+  process.env.provider_chain_2
 );
 const CHAIN_1_CONTRACT = new ethers.Contract(
   CHAIN_1_BRIDGE_ADDRESS,

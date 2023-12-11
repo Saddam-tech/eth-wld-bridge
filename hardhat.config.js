@@ -23,13 +23,13 @@ module.exports = {
       gas,
     },
     localhost_1: {
-      url: process.env.local_provider_chain_1,
+      url: process.env.provider_chain_1,
       // accounts: [encryptedPk],
       chainId: 31337,
       gas,
     },
     localhost_2: {
-      url: process.env.local_provider_chain_2,
+      url: process.env.provider_chain_2,
       // accounts: [encryptedPk],
       chainId: 31337,
       gas,
