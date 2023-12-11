@@ -26,7 +26,6 @@ contract WETH is Ownable {
     event BurnWETH(address indexed sender, uint256 amount);
 
     mapping(address => uint) public balanceOf;
-    mapping(address => uint) public c_balanceOf;
     mapping(address => mapping(address => uint)) private _allowances;
 
     // receive() external payable {
@@ -38,7 +37,6 @@ contract WETH is Ownable {
     }
 
     function deposit(address sender) public payable {
-        c_balanceOf[sender] += msg.value;
         emit Deposit(sender, msg.value);
     }
 
@@ -48,8 +46,6 @@ contract WETH is Ownable {
     }
 
     function withdraw(address to, uint256 amount) public onlyOwner {
-        require(c_balanceOf[to] >= amount, "Insufficient balance");
-        c_balanceOf[to] -= amount;
         payable(to).transfer(amount);
         emit Withdrawal(to, amount);
     }
