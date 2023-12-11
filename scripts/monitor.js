@@ -19,6 +19,7 @@ const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
   encryptedJson,
   process.env.PRIVATE_KEY_PW
 );
+
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_1_PROVIDER = new ethers.providers.JsonRpcProvider(
@@ -77,7 +78,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -112,7 +113,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -147,7 +148,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -182,7 +183,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -219,7 +220,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -254,7 +255,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -289,7 +290,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -324,7 +325,7 @@ async function processTransactionQueue() {
         destinations,
         amounts,
         nonces,
-        map_token_address_to_token_address[token],
+        token,
         admin_signature
       );
       console.log({ tx });
@@ -470,14 +471,14 @@ async function monitorLockEvents() {
   // Listen for the (LockETH) event on the CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
     EVENTS.LOCK_ETH,
-    async (from, to, amount, token, date, nonce) => {
+    async (from, to, amount, token, timestamp, nonce) => {
       console.log(MESSAGES.ETH_TRANSFER(1));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
       console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("date: ", date);
+      console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
@@ -490,7 +491,7 @@ async function monitorLockEvents() {
         amount,
         nonce,
         token,
-        date,
+        timestamp,
         processed: false,
       });
     }
@@ -498,14 +499,14 @@ async function monitorLockEvents() {
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
     EVENTS.LOCK_ETH,
-    async (from, to, amount, token, date, nonce) => {
+    async (from, to, amount, token, timestamp, nonce) => {
       console.log(MESSAGES.ETH_TRANSFER(2));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
       console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("date: ", date);
+      console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
@@ -517,7 +518,7 @@ async function monitorLockEvents() {
         amount,
         nonce,
         token,
-        date,
+        timestamp,
         processed: false,
       });
     }
@@ -526,13 +527,13 @@ async function monitorLockEvents() {
   // Listen for (BurnWETH) event on CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
     EVENTS.BURN_WETH,
-    async (from, to, amount, token, date, nonce) => {
+    async (from, to, amount, token, timestamp, nonce) => {
       console.log(MESSAGES.BURN(1));
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("date: ", date);
+      console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
@@ -544,7 +545,7 @@ async function monitorLockEvents() {
         amount,
         nonce,
         token,
-        date,
+        timestamp,
         processed: false,
       });
     }
@@ -553,13 +554,13 @@ async function monitorLockEvents() {
   // Listen for (BurnWETH) event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
     EVENTS.BURN_WETH,
-    async (from, to, amount, token, date, nonce) => {
+    async (from, to, amount, token, timestamp, nonce) => {
       console.log(MESSAGES.BURN(2));
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("date: ", date);
+      console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
@@ -571,7 +572,7 @@ async function monitorLockEvents() {
         amount,
         nonce,
         token,
-        date,
+        timestamp,
         processed: false,
       });
     }
