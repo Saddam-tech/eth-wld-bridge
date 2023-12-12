@@ -20,7 +20,7 @@ The logic is pretty much similar to ETH to WETH transfer. The original tokens ar
 
 ## Node(signer)
 
-Encrypted owner private key is stored on the server and script execution is implemented by providing a password to the encrypted key on the shell. The events are listened to from contracts on both chains at the same time. Transactions are stored and batch executed each 15 seconds which saves a significant amount of transaction fee.
+Encrypted owner private key is stored on the server and script execution is implemented by providing a password to the encrypted key on the shell. The events are listened to from contracts on both chains at the same time. Transactions are stored and batch executed each 15 seconds which saves a significant amount in transaction fees.
 
 Transaction live tracking state:
 
