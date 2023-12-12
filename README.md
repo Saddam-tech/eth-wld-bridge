@@ -20,7 +20,15 @@ The logic is pretty much similar to ETH to WETH transfer. The original tokens ar
 
 ## Node(signer)
 
-Encrypted owner private key is stored on the server and script execution is implemented by providing a password to the encrypted key on the shell. The events are listened to from contracts on both chains at the same time. Transactions are stored and batch executed each 15 seconds.
+Encrypted owner private key is stored on the server and script execution is implemented by providing a password to the encrypted key on the shell. The events are listened to from contracts on both chains at the same time. Transactions are stored and batch executed each 15 seconds which saves a significant amount of transaction fee.
+
+Transaction live tracking state:
+
+![node-tx-track](assets/node-tx-track.png)
+
+Ether lock event detection state on chain 2 (Worldland):
+
+![lock-event-detect](assets/lock-event-detect.png)
 
 ## Security Concerns
 
@@ -46,26 +54,27 @@ lockETH => does pretty much the same thing as sendToCosmos function, it first ch
 
 ```javascript
         function mintWETH(
-            address to,
-            uint256 amount,
+            address[] calldata destinations,
+            uint256[] calldata amounts,
+            uint256[] calldata nonces,
             address token,
-            uint256 nonce,
             bytes calldata signature
         ) external onlyOwner notInEmergency nonReentrant {
-            bytes32 message = prefixed(
-                keccak256(abi.encodePacked(to, amount, token, nonce))
-            );
+            bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
             require(
                 recoverSigner(message, signature) == owner(),
                 "Wrong signature!"
             );
-            require(!processedNonces[nonce], "Mint already processed!");
-            processedNonces[nonce] = true;
-            IWETH(token).mint(to, amount);
-    }
+            // mint transaction amounts to destinations
+            for (uint256 i = 0; i < amounts.length; i++) {
+                require(!processedNonces[nonces[i]], "Mint already processed!");
+                processedNonces[nonces[i]] = true;
+                IWETH(token).mint(destinations[i], amounts[i]);
+            }
+        }
 ```
 
-mintWETH => function is called by node after listening to a lockETH event on Ethereum to mint the same amount on Worldland. It checks if the caller is the owner which is the node in our case and if the contract is not in an emergency state, after the reentrancy check is made to prevent the nested stack call to the function. It receives the sender's signature as an argument to verify the signer, the signer’s address is recovered from the signature along with the corresponding arguments and if the result equals the owner's address the function proceeds to the next step. Next, the other chain nonce (transaction order number) is checked to prevent the same transactions accidentally being executed twice or more. If the above conditions are met the contract mints tokens to the user address.
+mintWETH => function is called by node after listening to a lockETH event on Ethereum to mint the same amount on Worldland. It checks if the caller is owner which is node in our case and if the contract is not in an emergency state, after the reentrancy check is made to prevent the nested stack call to the function. It receives the sender's signature as an argument to verify the signer, the signer’s address is recovered from the signature along with the corresponding arguments and if the result equals the owner's address the function proceeds to the next step. Before sending the amounts to destination addresses in batch we check the other chain nonce (transaction order number) to prevent the same transactions accidentally being executed twice. If the above conditions are met the contract mints tokens to the user addresses in batch.
 
 ### The BridgeBase contract has been forked from Cosmos Gravity Bridge with some modifications to the original code. The main functions used are:
 
@@ -74,6 +83,60 @@ sendToCosmos => Tokens are locked on the Ethereum side by sending them to the Gr
 submitBatch => When a quorum of validators agrees that tokens have been locked on Ethereum, including the requisite confirmation blocks, a relayer is selected to send an instruction to the Gravity module, which issues new tokens. [Link to the code](https://github.com/Gravity-Bridge/Gravity-Bridge/blob/main/solidity/contracts/Gravity.sol)
 
 verifySig => Utility function to verify geth style signatures. [Link to the code](https://github.com/Gravity-Bridge/Gravity-Bridge/blob/main/solidity/contracts/Gravity.sol)
+
+### BridgeBase :
+
+- Upon transferring wrapped ether from tendermint chain (Worldland) back to Ethereum burnWETH function is called and original eth is unlocked to the user by calling unlockETH function.
+
+```javascript
+    function burnWETH(
+        uint256 amount,
+        address token
+    ) external notInEmergency nonReentrant {
+        require(
+            IWETH(token).allowance(msg.sender, address(this)) > amount,
+            "Insufficient allowance!"
+        );
+        uint256 fee = amount.mul(feeRate).div(percentage);
+        uint256 afterFee = amount.sub(fee);
+        require(fee > 0, "Fee should be greater than zero!");
+        IWETH(token).transferFrom(msg.sender, owner(), fee);
+        IWETH(token).burn(msg.sender, afterFee);
+        emit BurnWETH(
+            msg.sender,
+            msg.sender,
+            afterFee,
+            token,
+            block.timestamp,
+            _nonce
+        );
+        _nonce++;
+    }
+
+```
+
+```javascript
+    function unLockETH(
+        address[] calldata destinations,
+        uint256[] calldata amounts,
+        uint256[] calldata nonces,
+        address token,
+        bytes calldata signature
+    ) external onlyOwner notInEmergency nonReentrant {
+        bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
+        require(
+            recoverSigner(message, signature) == owner(),
+            "Wrong signature!"
+        );
+        // unlock transaction amounts to destinations
+        for (uint256 i = 0; i < amounts.length; i++) {
+            require(!processedNonces[nonces[i]], "UnLock already processed!");
+            processedNonces[nonces[i]] = true;
+            IWETH(token).withdraw(destinations[i], amounts[i]);
+        }
+    }
+
+```
 
 ## Testing
 
