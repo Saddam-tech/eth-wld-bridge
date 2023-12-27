@@ -58,17 +58,17 @@ In order to start the bridge process, a transaction monitoring script should be 
 
     - The script should successfully run and output the following:
 
-    Started monitoring chains [1, 2] for Lock transactions...
+      Started monitoring chains [1, 2] for Lock transactions...
 
     - Transaction live tracking state:
 
 ![node-tx-track](assets/node-tx-track.png)
 
-    * Ether lock event detection state on chain 2 (Worldland):
+- Ether lock event detection state on chain 2 (Worldland):
 
 ![lock-event-detect](assets/lock-event-detect.png)
 
-    * Now we can safely delete the PRIVATE_KEY_PW variable from the environment file.
+- Now we can safely delete the PRIVATE_KEY_PW variable from the environment file.
 
 3. Delete the PRIVATE_KEY_PW variable from .env file
 
