@@ -4,6 +4,8 @@ Technical Documentation
 
 The BridgeBase is a major contract forked from Cosmos Gravity Bridge that holds the main functions and stores the users' funds.
 
+- The BridgeBase contract has to be deployed both on Ethereum and Worldland and node has to be started to listen to events coming from contracts.
+
 There are two main functionalities:
 
 ### - ETH to Wrapped ETH transfer:
@@ -19,6 +21,18 @@ If a sender wants to get their funds back on Ethereum they call burnWETH functio
 ![graph_2](assets/graph_2.png)
 
 The logic is pretty much similar to ETH to WETH transfer. The original tokens are locked in Ethereum and the same amount is minted on the tendermint chain (Worldland). If a sender wants their tokens back on Ethereum they burn a specific amount on the Worldland deployed BridgeBase contract and node(signer) will transfer the amount from the contract to the user on Ethereum.
+
+## ERC20 / WETH contract deployment and ownership transfer
+
+- ERC20 / WETH contracts should be mintable
+
+Steps to complete the process:
+
+1. Deploy ERC20 / WETH contracts
+
+2. Call the transferOwnership function in ERC20 / WETH contracts with the BridgeBase contract’s address as a new owner of the tokens.
+
+- Now the BridgeBase contract has a minting and burning privileges of ERC20 and WETH contracts
 
 ## Node(signer)
 
@@ -74,9 +88,7 @@ In order to start the bridge process, a transaction monitoring script should be 
 
 ## Security Concerns
 
-- Things to note:
-
-* After deleting the PRIVATE_KEY and PRIVATE_KEY_PW they are still stored in the memory of the computer. Before usage please consider the following risks associated with it:
+- After deleting the PRIVATE_KEY and PRIVATE_KEY_PW they are still stored in the memory of the computer. Before usage please consider the following risks associated with it:
 
 RAM scraping is a technique used by cybercriminals to extract sensitive data from a computer's random access memory (RAM)
 
@@ -85,6 +97,26 @@ RAM scraping is a technique used by cybercriminals to extract sensitive data fro
 * Keep the server address private (security measure known as “security through obscurity”):
 
 As there is no external REST request/responses made to and from the server. The IP address could be stored privately and not shared to the public. This puts an extra layer of security.
+
+- Reentrancy attacks against the functions of the contract:​
+
+BridgeBase contract uses ReentrancyGuard.sol contract from OpenZepellin to check reentrancy attacks against critical functions. The functions are protected with non-reentrant modifier.​
+
+- Emergency situations:​
+
+![emergencyStopped](assets/emergencyStopped.png)
+![emergencyStop](assets/emergencyStop.png)
+![resume](assets/resume.png)
+
+For the case of emergency situations, contract has an emergencyStopped boolean variable that is controllable by owner. The state of emergencyStopped variable can be changed using emergencyStop and resume functions. Each critical function is secured with notInEmergency modifier that checks the state and blocks/unblocks the execution of each function. The emergencyStopped variable being true means no external interaction with the contract is possible.
+
+- Usage of admin wallet address for other purposes while the node is up and running:​
+
+When the bridge node is in a monitoring state sending transactions from the admin wallet address should be restricted to only node. This is because transactions sent from the node might collide with the transactions sent from the admin wallet address externally and either of them do not get executed and get replaced with the one that has a higher gas value.​
+
+- Node being down for no reason when webpage is available:​
+
+If bridge node is down for any reason (not in the monitoring state), the emergencyStop function should be called on the bridge contracts both on Ethereum and Worldland to prevent any user depositing funds into the contract.​
 
 ### BridgeBase :
 
