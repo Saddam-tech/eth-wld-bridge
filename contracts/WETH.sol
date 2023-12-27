@@ -28,9 +28,9 @@ contract WETH is Ownable {
     mapping(address => uint) public balanceOf;
     mapping(address => mapping(address => uint)) private _allowances;
 
-    // receive() external payable {
-    // deposit();
-    // }
+    receive() external payable {
+        deposit(msg.sender);
+    }
 
     fallback() external {
         return;

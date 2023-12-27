@@ -10,27 +10,92 @@ There are two main functionalities:
 
 ![graph_1](assets/graph_1.png)
 
-The logic is quite simple, a user calls the lockETH function on Ethereum and sends an amount of eth to the contract. Function emits eth transfer event which is picked up by signer node. It then mints wrapped Eth on the tendermint chain (Worldland) to the user address. If a user wants to get their funds back on ethereum they call burnWETH function that burns their wrapped eth and emits burn event which is then picked up by node and the amount of locked eth is sent from the contract to the user address on ethereum.
+The logic is quite simple, the sender (see step 1 in the picture) calls the lockETH function within the Bridge contract on Ethereum network and sends an amount of ETH to the contract. The lockETH function emits an ETH transfer event which is picked up by Worldland Bridge Node. It then mints wrapped Eth on the tendermint chain (Worldland) to the user address.
+
+If a sender wants to get their funds back on Ethereum they call burnWETH function in BridgeBase contract on Worldland that burns their wrapped eth and emits burn event which is then picked up by node and the amount of locked eth is sent from the contract on Ethereum to the user address.
 
 ### - Token to Token transfer:
 
 ![graph_2](assets/graph_2.png)
 
-The logic is pretty much similar to ETH to WETH transfer. The original tokens are locked in Ethereum and the same amount is minted on the tendermint chain (Worldland). If a user wants their tokens back on Ethereum they burn a specific amount on the Worldland and node(signer) will transfer the amount from the contract to the user on Ethereum.
+The logic is pretty much similar to ETH to WETH transfer. The original tokens are locked in Ethereum and the same amount is minted on the tendermint chain (Worldland). If a sender wants their tokens back on Ethereum they burn a specific amount on the Worldland deployed BridgeBase contract and node(signer) will transfer the amount from the contract to the user on Ethereum.
 
 ## Node(signer)
 
-Encrypted owner private key is stored on the server and script execution is implemented by providing a password to the encrypted key on the shell. The events are listened to from contracts on both chains at the same time. Transactions are stored and batch executed each 15 seconds which saves a significant amount in transaction fees.
+Encrypted owner private key is stored on the server.
 
-Transaction live tracking state:
+In order to start the bridge process, a transaction monitoring script should be run initially by providing a password to the encrypted key in the environment file by the owner(the password can be deleted from the environment file after starting the process). The events are listened to from contracts on both chains at the same time. Transactions are queued and batch executed each 15 seconds which saves a significant amount in transaction fees. The process is completely event-driven which means the monitoring script listens (listening does not cost gas) to incoming events from both chains and stores transactions in the transaction pool. The transaction pool is checked each 15 seconds, waiting transactions are sent in batch and removed from the pool.
+
+- Steps to initiate the node:
+
+1.  Encrypt the owner private key:
+
+        a. Go to the eth-wld-bridge folder and set the owner private key inside .env file in the following  format:
+
+            ```shell
+            PRIVATE_KEY=your_private_key
+            ```
+        b. Set a password for your private key inside of .env file in the following format: (the password is used to decrypt the encrypted private key later):
+
+            ```shell
+            PRIVATE_KEY_PW=your_password
+            ```
+
+        c. Go to the /scripts folder and run encryptKey.js file:
+
+            ```shell
+            node encryptKey.js
+            ```
+
+           * Providing you have PRIVATE_KEY and PRIVATE_KEY_PW environment variables set inside the .env file it will generate .encryptedKey.json file which is a  cryptographically generated description and hash of the private key inside the root folder. Now we can safely delete the PRIVATE_KEY variable from the environment file.
+
+2.  Run the node:
+
+        * This documentation assumes that you have pm2 (daemon process manager) installed in your system.
+
+        a. Go to the root folder and run ecosystem.config.js with pm2 start:
+
+            ```shell
+            pm2 start ecosystem.config.js
+            ```
+
+        b. Check the running process with pm2 log:
+
+             ```shell
+             pm2 log
+             ```
+
+        * The script should successfully run and output the following:
+
+             ```shell
+             Started monitoring chains [1, 2] for Lock transactions...
+             ```
+
+        * Transaction live tracking state:
 
 ![node-tx-track](assets/node-tx-track.png)
 
-Ether lock event detection state on chain 2 (Worldland):
+        * Ether lock event detection state on chain 2 (Worldland):
 
 ![lock-event-detect](assets/lock-event-detect.png)
 
+        * Now we can safely delete the PRIVATE_KEY_PW variable from the environment file.
+
+3. Delete the PRIVATE_KEY_PW variable from .env file
+
 ## Security Concerns
+
+- Things to note:
+
+* After deleting the PRIVATE_KEY and PRIVATE_KEY_PW they are still stored in the memory of the computer. Before usage please consider the following risks associated with it:
+
+RAM scraping is a technique used by cybercriminals to extract sensitive data from a computer's random access memory (RAM)
+
+- Possible solution:
+
+* Keep the server address private (security measure known as “security through obscurity”):
+
+As there is no external REST request/responses made to and from the server. The IP address could be stored privately and not shared to the public. This puts an extra layer of security.
 
 ### BridgeBase :
 
