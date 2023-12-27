@@ -30,56 +30,45 @@ In order to start the bridge process, a transaction monitoring script should be 
 
 1.  Encrypt the owner private key:
 
-        a. Go to the eth-wld-bridge folder and set the owner private key inside .env file in the following  format:
+    a. Go to the eth-wld-bridge folder and set the owner private key inside .env file in the following format:
 
-            ```shell
             PRIVATE_KEY=your_private_key
-            ```
-        b. Set a password for your private key inside of .env file in the following format: (the password is used to decrypt the encrypted private key later):
 
-            ```shell
+    b. Set a password for your private key inside of .env file in the following format: (the password is used to decrypt the encrypted private key later):
+
             PRIVATE_KEY_PW=your_password
-            ```
 
-        c. Go to the /scripts folder and run encryptKey.js file:
+    c. Go to the /scripts folder and run encryptKey.js file:
 
-            ```shell
             node encryptKey.js
-            ```
 
-           * Providing you have PRIVATE_KEY and PRIVATE_KEY_PW environment variables set inside the .env file it will generate .encryptedKey.json file which is a  cryptographically generated description and hash of the private key inside the root folder. Now we can safely delete the PRIVATE_KEY variable from the environment file.
+    - Providing you have PRIVATE_KEY and PRIVATE_KEY_PW environment variables set inside the .env file it will generate .encryptedKey.json file which is a cryptographically generated description and hash of the private key inside the root folder. Now we can safely delete the PRIVATE_KEY variable from the environment file.
 
 2.  Run the node:
 
-        * This documentation assumes that you have pm2 (daemon process manager) installed in your system.
+    - This documentation assumes that you have pm2 (daemon process manager) installed in your system.
 
-        a. Go to the root folder and run ecosystem.config.js with pm2 start:
+    a. Go to the root folder and run ecosystem.config.js with pm2 start:
 
-            ```shell
-            pm2 start ecosystem.config.js
-            ```
+             pm2 start ecosystem.config.js
 
-        b. Check the running process with pm2 log:
+    b. Check the running process with pm2 log:
 
-             ```shell
              pm2 log
-             ```
 
-        * The script should successfully run and output the following:
+    - The script should successfully run and output the following:
 
-             ```shell
              Started monitoring chains [1, 2] for Lock transactions...
-             ```
 
-        * Transaction live tracking state:
+    - Transaction live tracking state:
 
 ![node-tx-track](assets/node-tx-track.png)
 
-        * Ether lock event detection state on chain 2 (Worldland):
+    * Ether lock event detection state on chain 2 (Worldland):
 
 ![lock-event-detect](assets/lock-event-detect.png)
 
-        * Now we can safely delete the PRIVATE_KEY_PW variable from the environment file.
+    * Now we can safely delete the PRIVATE_KEY_PW variable from the environment file.
 
 3. Delete the PRIVATE_KEY_PW variable from .env file
 
