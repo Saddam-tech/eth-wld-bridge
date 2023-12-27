@@ -32,15 +32,15 @@ In order to start the bridge process, a transaction monitoring script should be 
 
     a. Go to the eth-wld-bridge folder and set the owner private key inside .env file in the following format:
 
-            PRIVATE_KEY=your_private_key
+        PRIVATE_KEY=your_private_key
 
     b. Set a password for your private key inside of .env file in the following format: (the password is used to decrypt the encrypted private key later):
 
-            PRIVATE_KEY_PW=your_password
+        PRIVATE_KEY_PW=your_password
 
     c. Go to the /scripts folder and run encryptKey.js file:
 
-            node encryptKey.js
+        node encryptKey.js
 
     - Providing you have PRIVATE_KEY and PRIVATE_KEY_PW environment variables set inside the .env file it will generate .encryptedKey.json file which is a cryptographically generated description and hash of the private key inside the root folder. Now we can safely delete the PRIVATE_KEY variable from the environment file.
 
@@ -50,15 +50,15 @@ In order to start the bridge process, a transaction monitoring script should be 
 
     a. Go to the root folder and run ecosystem.config.js with pm2 start:
 
-             pm2 start ecosystem.config.js
+        pm2 start ecosystem.config.js
 
     b. Check the running process with pm2 log:
 
-             pm2 log
+        pm2 log
 
     - The script should successfully run and output the following:
 
-             Started monitoring chains [1, 2] for Lock transactions...
+    Started monitoring chains [1, 2] for Lock transactions...
 
     - Transaction live tracking state:
 
