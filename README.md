@@ -36,6 +36,8 @@ Steps to complete the process:
 
 ## Node(signer)
 
+![node-event-driven](assets/node-event-driven.png)
+
 Encrypted owner private key is stored on the server.
 
 In order to start the bridge process, a transaction monitoring script should be run initially by providing a password to the encrypted key in the environment file by the owner(the password can be deleted from the environment file after starting the process). The events are listened to from contracts on both chains at the same time. Transactions are queued and batch executed each 15 seconds which saves a significant amount in transaction fees. The process is completely event-driven which means the monitoring script listens (listening does not cost gas) to incoming events from both chains and stores transactions in the transaction pool. The transaction pool is checked each 15 seconds, waiting transactions are sent in batch and removed from the pool.
