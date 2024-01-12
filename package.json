@@ -28,6 +28,7 @@
     "watch--prod": "yarn hardhat run scripts/monitor.js --network worldland"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2"
+    "@openzeppelin/contracts": "^4.8.2",
+    "sqlite3": "^5.1.7"
   }
 }
