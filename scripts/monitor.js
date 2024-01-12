@@ -10,9 +10,16 @@ const {
   createSignature,
   message_type,
 } = require("../configs/util");
-const { gasLimit, txProcessInterval } = require("../configs/constants");
+const {
+  gasLimit,
+  txProcessInterval,
+  CHAINS,
+  PROCESSED,
+  FUNCTIONS,
+} = require("../configs/constants");
 const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
+const { insert } = require("../db/queries");
 
 const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
 const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
@@ -373,6 +380,17 @@ async function monitorLockEvents() {
         timestamp,
         processed: false,
       });
+      insert([
+        from,
+        to,
+        amount,
+        nonce,
+        token,
+        timestamp,
+        CHAINS.CHAIN_2,
+        PROCESSED.FALSE,
+        FUNCTIONS.MINTTOKEN,
+      ]);
     }
   );
 
@@ -403,6 +421,7 @@ async function monitorLockEvents() {
         timestamp,
         processed: false,
       });
+      insert([from, to, amount, nonce, token, timestamp, 1, 0, "mintWETH"]);
     }
   );
 

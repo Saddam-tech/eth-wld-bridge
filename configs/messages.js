@@ -14,6 +14,8 @@ const MESSAGES = {
   LOW_BALANCE: (amount, balance) =>
     `Requested more than the existing balance on chain_1. Requested amount: ${amount}, User balance: ${balance}`,
   REVERT_ACTION: "Reverting the action...",
+  DB_CONNECT: "Connected to the SQlite database!",
+  DB_CLOSE: "Closing the database connection...",
 };
 
 module.exports = { MESSAGES };

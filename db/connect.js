@@ -1,17 +1,12 @@
+const { MESSAGES } = require("../configs/messages");
+const { insert } = require("./queries");
+
 const sqlite3 = require("sqlite3").verbose();
 
-let db = new sqlite3.Database("./worldland_bridge", (err) => {
+let db = new sqlite3.Database("./worldland_bridge.sqlite", (err) => {
   if (err) {
     return console.error(err.message);
   }
-  console.log("Connected to the SQlite database!");
+  console.log(MESSAGES.DB_CONNECT);
 });
-
-db.close((err) => {
-  if (err) {
-    return console.error(err.message);
-  }
-  console.log("Closing the database connection...");
-});
-
 module.exports = { db };
