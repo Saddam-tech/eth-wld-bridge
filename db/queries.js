@@ -29,7 +29,12 @@ async function insert(rows) {
           // Handle error, perhaps rollback transaction or log
         }
       });
-      stmt.finalize();
+      stmt.finalize(() => {
+        // close the db connection
+        db.close((err) => {
+          console.error(err.message);
+        });
+      });
     });
   } catch (err) {
     console.error(err);
