@@ -1,10 +1,10 @@
-export const TABLES = {
+const TABLES = {
   TX_QUEUE: "tx_queue",
   TX_FAILED: "tx_failed",
   TX_PROCESSED: "tx_processed",
 };
 
-export const COLUMNS = {
+const COLUMNS = {
   from_address: "from_address",
   to_address: "to_address",
   amount: "amount",
@@ -15,3 +15,5 @@ export const COLUMNS = {
   processed: "processed",
   function_type: "function_type",
 };
+
+module.exports = { TABLES, COLUMNS };

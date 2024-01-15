@@ -1,5 +1,4 @@
 const { MESSAGES } = require("../configs/messages");
-const { insert } = require("./queries");
 
 const sqlite3 = require("sqlite3").verbose();
 
