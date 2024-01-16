@@ -34,7 +34,38 @@ async function insert(table, rows) {
       stmt.finalize(() => {
         // close the db connection
         db.close((err) => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      });
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function move(from_table, to_table, params) {
+  try {
+    let sql = `DELETE FROM ${from_table} WHERE ${columns
+      .map(
+        (el, i) =>
+          `${el} = ?${
+            columns.length > 1 && i + 1 !== columns.length ? " AND " : ""
+          }`
+      )
+      .join("")}`;
+    db.serialize(() => {
+      insert(to_table, params);
+      db.run(sql, params, (err) => {
+        if (err) {
           console.error(err);
+        }
+
+        db.close((err) => {
+          if (err) {
+            console.error(err);
+          }
         });
       });
     });
@@ -54,7 +85,9 @@ async function query_all(table) {
           }
           resolve(rows);
           db.close((err) => {
-            console.error(err);
+            if (err) {
+              console.error(err);
+            }
           });
         });
       });
@@ -79,7 +112,9 @@ async function query_params(table, params, values) {
         stmt.finalize(() => {
           // close the db connection
           db.close((err) => {
-            console.error(err);
+            if (err) {
+              console.error(err);
+            }
           });
         });
       });
@@ -89,11 +124,4 @@ async function query_params(table, params, values) {
   }
 }
 
-async function main() {
-  const tx_queue = await query_all("tx_queue");
-  console.log({ tx_queue });
-}
-
-main();
-
-module.exports = { insert, query_all, query_params };
+module.exports = { insert, query_all, query_params, move };

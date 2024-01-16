@@ -19,7 +19,7 @@ const {
 } = require("../configs/constants");
 const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
-const { insert, query_all } = require("../db/queries");
+const { insert, query_all, move } = require("../db/queries");
 const { TABLES } = require("../db/tables");
 
 const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
@@ -70,9 +70,9 @@ async function processTransactionQueue() {
       if (tx_queue.length > 0) {
         for (let i = 0; i < tx_queue.length; i++) {
           if (tx_queue[i].processed === PROCESSED.FALSE) {
-            // continue if the transaction is not processed yet
             // processed transactions will not exist in tx_queue table, but it does not hurt to make an extra check here
-            // start sorting the transactions here
+            // continue if the transaction is not processed yet
+            // start sorting the transactions
 
             // saving into MINTWETH temporary memory
             if (
@@ -142,6 +142,7 @@ async function processTransactionQueue() {
       }
     });
     await sorting; // do the rest of operation after the sorting is complete
+
     // chain1 mintWETH batch submission
     if (mintWETHTxQueueChain1.length > 0) {
       let destinations = [];
@@ -150,11 +151,33 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
         if (!mintWETHTxQueueChain1[i].processed) {
-          destinations.push(mintWETHTxQueueChain1[i].to);
-          amounts.push(mintWETHTxQueueChain1[i].amount);
-          nonces.push(mintWETHTxQueueChain1[i].nonce);
-          tokens.push(mintWETHTxQueueChain1[i].token);
-          mintWETHTxQueueChain1[i].processed = true;
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = mintWETHTxQueueChain1[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
           console.log(mintWETHTxQueueChain1[i]);
         }
       }
@@ -173,12 +196,6 @@ async function processTransactionQueue() {
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-      mintWETHTxQueueChain1 = mintWETHTxQueueChain1.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -188,32 +205,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
-        destinations.push(mintWETHTxQueueChain2[i].to);
-        amounts.push(mintWETHTxQueueChain2[i].amount);
-        nonces.push(mintWETHTxQueueChain2[i].nonce);
-        token =
-          map_token_address_to_token_address[mintWETHTxQueueChain2[i].token];
-        mintWETHTxQueueChain2[i].processed = true;
-        console.log(mintWETHTxQueueChain2[i]);
+        if (!mintWETHTxQueueChain2[i].processed) {
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = mintWETHTxQueueChain2[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
+          console.log(mintWETHTxQueueChain2[i]);
+        }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintWETH(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-      mintWETHTxQueueChain2 = mintWETHTxQueueChain2.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -223,32 +262,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
-        destinations.push(unLockETHTxQueueChain1[i].to);
-        amounts.push(unLockETHTxQueueChain1[i].amount);
-        nonces.push(unLockETHTxQueueChain1[i].nonce);
-        token =
-          map_token_address_to_token_address[unLockETHTxQueueChain1[i].token];
-        unLockETHTxQueueChain1[i].processed = true;
-        console.log(unLockETHTxQueueChain1[i]);
+        if (!unLockETHTxQueueChain1[i].processed) {
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = unLockETHTxQueueChain1[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
+          console.log(unLockETHTxQueueChain1[i]);
+        }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-      unLockETHTxQueueChain1 = unLockETHTxQueueChain1.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -258,32 +319,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
-        destinations.push(unLockETHTxQueueChain2[i].to);
-        amounts.push(unLockETHTxQueueChain2[i].amount);
-        nonces.push(unLockETHTxQueueChain2[i].nonce);
-        token =
-          map_token_address_to_token_address[unLockETHTxQueueChain2[i].token];
-        unLockETHTxQueueChain2[i].processed = true;
-        console.log(unLockETHTxQueueChain2[i]);
+        if (!unLockETHTxQueueChain2[i].processed) {
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = unLockETHTxQueueChain2[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
+          console.log(unLockETHTxQueueChain2[i]);
+        }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-      unLockETHTxQueueChain2 = unLockETHTxQueueChain2.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -293,34 +376,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
         if (!mintTokenTxQueueChain1[i].processed) {
-          destinations.push(mintTokenTxQueueChain1[i].to);
-          amounts.push(mintTokenTxQueueChain1[i].amount);
-          nonces.push(mintTokenTxQueueChain1[i].nonce);
-          token =
-            map_token_address_to_token_address[mintTokenTxQueueChain1[i].token];
-          mintTokenTxQueueChain1[i].processed = true;
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = mintTokenTxQueueChain1[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
           console.log(mintTokenTxQueueChain1[i]);
         }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintToken(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-      mintTokenTxQueueChain1 = mintTokenTxQueueChain1.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -330,32 +433,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
-        destinations.push(mintTokenTxQueueChain2[i].to);
-        amounts.push(mintTokenTxQueueChain2[i].amount);
-        nonces.push(mintTokenTxQueueChain2[i].nonce);
-        token =
-          map_token_address_to_token_address[mintTokenTxQueueChain2[i].token];
-        mintTokenTxQueueChain2[i].processed = true;
-        console.log(mintTokenTxQueueChain2[i]);
+        if (!mintTokenTxQueueChain2[i].processed) {
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = mintTokenTxQueueChain2[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
+          console.log(mintTokenTxQueueChain2[i]);
+        }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintToken(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-      mintTokenTxQueueChain2 = mintTokenTxQueueChain2.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -365,32 +490,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
-        destinations.push(unlockTokenTxQueueChain1[i].to);
-        amounts.push(unlockTokenTxQueueChain1[i].amount);
-        nonces.push(unlockTokenTxQueueChain1[i].nonce);
-        token =
-          map_token_address_to_token_address[unlockTokenTxQueueChain1[i].token];
-        unlockTokenTxQueueChain1[i].processed = true;
-        console.log(unlockTokenTxQueueChain1[i]);
+        if (!unlockTokenTxQueueChain1[i].processed) {
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = unlockTokenTxQueueChain1[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
+          console.log(unlockTokenTxQueueChain1[i]);
+        }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unlockToken(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-      unlockTokenTxQueueChain1 = unlockTokenTxQueueChain1.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -400,32 +547,54 @@ async function processTransactionQueue() {
       let destinations = [];
       let amounts = [];
       let nonces = [];
-      let token;
+      let tokens = [];
       for (let i = 0; i < unlockTokenTxQueueChain2.length; i++) {
-        destinations.push(unlockTokenTxQueueChain2[i].to);
-        amounts.push(unlockTokenTxQueueChain2[i].amount);
-        nonces.push(unlockTokenTxQueueChain2[i].nonce);
-        token =
-          map_token_address_to_token_address[unlockTokenTxQueueChain2[i].token];
-        unlockTokenTxQueueChain2[i].processed = true;
-        console.log(unlockTokenTxQueueChain2[i]);
+        if (!unlockTokenTxQueueChain2[i].processed) {
+          let {
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          } = unlockTokenTxQueueChain2[i];
+          destinations.push(to_address);
+          amounts.push(amount);
+          nonces.push(nonce);
+          tokens.push(token);
+          processed = PROCESSED.TRUE;
+          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+            from_address,
+            to_address,
+            amount,
+            nonce,
+            token,
+            timestamp,
+            chain,
+            processed,
+            function_type,
+          ]);
+          console.log(unlockTokenTxQueueChain2[i]);
+        }
       }
-      const admin_signature = await createSignature(message_type, [token]);
+      const admin_signature = await createSignature(message_type, [
+        destinations[0],
+        amounts[0],
+        nonces[0],
+        tokens[0],
+      ]);
       const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unlockToken(
         destinations,
         amounts,
         nonces,
-        token,
+        tokens,
         admin_signature
       );
       console.log({ tx });
       console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-      unlockTokenTxQueueChain2 = unlockTokenTxQueueChain2.filter(
-        (el) => el.processed === false
-      );
-      destinations = [];
-      amounts = [];
-      nonces = [];
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -454,15 +623,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // mintTokenTxQueueChain2.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -496,15 +656,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // mintTokenTxQueueChain1.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -538,15 +689,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // unlockTokenTxQueueChain2.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -580,15 +722,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // unlockTokenTxQueueChain1.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -623,15 +756,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // mintWETHTxQueueChain2.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -662,15 +786,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // mintWETHTxQueueChain1.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -701,15 +816,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // unLockETHTxQueueChain2.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
@@ -740,15 +846,6 @@ async function monitorLockEvents() {
         console.log(MESSAGES.ALREADY_PROCESSED);
         return;
       }
-      // unLockETHTxQueueChain1.push({
-      //   from,
-      //   to,
-      //   amount,
-      //   nonce,
-      //   token,
-      //   timestamp,
-      //   processed: false,
-      // });
       let otherChainToken = map_token_address_to_token_address[token];
       insert(TABLES.TX_QUEUE, [
         from,
