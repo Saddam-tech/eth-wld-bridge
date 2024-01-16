@@ -151,33 +151,11 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
         if (!mintWETHTxQueueChain1[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = mintWETHTxQueueChain1[i];
+          let { to_address, amount, nonce, token } = mintWETHTxQueueChain1[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(mintWETHTxQueueChain1[i]);
         }
       }
@@ -187,15 +165,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintWETH(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
+        .mintWETH(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintWETHTxQueueChain1[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintWETHTxQueueChain1[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(1));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -208,33 +237,11 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
         if (!mintWETHTxQueueChain2[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = mintWETHTxQueueChain2[i];
+          let { to_address, amount, nonce, token } = mintWETHTxQueueChain2[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(mintWETHTxQueueChain2[i]);
         }
       }
@@ -244,15 +251,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintWETH(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2)
+        .mintWETH(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintWETHTxQueueChain2[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintWETHTxQueueChain2[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(2));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -265,33 +323,11 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
         if (!unLockETHTxQueueChain1[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = unLockETHTxQueueChain1[i];
+          let { to_address, amount, nonce, token } = unLockETHTxQueueChain1[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(unLockETHTxQueueChain1[i]);
         }
       }
@@ -301,15 +337,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
+        .unLockETH(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = unLockETHTxQueueChain1[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = unLockETHTxQueueChain1[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(1));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -322,33 +409,11 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
         if (!unLockETHTxQueueChain2[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = unLockETHTxQueueChain2[i];
+          let { to_address, amount, nonce, token } = unLockETHTxQueueChain2[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(unLockETHTxQueueChain2[i]);
         }
       }
@@ -358,15 +423,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unLockETH(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
+        .unLockETH(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = unLockETHTxQueueChain2[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = unLockETHTxQueueChain2[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(2));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -379,33 +495,11 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
         if (!mintTokenTxQueueChain1[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = mintTokenTxQueueChain1[i];
+          let { to_address, amount, nonce, token } = mintTokenTxQueueChain1[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(mintTokenTxQueueChain1[i]);
         }
       }
@@ -415,15 +509,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).mintToken(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
+        .mintToken(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintTokenTxQueueChain1[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintTokenTxQueueChain1[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(1));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -436,33 +581,11 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
         if (!mintTokenTxQueueChain2[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = mintTokenTxQueueChain2[i];
+          let { to_address, amount, nonce, token } = mintTokenTxQueueChain2[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(mintTokenTxQueueChain2[i]);
         }
       }
@@ -472,15 +595,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2).mintToken(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2)
+        .mintToken(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintTokenTxQueueChain2[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = mintTokenTxQueueChain2[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(2));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -493,33 +667,12 @@ async function processTransactionQueue() {
       let tokens = [];
       for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
         if (!unlockTokenTxQueueChain1[i].processed) {
-          let {
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = unlockTokenTxQueueChain1[i];
+          let { to_address, amount, nonce, token } =
+            unlockTokenTxQueueChain1[i];
           destinations.push(to_address);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          ]);
           console.log(unlockTokenTxQueueChain1[i]);
         }
       }
@@ -529,15 +682,66 @@ async function processTransactionQueue() {
         nonces[0],
         tokens[0],
       ]);
-      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unlockToken(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
+        .unlockToken(destinations, amounts, nonces, tokens, admin_signature)
+        .then((tx) => {
+          for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = unlockTokenTxQueueChain1[i];
+            processed = PROCESSED.TRUE;
+            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log({ tx });
+          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
+        })
+        .catch((err) => {
+          for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
+            let {
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            } = unlockTokenTxQueueChain1[i];
+            processed = PROCESSED.FALSE;
+            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
+              from_address,
+              to_address,
+              amount,
+              nonce,
+              token,
+              timestamp,
+              chain,
+              processed,
+              function_type,
+            ]);
+          }
+          console.log(MESSAGES.TX_FAILED(1));
+          console.log(err);
+        });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }

@@ -8,6 +8,7 @@ const MESSAGES = {
     `<<<<<<<<<< BurnWETH event detected on CHAIN_${chain} >>>>>>>>>>>`,
   BATCH_PROCESSED: (chain, num) =>
     `Processed ${num} transactions in batch on chain ${chain}!`,
+  TX_FAILED: (chain) => `Failed to process the transaction on chain ${chain}`,
   NO_TX: (chain) => `No transactions to process on chain ${chain}.`,
   ALREADY_PROCESSED:
     "Skipping already processed transaction... Waiting for upcoming transactions...",
