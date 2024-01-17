@@ -5,12 +5,14 @@ const fs = require("fs-extra");
 const ethers = require("ethers");
 /** @type import('hardhat/config').HardhatUserConfig */
 const gas = 100000;
-const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
-const wallet = ethers.Wallet.fromEncryptedJsonSync(
-  encryptedJson,
-  process.env.PRIVATE_KEY_PW
-);
-const PRIVATE_KEY = wallet.privateKey;
+// const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+// const wallet = ethers.Wallet.fromEncryptedJsonSync(
+//   encryptedJson,
+//   process.env.PRIVATE_KEY_PW
+// );
+// const PRIVATE_KEY = wallet.privateKey;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+console.log({ PRIVATE_KEY });
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {

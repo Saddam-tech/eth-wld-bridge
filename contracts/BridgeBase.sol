@@ -86,10 +86,19 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         address[] calldata destinations,
         uint256[] calldata amounts,
         uint256[] calldata nonces,
-        address token,
+        address[] calldata tokens,
         bytes calldata signature
     ) external onlyOwner notInEmergency nonReentrant {
-        bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
+        bytes32 message = prefixed(
+            keccak256(
+                abi.encodePacked(
+                    destinations[0],
+                    amounts[0],
+                    nonces[0],
+                    tokens[0]
+                )
+            )
+        );
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
@@ -98,7 +107,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < amounts.length; i++) {
             require(!processedNonces[nonces[i]], "Mint already processed!");
             processedNonces[nonces[i]] = true;
-            IToken(token).mint(destinations[i], amounts[i]);
+            IToken(tokens[i]).mint(destinations[i], amounts[i]);
         }
     }
 
@@ -163,10 +172,19 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         address[] calldata destinations,
         uint256[] calldata amounts,
         uint256[] calldata nonces,
-        address token,
+        address[] calldata tokens,
         bytes calldata signature
     ) external onlyOwner notInEmergency nonReentrant {
-        bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
+        bytes32 message = prefixed(
+            keccak256(
+                abi.encodePacked(
+                    destinations[0],
+                    amounts[0],
+                    nonces[0],
+                    tokens[0]
+                )
+            )
+        );
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
@@ -174,12 +192,12 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         // unlock transaction amounts to destinations
         for (uint256 i = 0; i < amounts.length; i++) {
             require(
-                IToken(token).balanceOf(address(this)) >= amounts[i],
+                IToken(tokens[i]).balanceOf(address(this)) >= amounts[i],
                 "Insufficient contract balance!"
             );
             require(!processedNonces[nonces[i]], "UnLock already processed!");
             processedNonces[nonces[i]] = true;
-            IToken(token).transfer(destinations[i], amounts[i]);
+            IToken(tokens[i]).transfer(destinations[i], amounts[i]);
         }
     }
 
@@ -203,10 +221,19 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         address[] calldata destinations,
         uint256[] calldata amounts,
         uint256[] calldata nonces,
-        address token,
+        address[] calldata tokens,
         bytes calldata signature
     ) external onlyOwner notInEmergency nonReentrant {
-        bytes32 message = prefixed(keccak256(abi.encodePacked(token)));
+        bytes32 message = prefixed(
+            keccak256(
+                abi.encodePacked(
+                    destinations[0],
+                    amounts[0],
+                    nonces[0],
+                    tokens[0]
+                )
+            )
+        );
         require(
             recoverSigner(message, signature) == owner(),
             "Wrong signature!"
@@ -215,7 +242,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < amounts.length; i++) {
             require(!processedNonces[nonces[i]], "UnLock already processed!");
             processedNonces[nonces[i]] = true;
-            IWETH(token).withdraw(destinations[i], amounts[i]);
+            IWETH(tokens[i]).withdraw(destinations[i], amounts[i]);
         }
     }
 

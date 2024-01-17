@@ -15,10 +15,14 @@ async function createSignature(types, messages) {
   const signer = await ethers.getSigner();
   return signer.signMessage(ethers.utils.arrayify(hash));
 }
-// }
+
+function convertBigNumToString(bigNum) {
+  return Number(bigNum).toString();
+}
 
 module.exports = {
   map_token_address_to_token_address,
   message_type,
   createSignature,
+  convertBigNumToString,
 };

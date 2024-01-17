@@ -9,6 +9,7 @@ const {
   map_token_address_to_token_address,
   createSignature,
   message_type,
+  convertBigNumToString,
 } = require("../configs/util");
 const {
   gasLimit,
@@ -66,7 +67,7 @@ async function processTransactionQueue() {
     let unlockTokenTxQueueChain2 = [];
 
     const tx_queue = await query_all(TABLES.TX_QUEUE);
-    const sorting = new Promise(() => {
+    const sorting = new Promise((resolve) => {
       if (tx_queue.length > 0) {
         for (let i = 0; i < tx_queue.length; i++) {
           if (tx_queue[i].processed === PROCESSED.FALSE) {
@@ -139,6 +140,7 @@ async function processTransactionQueue() {
             }
           }
         }
+        resolve(true);
       }
     });
     await sorting; // do the rest of operation after the sorting is complete
@@ -828,13 +830,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_2,
         PROCESSED.FALSE,
         FUNCTIONS.MINTTOKEN,
@@ -861,13 +866,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_2,
         PROCESSED.FALSE,
         FUNCTIONS.MINTTOKEN,
@@ -894,13 +902,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_2,
         PROCESSED.FALSE,
         FUNCTIONS.UNLOCKTOKEN,
@@ -927,13 +938,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_1,
         PROCESSED.FALSE,
         FUNCTIONS.UNLOCKTOKEN,
@@ -961,13 +975,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_2,
         PROCESSED.FALSE,
         FUNCTIONS.MINTWETH,
@@ -991,13 +1008,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_1,
         PROCESSED.FALSE,
         FUNCTIONS.MINTWETH,
@@ -1021,13 +1041,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_2,
         PROCESSED.FALSE,
         FUNCTIONS.BURN_WETH,
@@ -1051,13 +1074,16 @@ async function monitorLockEvents() {
         return;
       }
       let otherChainToken = map_token_address_to_token_address[token];
+      let convertedAmount = convertBigNumToString(amount);
+      let convertedNonce = convertBigNumToString(nonce);
+      let convertedTimestamp = convertBigNumToString(timestamp);
       insert(TABLES.TX_QUEUE, [
         from,
         to,
-        amount,
-        nonce,
+        convertedAmount,
+        convertedNonce,
         otherChainToken,
-        timestamp,
+        convertedTimestamp,
         CHAINS.CHAIN_1,
         PROCESSED.FALSE,
         FUNCTIONS.UNLOCKETH,
