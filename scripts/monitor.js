@@ -67,83 +67,79 @@ async function processTransactionQueue() {
     let unlockTokenTxQueueChain2 = [];
 
     const tx_queue = await query_all(TABLES.TX_QUEUE);
-    const sorting = new Promise((resolve) => {
-      if (tx_queue.length > 0) {
-        for (let i = 0; i < tx_queue.length; i++) {
-          if (tx_queue[i].processed === PROCESSED.FALSE) {
-            // processed transactions will not exist in tx_queue table, but it does not hurt to make an extra check here
-            // continue if the transaction is not processed yet
-            // start sorting the transactions
+    if (tx_queue.length > 0) {
+      for (let i = 0; i < tx_queue.length; i++) {
+        if (tx_queue[i].processed === PROCESSED.FALSE) {
+          // processed transactions will not exist in tx_queue table, but it does not hurt to make an extra check here
+          // continue if the transaction is not processed yet
+          // start sorting the transactions
 
-            // saving into MINTWETH temporary memory
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_1 &&
-              tx_queue[i].function_type === FUNCTIONS.MINTWETH
-            ) {
-              // save into chain1 MINTWETH temporary memory
-              mintWETHTxQueueChain1.push(tx_queue[i]);
-            }
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_2 &&
-              tx_queue[i].function_type === FUNCTIONS.MINTWETH
-            ) {
-              // save into chain2 MINTWETH temporary memory
-              mintWETHTxQueueChain2.push(tx_queue[i]);
-            }
+          // saving into MINTWETH temporary memory
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_1 &&
+            tx_queue[i].function_type === FUNCTIONS.MINTWETH
+          ) {
+            // save into chain1 MINTWETH temporary memory
+            mintWETHTxQueueChain1.push(tx_queue[i]);
+          }
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_2 &&
+            tx_queue[i].function_type === FUNCTIONS.MINTWETH
+          ) {
+            // save into chain2 MINTWETH temporary memory
+            mintWETHTxQueueChain2.push(tx_queue[i]);
+          }
 
-            // save into UNLOCKETH temporary memory
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_1 &&
-              tx_queue[i].function_type === FUNCTIONS.UNLOCKETH
-            ) {
-              // save into chain1 UNLOCKETH temporary memory
-              unLockETHTxQueueChain1.push(tx_queue[i]);
-            }
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_2 &&
-              tx_queue[i].function_type === FUNCTIONS.UNLOCKETH
-            ) {
-              // save into chain2 UNLOCKETH temporary memory
-              unLockETHTxQueueChain2.push(tx_queue[i]);
-            }
+          // save into UNLOCKETH temporary memory
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_1 &&
+            tx_queue[i].function_type === FUNCTIONS.UNLOCKETH
+          ) {
+            // save into chain1 UNLOCKETH temporary memory
+            unLockETHTxQueueChain1.push(tx_queue[i]);
+          }
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_2 &&
+            tx_queue[i].function_type === FUNCTIONS.UNLOCKETH
+          ) {
+            // save into chain2 UNLOCKETH temporary memory
+            unLockETHTxQueueChain2.push(tx_queue[i]);
+          }
 
-            // save into MINTTOKEN temporary memory
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_1 &&
-              tx_queue[i].function_type === FUNCTIONS.MINTTOKEN
-            ) {
-              // save into chain1 MINTTOKEN temporary memory
-              mintTokenTxQueueChain1.push(tx_queue[i]);
-            }
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_2 &&
-              tx_queue[i].function_type === FUNCTIONS.MINTTOKEN
-            ) {
-              // save into chain2 UNLOCKETH temporary memory
-              mintTokenTxQueueChain2.push(tx_queue[i]);
-            }
+          // save into MINTTOKEN temporary memory
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_1 &&
+            tx_queue[i].function_type === FUNCTIONS.MINTTOKEN
+          ) {
+            // save into chain1 MINTTOKEN temporary memory
+            mintTokenTxQueueChain1.push(tx_queue[i]);
+          }
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_2 &&
+            tx_queue[i].function_type === FUNCTIONS.MINTTOKEN
+          ) {
+            // save into chain2 UNLOCKETH temporary memory
+            mintTokenTxQueueChain2.push(tx_queue[i]);
+          }
 
-            // save into UNLOCKTOKEN temporary memory
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_1 &&
-              tx_queue[i].function_type === FUNCTIONS.UNLOCKTOKEN
-            ) {
-              // save into chain1 UNLOCKTOKEN temporary memory
-              unlockTokenTxQueueChain1.push(tx_queue[i]);
-            }
-            if (
-              tx_queue[i].chain === CHAINS.CHAIN_2 &&
-              tx_queue[i].function_type === FUNCTIONS.UNLOCKTOKEN
-            ) {
-              // save into chain2 UNLOCKTOKEN temporary memory
-              unlockTokenTxQueueChain2.push(tx_queue[i]);
-            }
+          // save into UNLOCKTOKEN temporary memory
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_1 &&
+            tx_queue[i].function_type === FUNCTIONS.UNLOCKTOKEN
+          ) {
+            // save into chain1 UNLOCKTOKEN temporary memory
+            unlockTokenTxQueueChain1.push(tx_queue[i]);
+          }
+          if (
+            tx_queue[i].chain === CHAINS.CHAIN_2 &&
+            tx_queue[i].function_type === FUNCTIONS.UNLOCKTOKEN
+          ) {
+            // save into chain2 UNLOCKTOKEN temporary memory
+            unlockTokenTxQueueChain2.push(tx_queue[i]);
           }
         }
-        resolve(true);
       }
-    });
-    await sorting; // do the rest of operation after the sorting is complete
+    }
 
     // chain1 mintWETH batch submission
     if (mintWETHTxQueueChain1.length > 0) {
@@ -172,6 +168,7 @@ async function processTransactionQueue() {
         .then((tx) => {
           for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
             let {
+              id,
               from_address,
               to_address,
               amount,
@@ -183,17 +180,22 @@ async function processTransactionQueue() {
               function_type,
             } = mintWETHTxQueueChain1[i];
             processed = PROCESSED.TRUE;
-            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            ]);
+            move(
+              TABLES.TX_QUEUE,
+              TABLES.TX_PROCESSED,
+              [
+                from_address,
+                to_address,
+                amount,
+                nonce,
+                token,
+                timestamp,
+                chain,
+                processed,
+                function_type,
+              ],
+              id
+            );
           }
           console.log({ tx });
           console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
@@ -201,6 +203,7 @@ async function processTransactionQueue() {
         .catch((err) => {
           for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
             let {
+              id,
               from_address,
               to_address,
               amount,
@@ -212,17 +215,22 @@ async function processTransactionQueue() {
               function_type,
             } = mintWETHTxQueueChain1[i];
             processed = PROCESSED.FALSE;
-            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            ]);
+            move(
+              TABLES.TX_QUEUE,
+              TABLES.TX_FAILED,
+              [
+                from_address,
+                to_address,
+                amount,
+                nonce,
+                token,
+                timestamp,
+                chain,
+                processed,
+                function_type,
+              ],
+              id
+            );
           }
           console.log(MESSAGES.TX_FAILED(1));
           console.log(err);
@@ -258,6 +266,7 @@ async function processTransactionQueue() {
         .then((tx) => {
           for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
             let {
+              id,
               from_address,
               to_address,
               amount,
@@ -269,17 +278,22 @@ async function processTransactionQueue() {
               function_type,
             } = mintWETHTxQueueChain2[i];
             processed = PROCESSED.TRUE;
-            move(TABLES.TX_QUEUE, TABLES.TX_PROCESSED, [
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            ]);
+            move(
+              TABLES.TX_QUEUE,
+              TABLES.TX_PROCESSED,
+              [
+                from_address,
+                to_address,
+                amount,
+                nonce,
+                token,
+                timestamp,
+                chain,
+                processed,
+                function_type,
+              ],
+              id
+            );
           }
           console.log({ tx });
           console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
@@ -287,6 +301,7 @@ async function processTransactionQueue() {
         .catch((err) => {
           for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
             let {
+              id,
               from_address,
               to_address,
               amount,
@@ -298,17 +313,22 @@ async function processTransactionQueue() {
               function_type,
             } = mintWETHTxQueueChain2[i];
             processed = PROCESSED.FALSE;
-            move(TABLES.TX_QUEUE, TABLES.TX_FAILED, [
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            ]);
+            move(
+              TABLES.TX_QUEUE,
+              TABLES.TX_FAILED,
+              [
+                from_address,
+                to_address,
+                amount,
+                nonce,
+                token,
+                timestamp,
+                chain,
+                processed,
+                function_type,
+              ],
+              id
+            );
           }
           console.log(MESSAGES.TX_FAILED(2));
           console.log(err);

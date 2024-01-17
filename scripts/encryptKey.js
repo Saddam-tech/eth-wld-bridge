@@ -1,5 +1,6 @@
 const { ethers } = require("hardhat");
 const fs = require("fs-extra");
+const path = require("path");
 require("dotenv").config();
 
 async function main() {
@@ -8,8 +9,8 @@ async function main() {
     process.env.PRIVATE_KEY_PW,
     process.env.PRIVATE_KEY
   );
-  console.log({ encryptedKey });
-  fs.writeFileSync("../.encryptedKey.json", encryptedKey);
+  const resolvePath = path.resolve(__dirname, "../.encryptedKey.json");
+  fs.writeFileSync(resolvePath, encryptedKey);
 }
 
 main()

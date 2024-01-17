@@ -13,3 +13,6 @@ artifacts
 
 .encryptedKey.json 
 
+# .db file
+
+worldland_bridge.db

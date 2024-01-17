@@ -31,42 +31,22 @@ async function insert(table, rows) {
           // Handle error, perhaps rollback transaction or log
         }
       });
-      // stmt.finalize(() => {
-      // close the db connection
-      // db.close((err) => {
-      //   if (err) {
-      //     console.error(err);
-      //   }
-      // });
-      // });
+      stmt.finalize();
     });
   } catch (err) {
     console.error(err);
   }
 }
 
-async function move(from_table, to_table, params) {
+async function move(from_table, to_table, params, id) {
   try {
-    let sql = `DELETE FROM ${from_table} WHERE ${columns
-      .map(
-        (el, i) =>
-          `${el} = ?${
-            columns.length > 1 && i + 1 !== columns.length ? " AND " : ""
-          }`
-      )
-      .join("")}`;
+    let sql = `DELETE FROM ${from_table} WHERE id = ?`;
     db.serialize(() => {
       insert(to_table, params);
-      db.run(sql, params, (err) => {
+      db.run(sql, [id], (err) => {
         if (err) {
           console.error(err);
         }
-
-        // db.close((err) => {
-        //   if (err) {
-        //     console.error(err);
-        //   }
-        // });
       });
     });
   } catch (err) {
@@ -84,11 +64,6 @@ async function query_all(table) {
             reject(err);
           }
           resolve(rows);
-          // db.close((err) => {
-          //   if (err) {
-          //     console.error(err);
-          //   }
-          // });
         });
       });
     });
@@ -109,14 +84,7 @@ async function query_params(table, params, values) {
           }
           resolve(rows);
         });
-        // stmt.finalize(() => {
-        // close the db connection
-        // db.close((err) => {
-        //   if (err) {
-        //     console.error(err);
-        //   }
-        // });
-        // });
+        stmt.finalize();
       });
     });
   } catch (err) {
