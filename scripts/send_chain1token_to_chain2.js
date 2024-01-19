@@ -34,7 +34,7 @@ async function main() {
   }
   const tx = await MyContract.lockToken(
     signer.address,
-    ethers.utils.parseUnits("10", 18),
+    ethers.utils.parseUnits("1", 18),
     "DAI",
     TOKEN_ADDRESS_ETHEREUM
   );
