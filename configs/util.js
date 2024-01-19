@@ -3,6 +3,7 @@ const { PROCESSED, gasLimit } = require("./constants");
 const { TABLES } = require("../db/tables");
 const { MESSAGES } = require("./messages");
 const { move } = require("../db/queries");
+const { sendMessage } = require("./telegram_bot");
 require("dotenv").config();
 
 const message_type = ["address", "uint256", "uint256", "address"];
@@ -83,7 +84,25 @@ async function consumeTx(args) {
               id
             );
           }
-          console.log({ tx });
+          sendMessage(`
+          ${MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)}: 
+            ${queue.map(
+              (el) => `
+              id: ${el.id}
+              from: ${el.from_address}
+              to: ${el.to_address}
+              amount: ${el.amount}
+              nonce: ${el.nonce}
+              token: ${el.token}
+              timestamp: ${el.timestamp}
+              chain: ${el.chain}
+              processed: ${el.processed}
+              method: ${el.function_type}
+              `
+            )}
+          Transaction Hash: ${tx.hash}
+          `);
+          console.log({ txHash: tx.hash });
           console.log(
             MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)
           );
@@ -120,6 +139,23 @@ async function consumeTx(args) {
               id
             );
           }
+          sendMessage(`
+          ${MESSAGES.TX_FAILED(queue[0].chain)}: 
+            ${queue.map(
+              (el) => `
+              id: ${el.id}
+              from: ${el.from_address}
+              to: ${el.to_address}
+              amount: ${el.amount}
+              nonce: ${el.nonce}
+              token: ${el.token}
+              timestamp: ${el.timestamp}
+              chain: ${el.chain}
+              processed: ${el.processed}
+              method: ${el.function_type}
+              `
+            )}
+          `);
           console.log(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(err);
         });

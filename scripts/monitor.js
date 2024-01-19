@@ -21,6 +21,7 @@ const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
 const { insert, query_all, move, query_params } = require("../db/queries");
 const { TABLES } = require("../db/tables");
+const { sendMessage } = require("../configs/telegram_bot");
 
 const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
 const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
@@ -131,10 +132,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -148,6 +151,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.MINTTOKEN,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+        ${MESSAGES.TOKEN_TRANSFER(1)}
+        from: ${from}
+        to: ${to}
+        amount: ${convertedAmount}
+        token_chain_1: ${token}
+        token_chain_2: ${otherChainToken}
+        timestamp: ${convertedTimestamp}
+        nonce: ${convertedNonce}
+        `);
     }
   );
 
@@ -176,10 +190,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -193,6 +209,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.MINTTOKEN,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+        ${MESSAGES.TOKEN_TRANSFER(2)}
+        from: ${from}
+        to: ${to}
+        amount: ${convertedAmount}
+        token_chain_1: ${token}
+        token_chain_2: ${otherChainToken}
+        timestamp: ${convertedTimestamp}
+        nonce: ${convertedNonce}
+        `);
     }
   );
 
@@ -221,10 +248,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -238,6 +267,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.UNLOCKTOKEN,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+       ${MESSAGES.TOKEN_TRANSFER(1)}
+       from: ${from}
+       to: ${to}
+       amount: ${convertedAmount}
+       token_chain_1: ${token}
+       token_chain_2: ${otherChainToken}
+       timestamp: ${convertedTimestamp}
+       nonce: ${convertedNonce}
+       `);
     }
   );
 
@@ -266,10 +306,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -283,6 +325,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.UNLOCKTOKEN,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+         ${MESSAGES.TOKEN_TRANSFER(2)}
+         from: ${from}
+         to: ${to}
+         amount: ${convertedAmount}
+         token_chain_1: ${token}
+         token_chain_2: ${otherChainToken}
+         timestamp: ${convertedTimestamp}
+         nonce: ${convertedNonce}
+         `);
     }
   );
 
@@ -312,10 +365,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -329,6 +384,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.MINTWETH,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+       ${MESSAGES.ETH_TRANSFER(1)}
+       from: ${from}
+       to: ${to}
+       amount: ${convertedAmount}
+       token_chain_1: ${token}
+       token_chain_2: ${otherChainToken}
+       timestamp: ${convertedTimestamp}
+       nonce: ${convertedNonce}
+       `);
     }
   );
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
@@ -355,10 +421,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -372,6 +440,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.MINTWETH,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+        ${MESSAGES.ETH_TRANSFER(2)}
+        from: ${from}
+        to: ${to}
+        amount: ${convertedAmount}
+        token_chain_1: ${token}
+        token_chain_2: ${otherChainToken}
+        timestamp: ${convertedTimestamp}
+        nonce: ${convertedNonce}
+        `);
     }
   );
 
@@ -398,10 +477,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -415,6 +496,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.BURN_WETH,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+       ${MESSAGES.BURN(1)}
+       from: ${from}
+       to: ${to}
+       amount: ${convertedAmount}
+       token_chain_1: ${token}
+       token_chain_2: ${otherChainToken}
+       timestamp: ${convertedTimestamp}
+       nonce: ${convertedNonce}
+       `);
     }
   );
 
@@ -441,10 +533,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
+        sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
+        sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -458,6 +552,17 @@ async function monitorLockEvents() {
         PROCESSED.FALSE,
         FUNCTIONS.UNLOCKETH,
       ]);
+      // Sending notification to telegram bot
+      sendMessage(`
+        ${MESSAGES.BURN(2)}
+        from: ${from}
+        to: ${to}
+        amount: ${convertedAmount}
+        token_chain_1: ${token}
+        token_chain_2: ${otherChainToken}
+        timestamp: ${convertedTimestamp}
+        nonce: ${convertedNonce}
+        `);
     }
   );
 

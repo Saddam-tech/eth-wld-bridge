@@ -1,11 +1,13 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("./tasks/get-accounts");
+const path = require("path");
+const resolvePath = path.resolve(__dirname, "./.encryptedKey.json");
 const fs = require("fs-extra");
 const ethers = require("ethers");
 /** @type import('hardhat/config').HardhatUserConfig */
 const gas = 100000;
-const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 const wallet = ethers.Wallet.fromEncryptedJsonSync(
   encryptedJson,
   process.env.PRIVATE_KEY_PW
