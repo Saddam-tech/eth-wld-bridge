@@ -7,8 +7,6 @@ const {
 } = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 const {
   map_token_address_to_token_address,
-  createSignature,
-  message_type,
   convertBigNumToString,
   consumeTx,
 } = require("../configs/util");
