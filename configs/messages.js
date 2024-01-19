@@ -12,6 +12,8 @@ const MESSAGES = {
   NO_TX: (chain) => `No transactions to process on chain ${chain}.`,
   ALREADY_PROCESSED:
     "Skipping already processed transaction... Waiting for upcoming transactions...",
+  ALREADY_QUEUED:
+    "Transaction has already been included in the queue! Skipping this call... Loading the queue from db...",
   LOW_BALANCE: (amount, balance) =>
     `Requested more than the existing balance on chain_1. Requested amount: ${amount}, User balance: ${balance}`,
   REVERT_ACTION: "Reverting the action...",

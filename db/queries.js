@@ -72,13 +72,13 @@ async function query_all(table) {
   }
 }
 
-async function query_params(table, params, values) {
+async function query_params(table, param, value) {
   try {
     return new Promise((resolve, reject) => {
       db.serialize(() => {
-        let sql = `SELECT * FROM ${table} WHERE ${params[0]} = ? AND ${params[1]} = ? AND ${params[2]} = ?`;
+        let sql = `SELECT * FROM ${table} WHERE ${param} = ?`;
         let stmt = db.prepare(sql);
-        stmt.all(values, (err, rows) => {
+        stmt.all([value], (err, rows) => {
           if (err) {
             reject(err);
           }
