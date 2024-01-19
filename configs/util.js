@@ -1,8 +1,8 @@
 const { ethers } = require("hardhat");
-const { PROCESSED } = require("./constants");
-const { move } = require("../db/queries");
+const { PROCESSED, gasLimit } = require("./constants");
 const { TABLES } = require("../db/tables");
 const { MESSAGES } = require("./messages");
+const { move } = require("../db/queries");
 require("dotenv").config();
 
 const message_type = ["address", "uint256", "uint256", "address"];
@@ -24,7 +24,7 @@ function convertBigNumToString(bigNum) {
   return Number(bigNum).toString();
 }
 
-async function executeQueuedTxs(args) {
+async function consumeTx(args) {
   try {
     let { queue, contract, wallet, method } = args;
     // batch submission
@@ -123,8 +123,6 @@ async function executeQueuedTxs(args) {
           console.log(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(err);
         });
-    } else {
-      console.log(MESSAGES.NO_TX(1));
     }
   } catch (err) {
     console.error(err);
@@ -136,4 +134,5 @@ module.exports = {
   message_type,
   createSignature,
   convertBigNumToString,
+  consumeTx,
 };

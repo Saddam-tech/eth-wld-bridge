@@ -4,7 +4,7 @@
 //   process.env.PRIVATE_KEY_PW
 // );
 
-const gasLimit = 100000;
+const gasLimit = 1000000;
 const txProcessInterval = 15000;
 
 const CHAINS = {

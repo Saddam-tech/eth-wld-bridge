@@ -10,6 +10,7 @@ const {
   createSignature,
   message_type,
   convertBigNumToString,
+  consumeTx,
 } = require("../configs/util");
 const {
   gasLimit,
@@ -144,743 +145,96 @@ async function processTransactionQueue() {
 
     // chain1 mintWETH batch submission
     if (mintWETHTxQueueChain1.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
-        if (!mintWETHTxQueueChain1[i].processed) {
-          let { to_address, amount, nonce, token } = mintWETHTxQueueChain1[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
-        .mintWETH(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintWETHTxQueueChain1[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < mintWETHTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintWETHTxQueueChain1[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(1));
-          console.log(err);
-        });
+      consumeTx({
+        queue: mintWETHTxQueueChain1,
+        contract: CHAIN_1_CONTRACT,
+        wallet: WALLET_CHAIN_1,
+        method: mintWETHTxQueueChain1[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
 
     // chain2 mintWETH batch submission
     if (mintWETHTxQueueChain2.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
-        if (!mintWETHTxQueueChain2[i].processed) {
-          let { to_address, amount, nonce, token } = mintWETHTxQueueChain2[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2)
-        .mintWETH(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintWETHTxQueueChain2[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < mintWETHTxQueueChain2.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintWETHTxQueueChain2[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(2));
-          console.log(err);
-        });
+      consumeTx({
+        queue: mintWETHTxQueueChain2,
+        contract: CHAIN_2_CONTRACT,
+        wallet: WALLET_CHAIN_2,
+        method: mintWETHTxQueueChain2[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
 
     // chain1 unLockETH batch submission
     if (unLockETHTxQueueChain1.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
-        if (!unLockETHTxQueueChain1[i].processed) {
-          let { to_address, amount, nonce, token } = unLockETHTxQueueChain1[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
-        .unLockETH(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = unLockETHTxQueueChain1[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < unLockETHTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = unLockETHTxQueueChain1[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(1));
-          console.log(err);
-        });
+      consumeTx({
+        queue: unLockETHTxQueueChain1,
+        contract: CHAIN_1_CONTRACT,
+        wallet: WALLET_CHAIN_1,
+        method: unLockETHTxQueueChain1[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
 
     // chain2 unLockETH batch submission
     if (unLockETHTxQueueChain2.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
-        if (!unLockETHTxQueueChain2[i].processed) {
-          let { to_address, amount, nonce, token } = unLockETHTxQueueChain2[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
-        .unLockETH(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = unLockETHTxQueueChain2[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < unLockETHTxQueueChain2.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = unLockETHTxQueueChain2[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(2));
-          console.log(err);
-        });
+      consumeTx({
+        queue: unLockETHTxQueueChain2,
+        contract: CHAIN_2_CONTRACT,
+        wallet: WALLET_CHAIN_2,
+        method: unLockETHTxQueueChain2[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
 
     // chain1 mintToken batch submission
     if (mintTokenTxQueueChain1.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
-        if (!mintTokenTxQueueChain1[i].processed) {
-          let { to_address, amount, nonce, token } = mintTokenTxQueueChain1[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
-        .mintToken(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintTokenTxQueueChain1[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < mintTokenTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintTokenTxQueueChain1[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(1));
-          console.log(err);
-        });
+      consumeTx({
+        queue: mintTokenTxQueueChain1,
+        contract: CHAIN_1_CONTRACT,
+        wallet: WALLET_CHAIN_1,
+        method: mintTokenTxQueueChain1[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
 
     // chain2 mintToken batch submission
     if (mintTokenTxQueueChain2.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
-        if (!mintTokenTxQueueChain2[i].processed) {
-          let { to_address, amount, nonce, token } = mintTokenTxQueueChain2[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_2_CONTRACT.connect(WALLET_CHAIN_2)
-        .mintToken(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintTokenTxQueueChain2[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < mintTokenTxQueueChain2.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = mintTokenTxQueueChain2[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(2));
-          console.log(err);
-        });
+      consumeTx({
+        queue: mintTokenTxQueueChain2,
+        contract: CHAIN_2_CONTRACT,
+        wallet: WALLET_CHAIN_2,
+        method: mintTokenTxQueueChain2[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
 
     // chain1 unlockToken batch submission
     if (unlockTokenTxQueueChain1.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
-        if (!unlockTokenTxQueueChain1[i].processed) {
-          let { to_address, amount, nonce, token } =
-            unlockTokenTxQueueChain1[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1)
-        .unlockToken(destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
-          for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = unlockTokenTxQueueChain1[i];
-            processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log({ tx });
-          console.log(MESSAGES.BATCH_PROCESSED(1, destinations.length));
-        })
-        .catch((err) => {
-          for (let i = 0; i < unlockTokenTxQueueChain1.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = unlockTokenTxQueueChain1[i];
-            processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
-          }
-          console.log(MESSAGES.TX_FAILED(1));
-          console.log(err);
-        });
+      consumeTx({
+        queue: unlockTokenTxQueueChain1,
+        contract: CHAIN_1_CONTRACT,
+        wallet: WALLET_CHAIN_1,
+        method: unlockTokenTxQueueChain1[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
 
     // chain2 unlockToken batch submission
     if (unlockTokenTxQueueChain2.length > 0) {
-      let destinations = [];
-      let amounts = [];
-      let nonces = [];
-      let tokens = [];
-      for (let i = 0; i < unlockTokenTxQueueChain2.length; i++) {
-        if (!unlockTokenTxQueueChain2[i].processed) {
-          let {
-            id,
-            from_address,
-            to_address,
-            amount,
-            nonce,
-            token,
-            timestamp,
-            chain,
-            processed,
-            function_type,
-          } = unlockTokenTxQueueChain2[i];
-          destinations.push(to_address);
-          amounts.push(amount);
-          nonces.push(nonce);
-          tokens.push(token);
-          processed = PROCESSED.TRUE;
-          move(
-            TABLES.TX_QUEUE,
-            TABLES.TX_PROCESSED,
-            [
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            ],
-            id
-          );
-          console.log(unlockTokenTxQueueChain2[i]);
-        }
-      }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
-      const tx = await CHAIN_1_CONTRACT.connect(WALLET_CHAIN_1).unlockToken(
-        destinations,
-        amounts,
-        nonces,
-        tokens,
-        admin_signature
-      );
-      console.log({ tx });
-      console.log(MESSAGES.BATCH_PROCESSED(2, destinations.length));
+      consumeTx({
+        queue: unlockTokenTxQueueChain2,
+        contract: CHAIN_2_CONTRACT,
+        wallet: WALLET_CHAIN_2,
+        method: unlockTokenTxQueueChain2[0].function_type,
+      });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
