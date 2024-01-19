@@ -120,14 +120,23 @@ async function monitorLockEvents() {
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
       let otherChainToken = map_token_address_to_token_address[token];
       let convertedAmount = convertBigNumToString(amount);
       let convertedNonce = convertBigNumToString(nonce);
       let convertedTimestamp = convertBigNumToString(timestamp);
+      let alreadyQueuedTxs = await query_params(
+        TABLES.TX_QUEUE,
+        "nonce",
+        convertedNonce
+      );
+      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
+        console.log(MESSAGES.ALREADY_PROCESSED);
+        return;
+      }
+      if (alreadyQueuedTxs.length > 0) {
+        console.log(MESSAGES.ALREADY_QUEUED);
+        return;
+      }
       insert(TABLES.TX_QUEUE, [
         from,
         to,
@@ -156,14 +165,23 @@ async function monitorLockEvents() {
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
       let otherChainToken = map_token_address_to_token_address[token];
       let convertedAmount = convertBigNumToString(amount);
       let convertedNonce = convertBigNumToString(nonce);
       let convertedTimestamp = convertBigNumToString(timestamp);
+      let alreadyQueuedTxs = await query_params(
+        TABLES.TX_QUEUE,
+        "nonce",
+        convertedNonce
+      );
+      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
+        console.log(MESSAGES.ALREADY_PROCESSED);
+        return;
+      }
+      if (alreadyQueuedTxs.length > 0) {
+        console.log(MESSAGES.ALREADY_QUEUED);
+        return;
+      }
       insert(TABLES.TX_QUEUE, [
         from,
         to,
@@ -192,14 +210,23 @@ async function monitorLockEvents() {
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
       let otherChainToken = map_token_address_to_token_address[token];
       let convertedAmount = convertBigNumToString(amount);
       let convertedNonce = convertBigNumToString(nonce);
       let convertedTimestamp = convertBigNumToString(timestamp);
+      let alreadyQueuedTxs = await query_params(
+        TABLES.TX_QUEUE,
+        "nonce",
+        convertedNonce
+      );
+      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
+        console.log(MESSAGES.ALREADY_PROCESSED);
+        return;
+      }
+      if (alreadyQueuedTxs.length > 0) {
+        console.log(MESSAGES.ALREADY_QUEUED);
+        return;
+      }
       insert(TABLES.TX_QUEUE, [
         from,
         to,
@@ -228,14 +255,23 @@ async function monitorLockEvents() {
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
-      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
       let otherChainToken = map_token_address_to_token_address[token];
       let convertedAmount = convertBigNumToString(amount);
       let convertedNonce = convertBigNumToString(nonce);
       let convertedTimestamp = convertBigNumToString(timestamp);
+      let alreadyQueuedTxs = await query_params(
+        TABLES.TX_QUEUE,
+        "nonce",
+        convertedNonce
+      );
+      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
+        console.log(MESSAGES.ALREADY_PROCESSED);
+        return;
+      }
+      if (alreadyQueuedTxs.length > 0) {
+        console.log(MESSAGES.ALREADY_QUEUED);
+        return;
+      }
       insert(TABLES.TX_QUEUE, [
         from,
         to,
