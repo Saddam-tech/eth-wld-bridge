@@ -1,11 +1,8 @@
 const MESSAGES = {
   INIT: "Started monitoring chains [1, 2] for Lock transactions...",
-  TOKEN_TRANSFER: (chain) =>
-    `<<<<<<<<<< TransferToken event detected on CHAIN_${chain} >>>>>>>>>>>`,
-  ETH_TRANSFER: (chain) =>
-    `<<<<<<<<<< ETH LOCK event detected on CHAIN_${chain} >>>>>>>>>>>`,
-  BURN: (chain) =>
-    `<<<<<<<<<< BurnWETH event detected on CHAIN_${chain} >>>>>>>>>>>`,
+  TOKEN_TRANSFER: (chain) => `TransferToken event detected on CHAIN_${chain}`,
+  ETH_TRANSFER: (chain) => `ETH LOCK event detected on CHAIN_${chain}`,
+  BURN: (chain) => `BurnWETH event detected on CHAIN_${chain}`,
   BATCH_PROCESSED: (chain, num) =>
     `Processed ${num} transactions in batch on chain ${chain}!`,
   TX_FAILED: (chain) => `Failed to process the transaction on chain ${chain}`,
