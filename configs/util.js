@@ -85,23 +85,10 @@ async function consumeTx(args) {
             );
           }
           sendMessage(`
-          ${MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)}: 
-            ${queue.map(
-              (el) => `
-              id: ${el.id}
-              from: ${el.from_address}
-              to: ${el.to_address}
-              amount: ${el.amount}
-              nonce: ${el.nonce}
-              token: ${el.token}
-              timestamp: ${el.timestamp}
-              chain: ${el.chain}
-              processed: ${el.processed}
-              method: ${el.function_type}
-              `
-            )}
-          Transaction Hash: ${tx.hash}
-          `);
+          ${MESSAGES.BATCH_PROCESSED(
+            queue[0].chain,
+            destinations.length
+          )} Transaction Hash: ${tx.hash}`);
           console.log({ txHash: tx.hash });
           console.log(
             MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)
@@ -139,23 +126,7 @@ async function consumeTx(args) {
               id
             );
           }
-          sendMessage(`
-          ${MESSAGES.TX_FAILED(queue[0].chain)}: 
-            ${queue.map(
-              (el) => `
-              id: ${el.id}
-              from: ${el.from_address}
-              to: ${el.to_address}
-              amount: ${el.amount}
-              nonce: ${el.nonce}
-              token: ${el.token}
-              timestamp: ${el.timestamp}
-              chain: ${el.chain}
-              processed: ${el.processed}
-              method: ${el.function_type}
-              `
-            )}
-          `);
+          sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(err);
         });

@@ -22,12 +22,9 @@ const { EVENTS } = require("../configs/events");
 const { insert, query_all, move, query_params } = require("../db/queries");
 const { TABLES } = require("../db/tables");
 const { sendMessage } = require("../configs/telegram_bot");
+const { getParameterFromAWS } = require("./vaultAccess");
 
 const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
-const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
-  encryptedJson,
-  process.env.PRIVATE_KEY_PW
-);
 
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
@@ -49,8 +46,8 @@ const CHAIN_2_CONTRACT = new ethers.Contract(
   CHAIN_2_PROVIDER,
   { gasLimit }
 );
-const WALLET_CHAIN_1 = new ethers.Wallet(encryptedPk, CHAIN_1_PROVIDER);
-const WALLET_CHAIN_2 = new ethers.Wallet(encryptedPk, CHAIN_2_PROVIDER);
+
+let PRIVATE_KEY_PW = "";
 
 async function processTransactionQueue() {
   try {
@@ -60,6 +57,9 @@ async function processTransactionQueue() {
     const tx_queue = await query_all(TABLES.TX_QUEUE);
     console.log({ tx_queue });
     if (tx_queue.length > 0) {
+      if (!PRIVATE_KEY_PW) {
+        PRIVATE_KEY_PW = await getParameterFromAWS();
+      }
       for (let i = 0; i < tx_queue.length; i++) {
         if (tx_queue[i].processed === PROCESSED.FALSE) {
           // processed transactions will not exist in tx_queue table, but it does not hurt to make an extra check here
@@ -79,6 +79,11 @@ async function processTransactionQueue() {
 
     // chain 1 queue batch submission
     if (queue_chain_1.length > 0) {
+      const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
+        encryptedJson,
+        PRIVATE_KEY_PW
+      );
+      const WALLET_CHAIN_1 = new ethers.Wallet(encryptedPk, CHAIN_1_PROVIDER);
       consumeTx({
         queue: queue_chain_1,
         contract: CHAIN_1_CONTRACT,
@@ -91,6 +96,11 @@ async function processTransactionQueue() {
 
     // chain2 queue batch submission
     if (queue_chain_2.length > 0) {
+      const encryptedPk = new ethers.Wallet.fromEncryptedJsonSync(
+        encryptedJson,
+        PRIVATE_KEY_PW
+      );
+      const WALLET_CHAIN_2 = new ethers.Wallet(encryptedPk, CHAIN_2_PROVIDER);
       consumeTx({
         queue: queue_chain_2,
         contract: CHAIN_2_CONTRACT,
