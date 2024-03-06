@@ -5,12 +5,13 @@ const path = require("path");
 const resolvePath = path.resolve(__dirname, "./.encryptedKey.json");
 const fs = require("fs-extra");
 const ethers = require("ethers");
+const { getParameterFromAWS } = require("./scripts/vaultAccess");
 /** @type import('hardhat/config').HardhatUserConfig */
 const gas = 100000;
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 const wallet = ethers.Wallet.fromEncryptedJsonSync(
   encryptedJson,
-  process.env.PRIVATE_KEY_PW
+  await getParameterFromAWS()
 );
 const PRIVATE_KEY = wallet.privateKey;
 module.exports = {
