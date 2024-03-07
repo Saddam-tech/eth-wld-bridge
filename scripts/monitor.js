@@ -466,7 +466,7 @@ async function monitorLockEvents() {
 
   // Listen for (BurnWETH) event on CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
-    EVENTS.BURN_WETH,
+    EVENTS.BURNWETH,
     async (from, to, amount, token, timestamp, nonce) => {
       console.log(MESSAGES.BURN(1));
       console.log("to: ", to);
@@ -504,7 +504,7 @@ async function monitorLockEvents() {
         convertedTimestamp,
         CHAINS.CHAIN_2,
         PROCESSED.FALSE,
-        FUNCTIONS.BURN_WETH,
+        FUNCTIONS.UNLOCKETH,
       ]);
       // Sending notification to telegram bot
       sendMessage(`
@@ -522,7 +522,7 @@ async function monitorLockEvents() {
 
   // Listen for (BurnWETH) event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
-    EVENTS.BURN_WETH,
+    EVENTS.BURNWETH,
     async (from, to, amount, token, timestamp, nonce) => {
       console.log(MESSAGES.BURN(2));
       console.log("to: ", to);
