@@ -22,7 +22,7 @@ async function createSignature(types, messages) {
 }
 
 function convertBigNumToString(bigNum) {
-  return Number(bigNum).toString();
+  return ethers.BigNumber.from(bigNum).toString();
 }
 
 async function consumeTx(args) {
