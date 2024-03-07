@@ -15,7 +15,7 @@ const FUNCTIONS = {
   MINTWETH: "mintWETH",
   MINTTOKEN: "mintToken",
   UNLOCKTOKEN: "unlockToken",
-  UNLOCKETH: "unlockETH",
+  UNLOCKETH: "unLockETH",
 };
 
 module.exports = {
