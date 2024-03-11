@@ -14,6 +14,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     uint256 public feeRate;
+    uint256 public fixedFee;
     bool public emergencyStopped;
     uint public _nonce;
     //prettier-ignore
@@ -80,6 +81,10 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         feeRate = rate;
     }
 
+    function setFixedFee(uint256 fee) external onlyOwner {
+        fixedFee = rate;
+    }
+
     // TOKEN
 
     function mintToken(
@@ -116,14 +121,16 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 amount,
         address token,
         string calldata tokenType
-    ) external notInEmergency nonReentrant {
+    ) external payable notInEmergency nonReentrant {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
         uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
-        require(fee > 0, "Fee should be greater than zero!");
+        require(msg.value >= fixedFee, "Fee is low!");
+        (bool success, ) = owner().call(value: fixedFee)("");
+        require(success, "Transfer to owner failed!");
         IToken(token).transferFrom(msg.sender, owner(), fee);
         IToken(token).burn(msg.sender, afterFee);
         emit BurnToken(
@@ -143,19 +150,22 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 amount,
         string calldata tokenType,
         address token
-    ) external notInEmergency nonReentrant {
+    ) external payable notInEmergency nonReentrant {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
         uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
-        require(fee > 0, "Fee should be greater than zero!");
+        require(msg.value >= fixedFee, "Fee is low!");
+        (bool success, ) = owner().call{value: fixedFee}("");
+        require(success, "Transfer to owner failed!");
         IToken(token).transferFrom(msg.sender, owner(), fee);
         require(
             IToken(token).transferFrom(msg.sender, address(this), afterFee),
             "Lock failed"
         );
+        
         emit LockToken(
             msg.sender,
             to,
@@ -208,9 +218,10 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         address token
     ) external payable notInEmergency nonReentrant {
         uint256 fee = msg.value.mul(feeRate).div(percentage);
-        uint256 afterFee = msg.value.sub(fee);
-        require(fee > 0, "Fee should be greater than zero!");
-        (bool success, ) = owner().call{value: fee}("");
+        uint256 finalFee = fee.add(fixedFee);
+        uint256 afterFee = msg.value.sub(finalFee);
+        require(msg.value >= finalFee, "Fee is low!");
+        (bool success, ) = owner().call{value: finalFee}("");
         require(success, "Transfer to owner failed!");
         IWETH(token).deposit{value: afterFee}(msg.sender);
         emit LockETH(msg.sender, to, afterFee, token, block.timestamp, _nonce);
@@ -278,14 +289,16 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     function burnWETH(
         uint256 amount,
         address token
-    ) external notInEmergency nonReentrant {
+    ) external payable notInEmergency nonReentrant {
         require(
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
         uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
-        require(fee > 0, "Fee should be greater than zero!");
+        require(msg.value >= fixedFee, "Fee is low!");
+        (bool success, ) = owner().call(value: fixedFee)("");
+        require(success, "Transfer to owner failed!");
         IWETH(token).transferFrom(msg.sender, owner(), fee);
         IWETH(token).burn(msg.sender, afterFee);
         emit BurnWETH(
