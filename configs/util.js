@@ -15,10 +15,9 @@ const map_token_address_to_token_address = {
   [process.env.WETH_ADDRESS_WORLDLAND]: process.env.WETH_ADDRESS_ETHEREUM,
 };
 
-async function createSignature(types, messages) {
+async function createSignature(types, messages, wallet) {
   const hash = ethers.utils.solidityKeccak256(types, messages);
-  const signer = await ethers.getSigner();
-  return signer.signMessage(ethers.utils.arrayify(hash));
+  return await wallet.signMessage(ethers.utils.arrayify(hash));
 }
 
 function convertBigNumToString(bigNum) {
@@ -43,12 +42,11 @@ async function consumeTx(args) {
           tokens.push(token);
         }
       }
-      const admin_signature = await createSignature(message_type, [
-        destinations[0],
-        amounts[0],
-        nonces[0],
-        tokens[0],
-      ]);
+      const admin_signature = await createSignature(
+        message_type,
+        [destinations[0], amounts[0], nonces[0], tokens[0]],
+        wallet
+      );
       contract
         .connect(wallet)
         [method](destinations, amounts, nonces, tokens, admin_signature)

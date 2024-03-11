@@ -2,7 +2,7 @@ const aws = require("aws-sdk");
 require("dotenv").config({ path: "../.env" });
 
 const paramName = process.env.AWS_PARAM_NAME;
-const region = proceess.env.AWS_REGION;
+const region = process.env.AWS_REGION;
 aws.config.update({ region });
 const ssm = new aws.SSM();
 

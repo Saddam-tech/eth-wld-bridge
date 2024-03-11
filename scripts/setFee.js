@@ -7,21 +7,23 @@ const {
 
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
-const TOKEN_ADDRESS_ETHEREUM = process.env.TOKEN_ADDRESS_ETHEREUM;
 
 async function main() {
-  const signer = await ethers.getSigner();
+  const signer = await ethers.getSigner(1);
 
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
     ethereum_bridge_abi,
     signer
   );
-  const tx = await MyContract.setFeeRate(ethers.utils.parseUnits("10", 18));
+  // const tx = await MyContract.setFeeRate(ethers.utils.parseUnits("1", 18));
+  const tx = await MyContract.setFixedFee(ethers.utils.parseUnits("20", 18));
   //   const tx = await MyContract.feeToOwner();
 
   //   console.log({ tx: ethers.utils.formatUnits(tx, 18) });
   console.log(tx);
+  // const balance = ethers.utils.formatEther(await signer.getBalance());
+  // console.log({ balance });
 }
 
 main()

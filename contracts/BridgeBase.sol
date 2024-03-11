@@ -20,9 +20,10 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     //prettier-ignore
     uint256 percentage = 100 * 10**18;
 
-    constructor(uint256 _feeRate) {
+    constructor(uint256 _feeRate, uint256 _fixedFee) {
         emergencyStopped = false;
         feeRate = _feeRate;
+        fixedFee = _fixedFee;
     }
 
     modifier notInEmergency() {
@@ -82,7 +83,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     }
 
     function setFixedFee(uint256 fee) external onlyOwner {
-        fixedFee = rate;
+        fixedFee = fee;
     }
 
     // TOKEN
@@ -129,7 +130,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
         require(msg.value >= fixedFee, "Fee is low!");
-        (bool success, ) = owner().call(value: fixedFee)("");
+        (bool success, ) = owner().call{value: fixedFee}("");
         require(success, "Transfer to owner failed!");
         IToken(token).transferFrom(msg.sender, owner(), fee);
         IToken(token).burn(msg.sender, afterFee);
@@ -165,7 +166,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IToken(token).transferFrom(msg.sender, address(this), afterFee),
             "Lock failed"
         );
-        
+
         emit LockToken(
             msg.sender,
             to,
@@ -297,7 +298,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
         require(msg.value >= fixedFee, "Fee is low!");
-        (bool success, ) = owner().call(value: fixedFee)("");
+        (bool success, ) = owner().call{value: fixedFee}("");
         require(success, "Transfer to owner failed!");
         IWETH(token).transferFrom(msg.sender, owner(), fee);
         IWETH(token).burn(msg.sender, afterFee);

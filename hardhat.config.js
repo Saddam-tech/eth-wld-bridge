@@ -11,7 +11,7 @@ const gas = 100000;
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 const wallet = ethers.Wallet.fromEncryptedJsonSync(
   encryptedJson,
-  await getParameterFromAWS()
+  process.env.PRIVATE_KEY_PW
 );
 const PRIVATE_KEY = wallet.privateKey;
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
     worldland: {
       url: process.env.provider_chain_2,
       accounts: [PRIVATE_KEY],
-      chainId: 103,
+      chainId: 10395,
       gas,
     },
     localhost_1: {
