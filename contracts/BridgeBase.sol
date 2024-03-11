@@ -17,7 +17,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     bool public emergencyStopped;
     uint public _nonce;
     //prettier-ignore
-    uint256 percentage = 10**18;
+    uint256 percentage = 100 * 10**18;
 
     constructor(uint256 _feeRate) {
         emergencyStopped = false;
