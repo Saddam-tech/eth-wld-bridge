@@ -14,16 +14,27 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     uint256 public feeRate;
-    uint256 public fixedFee;
     bool public emergencyStopped;
     uint public _nonce;
     //prettier-ignore
     uint256 percentage = 100 * 10**18;
+    FixedFee public fixedFee;
 
-    constructor(uint256 _feeRate, uint256 _fixedFee) {
+    struct FixedFee {
+        uint id;
+        string fee_type;
+        uint256 amount;
+    }
+
+    constructor(
+        uint256 _feeRate,
+        uint fixedFee_id,
+        string memory fixedFee_type,
+        uint256 fixedFee_amount
+    ) {
         emergencyStopped = false;
         feeRate = _feeRate;
-        fixedFee = _fixedFee;
+        fixedFee = FixedFee(fixedFee_id, fixedFee_type, fixedFee_amount);
     }
 
     modifier notInEmergency() {
@@ -82,8 +93,19 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         feeRate = rate;
     }
 
-    function setFixedFee(uint256 fee) external onlyOwner {
-        fixedFee = fee;
+    function setFixedFee(
+        uint id,
+        string calldata fee_type,
+        uint256 fee
+    ) external onlyOwner {
+        fixedFee = FixedFee(id, fee_type, fee);
+    }
+
+    function getFixedfee()
+        external
+        returns (uint id, string memory fee_type, uint256 amount)
+    {
+        return (fixedFee.id, fixedFee.fee_type, fixedFee.amount);
     }
 
     // TOKEN
@@ -219,10 +241,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         address token
     ) external payable notInEmergency nonReentrant {
         uint256 fee = msg.value.mul(feeRate).div(percentage);
-        uint256 finalFee = fee.add(fixedFee);
-        uint256 afterFee = msg.value.sub(finalFee);
-        require(msg.value >= finalFee, "Fee is low!");
-        (bool success, ) = owner().call{value: finalFee}("");
+        uint256 afterFee = msg.value.sub(fee);
+        (bool success, ) = owner().call{value: fee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
         IWETH(token).deposit{value: afterFee}(msg.sender);
         emit LockETH(msg.sender, to, afterFee, token, block.timestamp, _nonce);
