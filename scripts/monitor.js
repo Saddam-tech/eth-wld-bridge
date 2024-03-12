@@ -58,7 +58,8 @@ async function processTransactionQueue() {
     console.log({ tx_queue });
     if (tx_queue.length > 0) {
       if (!PRIVATE_KEY_PW) {
-        PRIVATE_KEY_PW = await getParameterFromAWS();
+        // PRIVATE_KEY_PW = await getParameterFromAWS();
+        PRIVATE_KEY_PW = process.env.PRIVATE_KEY_PW;
       }
       for (let i = 0; i < tx_queue.length; i++) {
         if (tx_queue[i].processed === PROCESSED.FALSE) {
