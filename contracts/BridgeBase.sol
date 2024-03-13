@@ -22,6 +22,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
 
     struct FixedFee {
         uint id;
+        address contract_address;
         string fee_type;
         uint256 amount;
     }
@@ -29,12 +30,18 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     constructor(
         uint256 _feeRate,
         uint fixedFee_id,
+        address contract_address,
         string memory fixedFee_type,
         uint256 fixedFee_amount
     ) {
         emergencyStopped = false;
         feeRate = _feeRate;
-        fixedFee = FixedFee(fixedFee_id, fixedFee_type, fixedFee_amount);
+        fixedFee = FixedFee(
+            fixedFee_id,
+            contract_address,
+            fixedFee_type,
+            fixedFee_amount
+        );
     }
 
     modifier notInEmergency() {
@@ -65,10 +72,13 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     event LockETH(
         address from,
         address to,
+        uint256 fee,
         uint256 amount,
         address token,
         uint date,
-        uint256 nonce
+        uint256 nonce,
+        address fixedFee_contract_address,
+        uint256 fixedFee_amount
     );
     event BurnWETH(
         address from,
@@ -95,17 +105,44 @@ contract BridgeBase is Ownable, ReentrancyGuard {
 
     function setFixedFee(
         uint id,
+        address contract_address,
         string calldata fee_type,
         uint256 fee
     ) external onlyOwner {
-        fixedFee = FixedFee(id, fee_type, fee);
+        fixedFee = FixedFee(id, contract_address, fee_type, fee);
+    }
+
+    function getFeeAmount(uint256 amountIn) public returns (uint256 fee) {
+        return amountIn.mul(feeRate).div(percentage);
     }
 
     function getFixedfee()
         external
-        returns (uint id, string memory fee_type, uint256 amount)
+        returns (
+            uint id,
+            address contract_address,
+            string memory fee_type,
+            uint256 amount
+        )
     {
-        return (fixedFee.id, fixedFee.fee_type, fixedFee.amount);
+        return (
+            fixedFee.id,
+            contract_address,
+            fixedFee.fee_type,
+            fixedFee.amount
+        );
+    }
+
+    function resetProcessedNonces(
+        uint256 from,
+        uint256 to,
+        bool state
+    ) external onlyOwner {
+        require(to >= from, "Invalid range!");
+
+        for (uint i = from; i < to; i++) {
+            processedNonces[i] = state;
+        }
     }
 
     // TOKEN
@@ -238,14 +275,35 @@ contract BridgeBase is Ownable, ReentrancyGuard {
 
     function lockETH(
         address to,
-        address token
+        address token,
+        uint256 calcFee
     ) external payable notInEmergency nonReentrant {
-        uint256 fee = msg.value.mul(feeRate).div(percentage);
-        uint256 afterFee = msg.value.sub(fee);
-        (bool success, ) = owner().call{value: fee}(""); // bridge fee transfer
-        require(success, "Transfer to owner failed!");
-        IWETH(token).deposit{value: afterFee}(msg.sender);
-        emit LockETH(msg.sender, to, afterFee, token, block.timestamp, _nonce);
+        uint256 afterFee = msg.value.sub(calcFee);
+        uint256 _calcFee = getFeeAmount(afterFee);
+        require(calcFee == _calcFee, "Insufficient bridge fee!");
+        require(
+            IWETH(fixedFee.contract_address).balanceOf(msg.sender) >=
+                fixedFee.amount,
+            "Insufficient balance for the network fee!"
+        );
+        (bool success, ) = owner().call{value: calcFee}(""); // bridge fee transfer
+        require(success, "Transfer to owner failed! (bridge fee)");
+        require(
+            IWETH(fixedFee.contract_address).transfer(owner(), fixedFee.amount), // network fee transfer
+            "Transfer to owner failed! (network fee)"
+        );
+        IWETH(token).deposit{value: afterFee}(msg.sender); // lock
+        emit LockETH(
+            msg.sender,
+            to,
+            calcFee,
+            afterFee,
+            token,
+            block.timestamp,
+            _nonce,
+            fixedFee.contract_address,
+            fixedFee.amount
+        );
         _nonce++;
     }
 
@@ -317,7 +375,6 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         uint256 fee = amount.mul(feeRate).div(percentage);
         uint256 afterFee = amount.sub(fee);
-        require(msg.value >= fixedFee, "Fee is low!");
         (bool success, ) = owner().call{value: fixedFee}("");
         require(success, "Transfer to owner failed!");
         IWETH(token).transferFrom(msg.sender, owner(), fee);

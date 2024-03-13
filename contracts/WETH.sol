@@ -16,17 +16,17 @@ contract WETH is Ownable {
     event Approval(
         address indexed sender,
         address indexed spender,
-        uint amount
+        uint256 amount
     );
-    event Transfer(address indexed from, address indexed to, uint amount);
-    event Deposit(address indexed sender, uint amount);
-    event Withdrawal(address indexed to, uint amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event Deposit(address indexed sender, uint256 amount);
+    event Withdrawal(address indexed to, uint256 amount);
 
     event MintWETH(address indexed sender, uint256 amount);
     event BurnWETH(address indexed sender, uint256 amount);
 
-    mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) private _allowances;
+    mapping(address => uint256) public balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     receive() external payable {
         deposit(msg.sender);
@@ -36,12 +36,16 @@ contract WETH is Ownable {
         return;
     }
 
+    function balanceOf(address account) public view virtual returns (uint256) {
+        return balances[account];
+    }
+
     function deposit(address sender) public payable {
         emit Deposit(sender, msg.value);
     }
 
     function mint(address to, uint256 amount) public onlyOwner {
-        balanceOf[to] += amount;
+        balances[to] += amount;
         emit MintWETH(to, amount);
     }
 
@@ -51,38 +55,38 @@ contract WETH is Ownable {
     }
 
     function burn(address sender, uint256 amount) public {
-        require(balanceOf[sender] >= amount, "Insufficient balance");
-        balanceOf[sender] -= amount;
+        require(balances[sender] >= amount, "Insufficient balance");
+        balances[sender] -= amount;
         emit BurnWETH(sender, amount);
     }
 
-    function totalSupply() public view returns (uint) {
+    function totalSupply() public view returns (uint256) {
         return address(this).balance;
     }
 
     function allowance(
         address owner,
         address spender
-    ) public view virtual returns (uint) {
+    ) public view virtual returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint amount) public returns (bool) {
+    function approve(address spender, uint256 amount) public returns (bool) {
         _allowances[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
     }
 
-    function transfer(address to, uint amount) public returns (bool) {
+    function transfer(address to, uint256 amount) public returns (bool) {
         return transferFrom(msg.sender, to, amount);
     }
 
     function transferFrom(
         address from,
         address to,
-        uint amount
+        uint256 amount
     ) public returns (bool) {
-        require(balanceOf[from] >= amount, "Insufficient balance");
+        require(balances[from] >= amount, "Insufficient balance");
 
         if (
             from != msg.sender &&
@@ -95,8 +99,8 @@ contract WETH is Ownable {
             _allowances[from][msg.sender] -= amount;
         }
 
-        balanceOf[from] -= amount;
-        balanceOf[to] += amount;
+        balances[from] -= amount;
+        balances[to] += amount;
 
         emit Transfer(from, to, amount);
 
