@@ -19,7 +19,11 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     //prettier-ignore
     uint256 percentage = 100 * 10**18;
     NetworkFee public networkFee;
-
+    enum NetworkFeeTypes {
+        NOFEE,
+        WETHORWWLC,
+        WLCORETH
+    }
     struct NetworkFee {
         uint id;
         address contract_address;
@@ -106,6 +110,10 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         emergencyStopped = false;
     }
 
+    function castEnum(NetworkFeeTypes feeType) public pure returns (uint) {
+        return uint(feeType);
+    }
+
     function setBridgeFeeRate(uint256 rate) external onlyOwner {
         bridgeFeeRate = rate; // % in wei
     }
@@ -119,12 +127,15 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         networkFee = NetworkFee(id, contract_address, fee_type, fee);
     }
 
-    function getBridgeFeeAmount(uint256 amountIn) public returns (uint256 fee) {
+    function getBridgeFeeAmount(
+        uint256 amountIn
+    ) public view returns (uint256 fee) {
         return amountIn.mul(bridgeFeeRate).div(percentage);
     }
 
-    function getFixedfee()
+    function getNetworkfee()
         external
+        view
         returns (
             uint id,
             address contract_address,
@@ -319,13 +330,18 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed! (bridge fee)");
-        require(
-            IWETH(networkFee.contract_address).transfer(
-                owner(),
-                networkFee.amount
-            ), // network fee transfer
-            "Transfer to owner failed! (network fee)"
-        );
+        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).transfer(
+                    owner(),
+                    networkFee.amount
+                ), // network fee transfer
+                "Transfer to owner failed! (network fee)"
+            );
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            require(_success, "Transfer to owner failed! (network fee)");
+        }
         IWETH(token).deposit{value: afterFee}(msg.sender); // lock
         emit LockETH(
             msg.sender,
