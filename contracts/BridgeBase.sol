@@ -52,21 +52,25 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     event LockToken(
         address from,
         address to,
+        uint256 bridgeFee,
         uint256 amount,
         address token,
         uint date,
-        string tokenType,
-        uint256 nonce
+        uint256 nonce,
+        address networkFee_contract_address,
+        uint256 networkFee_amount
     );
 
     event BurnToken(
         address from,
         address to,
+        uint256 bridgeFee,
         uint256 amount,
         address token,
         uint date,
-        string tokenType,
-        uint256 nonce
+        uint256 nonce,
+        address networkFee_contract_address,
+        uint256 networkFee_amount
     );
 
     event LockETH(
@@ -180,63 +184,87 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     }
 
     function burnToken(
-        address to,
+        uint256 bridgeCalcFee,
         uint256 amount,
-        address token,
-        string calldata tokenType
-    ) external payable notInEmergency nonReentrant {
-        require(
-            IToken(token).allowance(msg.sender, address(this)) > amount,
-            "Insufficient allowance!"
-        );
-        uint256 fee = amount.mul(bridgeFeeRate).div(percentage);
-        uint256 afterFee = amount.sub(fee);
-        require(msg.value >= networkFee, "Fee is low!");
-        (bool success, ) = owner().call{value: networkFee}("");
-        require(success, "Transfer to owner failed!");
-        IToken(token).transferFrom(msg.sender, owner(), fee);
-        IToken(token).burn(msg.sender, afterFee);
-        emit BurnToken(
-            msg.sender,
-            to,
-            afterFee,
-            token,
-            block.timestamp,
-            tokenType,
-            _nonce
-        );
-        _nonce++;
-    }
-
-    function lockToken(
-        address to,
-        uint256 amount,
-        string calldata tokenType,
         address token
     ) external payable notInEmergency nonReentrant {
         require(
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 fee = amount.mul(bridgeFeeRate).div(percentage);
-        uint256 afterFee = amount.sub(fee);
-        require(msg.value >= networkFee, "Fee is low!");
-        (bool success, ) = owner().call{value: networkFee}("");
-        require(success, "Transfer to owner failed!");
-        IToken(token).transferFrom(msg.sender, owner(), fee);
+        uint256 _bridgeCalcFee = getBridgeFeeAmount(amount);
+        require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
-            IToken(token).transferFrom(msg.sender, address(this), afterFee),
+            IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
+                networkFee.amount,
+            "Insufficient balance for the network fee!"
+        );
+
+        (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
+        require(success, "Transfer to owner failed!");
+        require(
+            IWETH(networkFee.contract_address).transfer(
+                owner(),
+                networkFee.amount
+            ), // network fee transfer
+            "Transfer to owner failed! (network fee)"
+        );
+        IToken(token).burn(msg.sender, amount);
+        emit BurnToken(
+            msg.sender,
+            msg.sender,
+            bridgeCalcFee,
+            amount,
+            token,
+            block.timestamp,
+            _nonce,
+            networkFee.contract_address,
+            networkFee.amount
+        );
+        _nonce++;
+    }
+
+    function lockToken(
+        uint256 bridgeCalcFee,
+        address token,
+        uint256 amount
+    ) external payable notInEmergency nonReentrant {
+        require(
+            IToken(token).allowance(msg.sender, address(this)) > amount,
+            "Insufficient allowance!"
+        );
+        uint256 _bridgeCalcFee = getBridgeFeeAmount(amount);
+        require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
+        require(
+            IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
+                networkFee.amount,
+            "Insufficient balance for the network fee!"
+        );
+        (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
+        require(success, "Transfer to owner failed!");
+        require(
+            IWETH(networkFee.contract_address).transfer(
+                owner(),
+                networkFee.amount
+            ), // network fee transfer
+            "Transfer to owner failed! (network fee)"
+        );
+
+        require(
+            IToken(token).transferFrom(msg.sender, address(this), amount),
             "Lock failed"
         );
 
         emit LockToken(
             msg.sender,
-            to,
-            afterFee,
+            msg.sender,
+            bridgeCalcFee,
+            amount,
             token,
             block.timestamp,
-            tokenType,
-            _nonce
+            _nonce,
+            networkFee.contract_address,
+            networkFee.amount
         );
         _nonce++;
     }
