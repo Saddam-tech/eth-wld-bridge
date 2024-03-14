@@ -20,7 +20,7 @@ async function main() {
     1,
     _WETH.address,
     "WETH",
-    ethers.utils.parseUnits("1", 18)
+    ethers.utils.parseUnits("0.01", 18)
   );
   await _bridge.deployed();
   const signer = await ethers.getSigner();
