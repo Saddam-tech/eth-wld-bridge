@@ -210,16 +210,20 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 networkFee.amount,
             "Insufficient balance for the network fee!"
         );
-
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
-        require(
-            IWETH(networkFee.contract_address).transfer(
-                owner(),
-                networkFee.amount
-            ), // network fee transfer
-            "Transfer to owner failed! (network fee)"
-        );
+        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).transfer(
+                    owner(),
+                    networkFee.amount
+                ), // network fee transfer
+                "Transfer to owner failed! (network fee)"
+            );
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            require(_success, "Transfer to owner failed! (network fee)");
+        }
         IToken(token).burn(msg.sender, amount);
         emit BurnToken(
             msg.sender,
@@ -253,19 +257,22 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
-        require(
-            IWETH(networkFee.contract_address).transfer(
-                owner(),
-                networkFee.amount
-            ), // network fee transfer
-            "Transfer to owner failed! (network fee)"
-        );
-
+        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).transfer(
+                    owner(),
+                    networkFee.amount
+                ), // network fee transfer
+                "Transfer to owner failed! (network fee)"
+            );
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            require(_success, "Transfer to owner failed! (network fee)");
+        }
         require(
             IToken(token).transferFrom(msg.sender, address(this), amount),
             "Lock failed"
         );
-
         emit LockToken(
             msg.sender,
             msg.sender,
@@ -434,13 +441,18 @@ contract BridgeBase is Ownable, ReentrancyGuard {
 
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
-        require(
-            IWETH(networkFee.contract_address).transfer(
-                owner(),
-                networkFee.amount
-            ), // network fee transfer
-            "Transfer to owner failed! (network fee)"
-        );
+        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).transfer(
+                    owner(),
+                    networkFee.amount
+                ), // network fee transfer
+                "Transfer to owner failed! (network fee)"
+            );
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            require(_success, "Transfer to owner failed! (network fee)");
+        }
         IWETH(token).burn(msg.sender, amount);
         emit BurnWETH(
             msg.sender,
