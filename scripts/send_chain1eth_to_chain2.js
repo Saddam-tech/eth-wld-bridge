@@ -5,9 +5,11 @@ const {
   abi: ethereum_bridge_abi,
 } = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 
+const { abi: wwlc_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
+
 const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
   process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
-const WETH_ADDRESS_ETHEREUM = process.env.WETH_ADDRESS_ETHEREUM;
+const WWLC_ADDRESS_ETHEREUM = process.env.WETH_ADDRESS_ETHEREUM;
 
 async function main() {
   const signer = await ethers.getSigner(1);
@@ -17,13 +19,33 @@ async function main() {
     ethereum_bridge_abi,
     signer
   );
+  const WWLC_CONTRACT = new ethers.Contract(
+    WWLC_ADDRESS_ETHEREUM,
+    wwlc_abi,
+    signer
+  );
+
+  let allowance = ethers.utils.formatEther(
+    await WWLC_CONTRACT.allowance(
+      signer.address,
+      ETHEREUM_BRIDGE_CONTRACT_ADDRESS
+    )
+  );
+
+  if (Number(allowance) <= 0) {
+    await WWLC_CONTRACT.approve(
+      ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
+      ethers.utils.parseUnits("1000000", 18)
+    );
+  }
+
   const bridgeFee = await MyContract.getBridgeFee(
-    ethers.utils.parseUnits("10", 18)
+    ethers.utils.parseUnits("1", 18)
   );
   const parsedFee = ethers.utils.formatEther(bridgeFee);
-  const total = 10 + Number(parsedFee);
+  const total = 1 + Number(parsedFee);
 
-  const tx = await MyContract.lockETH(WETH_ADDRESS_ETHEREUM, bridgeFee, {
+  const tx = await MyContract.lockETH(WWLC_ADDRESS_ETHEREUM, bridgeFee, {
     value: ethers.utils.parseUnits(total.toString(), 18),
   });
 

@@ -6,7 +6,7 @@ const { abi: weth_abi } = require("../artifacts/contracts/WETH.sol/WETH.json");
 const WETH_ADDRESS_WORLDLAND = process.env.WETH_ADDRESS_WORLDLAND;
 
 async function main() {
-  const signer = await ethers.getSigner(1);
+  const signer = await ethers.getSigner();
 
   const WETH_CONTRACT = new ethers.Contract(
     WETH_ADDRESS_WORLDLAND,
