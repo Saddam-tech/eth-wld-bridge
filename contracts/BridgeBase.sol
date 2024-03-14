@@ -127,9 +127,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         networkFee = NetworkFee(id, contract_address, fee_type, fee);
     }
 
-    function getBridgeFeeAmount(
-        uint256 amountIn
-    ) public view returns (uint256 fee) {
+    function getBridgeFee(uint256 amountIn) public view returns (uint256 fee) {
         return amountIn.mul(bridgeFeeRate).div(percentage);
     }
 
@@ -203,7 +201,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 _bridgeCalcFee = getBridgeFeeAmount(amount);
+        uint256 _bridgeCalcFee = getBridgeFee(amount);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
             IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -214,7 +212,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(success, "Transfer to owner failed!");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
             require(
-                IWETH(networkFee.contract_address).transfer(
+                IWETH(networkFee.contract_address).transferFrom(
+                    msg.sender,
                     owner(),
                     networkFee.amount
                 ), // network fee transfer
@@ -248,7 +247,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 _bridgeCalcFee = getBridgeFeeAmount(amount);
+        uint256 _bridgeCalcFee = getBridgeFee(amount);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
             IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -259,7 +258,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(success, "Transfer to owner failed!");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
             require(
-                IWETH(networkFee.contract_address).transfer(
+                IWETH(networkFee.contract_address).transferFrom(
+                    msg.sender,
                     owner(),
                     networkFee.amount
                 ), // network fee transfer
@@ -327,7 +327,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 bridgeCalcFee
     ) external payable notInEmergency nonReentrant {
         uint256 afterFee = msg.value.sub(bridgeCalcFee);
-        uint256 _bridgeCalcFee = getBridgeFeeAmount(afterFee);
+        uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
             IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -338,7 +338,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(success, "Transfer to owner failed! (bridge fee)");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
             require(
-                IWETH(networkFee.contract_address).transfer(
+                IWETH(networkFee.contract_address).transferFrom(
+                    msg.sender,
                     owner(),
                     networkFee.amount
                 ), // network fee transfer
@@ -430,7 +431,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 _bridgeCalcFee = getBridgeFeeAmount(amount);
+        uint256 _bridgeCalcFee = getBridgeFee(amount);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
             IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -442,7 +443,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(success, "Transfer to owner failed!");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
             require(
-                IWETH(networkFee.contract_address).transfer(
+                IWETH(networkFee.contract_address).transferFrom(
+                    msg.sender,
                     owner(),
                     networkFee.amount
                 ), // network fee transfer

@@ -30,11 +30,13 @@ async function main() {
     console.log("Insufficient allowance! Approving...");
     ERC20.approve(MyContract.address, ethers.utils.parseUnits("10000000", 18));
   }
+  const bridgeFee = await MyContract.getBridgeFee(
+    ethers.utils.parseUnits("10", 18)
+  );
   const tx = await MyContract.lockToken(
-    signer.address,
-    ethers.utils.parseUnits("1", 18),
-    "DAI",
-    TOKEN_ADDRESS_WORLDLAND
+    bridgeFee,
+    TOKEN_ADDRESS_WORLDLAND,
+    ethers.utils.parseUnits("10", 18)
   );
 
   console.log({ tx });
