@@ -323,7 +323,6 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     // WRAPPED ETHER
 
     function lockETH(
-        address to,
         address token,
         uint256 bridgeCalcFee
     ) external payable notInEmergency nonReentrant {
@@ -352,7 +351,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         IWETH(token).deposit{value: afterFee}(msg.sender); // lock
         emit LockETH(
             msg.sender,
-            to,
+            msg.sender,
             bridgeCalcFee,
             afterFee,
             token,

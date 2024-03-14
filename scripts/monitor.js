@@ -121,14 +121,26 @@ async function monitorLockEvents() {
   // Listen for LockToken event on CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
     EVENTS.LOCKTOKEN,
-    async (from, to, amount, token, timestamp, tokenType, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(1));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("token_name: ", tokenType);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -170,6 +182,8 @@ async function monitorLockEvents() {
         amount: ${convertedAmount}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
+        bridge_fee: ${bridgeFee}
+        network_fee: ${networkFee}
         timestamp: ${convertedTimestamp}
         nonce: ${convertedNonce}
         `);
@@ -179,14 +193,26 @@ async function monitorLockEvents() {
   // Listen for LockToken event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
     EVENTS.LOCKTOKEN,
-    async (from, to, amount, token, timestamp, tokenType, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(2));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("token_name: ", tokenType);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -237,14 +263,26 @@ async function monitorLockEvents() {
   // Listen for BurnToken event on CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
     EVENTS.BURNTOKEN,
-    async (from, to, amount, token, timestamp, tokenType, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(1));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("token_name: ", tokenType);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -295,14 +333,26 @@ async function monitorLockEvents() {
   // Listen for BurnToken event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
     EVENTS.BURNTOKEN,
-    async (from, to, amount, token, timestamp, tokenType, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(2));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("token_name: ", tokenType);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -355,13 +405,26 @@ async function monitorLockEvents() {
   // Listen for the (LockETH) event on the CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
     EVENTS.LOCK_ETH,
-    async (from, to, amount, token, timestamp, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.ETH_TRANSFER(1));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -411,13 +474,26 @@ async function monitorLockEvents() {
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
     EVENTS.LOCK_ETH,
-    async (from, to, amount, token, timestamp, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.ETH_TRANSFER(2));
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -468,12 +544,25 @@ async function monitorLockEvents() {
   // Listen for (BurnWETH) event on CHAIN_1_CONTRACT
   CHAIN_1_CONTRACT.on(
     EVENTS.BURNWETH,
-    async (from, to, amount, token, timestamp, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.BURN(1));
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -524,12 +613,25 @@ async function monitorLockEvents() {
   // Listen for (BurnWETH) event on CHAIN_2_CONTRACT
   CHAIN_2_CONTRACT.on(
     EVENTS.BURNWETH,
-    async (from, to, amount, token, timestamp, nonce) => {
+    async (
+      from,
+      to,
+      bridgeFee,
+      amount,
+      token,
+      timestamp,
+      nonce,
+      networkFeeContractAddress,
+      networkFee
+    ) => {
       console.log(MESSAGES.BURN(2));
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
