@@ -34,12 +34,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
 
     constructor(
         uint256 _bridgeFeeRate,
+        uint256 _networkFeeRate,
         uint networkFee_id,
         address contract_address,
         string memory networkFee_type,
         uint256 networkFee_amount
     ) {
         emergencyStopped = false;
+        networkFeeRate = _networkFeeRate;
         bridgeFeeRate = _bridgeFeeRate;
         networkFee = NetworkFee(
             networkFee_id,
@@ -209,14 +211,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         uint256 _bridgeCalcFee = getBridgeFee(amount);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        require(
-            IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
-                networkFee.amount,
-            "Insufficient balance for the network fee!"
-        );
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
+                    networkFee.amount,
+                "Insufficient balance for the network fee!"
+            );
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
@@ -255,14 +257,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         uint256 _bridgeCalcFee = getBridgeFee(amount);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        require(
-            IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
-                networkFee.amount,
-            "Insufficient balance for the network fee!"
-        );
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
+                    networkFee.amount,
+                "Insufficient balance for the network fee!"
+            );
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
@@ -335,14 +337,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 afterFee = msg.value.sub(bridgeCalcFee);
         uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        require(
-            IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
-                networkFee.amount,
-            "Insufficient balance for the network fee!"
-        );
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed! (bridge fee)");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
+                    networkFee.amount,
+                "Insufficient balance for the network fee!"
+            );
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
@@ -439,15 +441,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         uint256 _bridgeCalcFee = getBridgeFee(amount);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        require(
-            IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
-                networkFee.amount,
-            "Insufficient balance for the network fee!"
-        );
-
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
         if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+            require(
+                IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
+                    networkFee.amount,
+                "Insufficient balance for the network fee!"
+            );
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,

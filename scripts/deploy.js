@@ -10,14 +10,15 @@ async function main() {
   console.log("Deploying contracts...");
   const bridge = await ethers.getContractFactory("BridgeBase");
   const WETH = await ethers.getContractFactory("WETH");
-  const _WETH = await WETH.deploy("Wrapped ETH", "WETH");
+  const _WETH = await WETH.deploy("Wrapped WLC", "WWLC");
   const ERC20Custom = await ethers.getContractFactory("ERC20Custom");
   const _ERC20Custom = await ERC20Custom.deploy("Dai", "DAI");
   await _WETH.deployed();
   await _ERC20Custom.deployed();
   const _bridge = await bridge.deploy(
     ethers.utils.parseUnits("0.01", 18),
-    1,
+    ethers.utils.parseUnits("500", 18),
+    0,
     _WETH.address,
     "WETH",
     ethers.utils.parseUnits("0.01", 18)
