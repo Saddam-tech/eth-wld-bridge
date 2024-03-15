@@ -136,11 +136,11 @@ async function monitorLockEvents() {
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -180,10 +180,10 @@ async function monitorLockEvents() {
         from: ${from}
         to: ${to}
         amount: ${convertedAmount}
-        token_chain_1: ${token}
-        token_chain_2: ${otherChainToken}
         bridge_fee: ${bridgeFee}
         network_fee: ${networkFee}
+        token_chain_1: ${token}
+        token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
         nonce: ${convertedNonce}
         `);
@@ -208,11 +208,11 @@ async function monitorLockEvents() {
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -252,6 +252,8 @@ async function monitorLockEvents() {
         from: ${from}
         to: ${to}
         amount: ${convertedAmount}
+        bridge_fee: ${bridgeFee}
+        network_fee: ${networkFee}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
@@ -278,11 +280,11 @@ async function monitorLockEvents() {
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -322,6 +324,8 @@ async function monitorLockEvents() {
        from: ${from}
        to: ${to}
        amount: ${convertedAmount}
+       bridge_fee: ${bridgeFee}
+       network_fee: ${networkFee}
        token_chain_1: ${token}
        token_chain_2: ${otherChainToken}
        timestamp: ${convertedTimestamp}
@@ -348,11 +352,11 @@ async function monitorLockEvents() {
       console.log("from: ", from);
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -392,6 +396,8 @@ async function monitorLockEvents() {
          from: ${from}
          to: ${to}
          amount: ${convertedAmount}
+         bridge_fee: ${bridgeFee}
+         network_fee: ${networkFee}
          token_chain_1: ${token}
          token_chain_2: ${otherChainToken}
          timestamp: ${convertedTimestamp}
@@ -419,12 +425,12 @@ async function monitorLockEvents() {
       console.log(MESSAGES.ETH_TRANSFER(1));
       console.log("from: ", from);
       console.log("to: ", to);
+      console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -464,6 +470,8 @@ async function monitorLockEvents() {
        from: ${from}
        to: ${to}
        amount: ${convertedAmount}
+       bridge_fee: ${bridgeFee}
+       network_fee: ${networkFee}
        token_chain_1: ${token}
        token_chain_2: ${otherChainToken}
        timestamp: ${convertedTimestamp}
@@ -488,12 +496,12 @@ async function monitorLockEvents() {
       console.log(MESSAGES.ETH_TRANSFER(2));
       console.log("from: ", from);
       console.log("to: ", to);
+      console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -533,6 +541,8 @@ async function monitorLockEvents() {
         from: ${from}
         to: ${to}
         amount: ${convertedAmount}
+        bridge_fee: ${bridgeFee}
+        network_fee: ${networkFee}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
@@ -558,11 +568,11 @@ async function monitorLockEvents() {
       console.log(MESSAGES.BURN(1));
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -602,6 +612,8 @@ async function monitorLockEvents() {
        from: ${from}
        to: ${to}
        amount: ${convertedAmount}
+       bridge_fee: ${bridgeFee}
+       network_fee: ${networkFee}
        token_chain_1: ${token}
        token_chain_2: ${otherChainToken}
        timestamp: ${convertedTimestamp}
@@ -627,11 +639,11 @@ async function monitorLockEvents() {
       console.log(MESSAGES.BURN(2));
       console.log("to: ", to);
       console.log("amount: ", ethers.utils.formatEther(amount));
+      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+      console.log("networkFee_contract_address: ", networkFeeContractAddress);
       console.log("chain1token: ", map_token_address_to_token_address[token]);
       console.log("chain2token: ", token);
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -671,6 +683,8 @@ async function monitorLockEvents() {
         from: ${from}
         to: ${to}
         amount: ${convertedAmount}
+        bridge_fee: ${bridgeFee}
+        network_fee: ${networkFee}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
