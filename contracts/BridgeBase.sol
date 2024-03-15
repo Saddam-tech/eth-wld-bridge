@@ -139,24 +139,6 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         return amountIn.mul(bridgeFeeRate).div(percentage);
     }
 
-    function getNetworkfee()
-        external
-        view
-        returns (
-            uint id,
-            address contract_address,
-            string memory fee_type,
-            uint256 amount
-        )
-    {
-        return (
-            networkFee.id,
-            contract_address,
-            networkFee.fee_type,
-            networkFee.amount
-        );
-    }
-
     function resetProcessedNonces(
         uint256 from,
         uint256 to,

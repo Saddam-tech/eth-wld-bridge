@@ -60,11 +60,11 @@ async function main() {
         bridge_abi,
         signers[i]
       );
-      const WETH_CONTRACT = new ethers.Contract(
-        WETH_ADDRESS_WORLDLAND,
-        weth_abi,
-        signers[i]
-      );
+      //   const WETH_CONTRACT = new ethers.Contract(
+      //     WETH_ADDRESS_WORLDLAND,
+      //     weth_abi,
+      //     signers[i]
+      //   );
       //   const approve = WETH_CONTRACT.approve(
       //     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
       //     ethers.utils.parseUnits("1000000", 18)
