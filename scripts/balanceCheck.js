@@ -17,6 +17,10 @@ async function main() {
   let balance = await WETH_CONTRACT.balanceOf(signer.address);
   balance = ethers.utils.formatEther(balance);
   console.log({ balance });
+
+  const provider = new ethers.providers.JsonRpcProvider();
+  const gasPrice = await provider.getGasPrice();
+  console.log({ gasPrice: ethers.utils.formatEther(gasPrice) });
 }
 
 main()

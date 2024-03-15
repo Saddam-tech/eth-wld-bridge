@@ -18,19 +18,28 @@ async function main() {
       signers.push(signer);
     }
     await Promise.all(signers);
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.provider_chain_1
+    );
+    const contract = new ethers.Contract(
+      ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
+      ethereum_bridge_abi,
+      provider
+    );
+    const bridgeFee = await contract.getBridgeFee(
+      ethers.utils.parseUnits("1", 18)
+    );
+    const parsedFee = ethers.utils.formatEther(bridgeFee);
+    const total = 1 + Number(parsedFee);
     for (let i = 0; i < signers.length; i++) {
       const MyContract = new ethers.Contract(
         ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
         ethereum_bridge_abi,
         signers[i]
       );
-      const tx = MyContract.lockETH(
-        signers[i]?.address,
-        WETH_ADDRESS_ETHEREUM,
-        {
-          value: ethers.utils.parseUnits("10", 18),
-        }
-      );
+      const tx = MyContract.lockETH(WETH_ADDRESS_ETHEREUM, bridgeFee, {
+        value: ethers.utils.parseUnits(total.toString(), 18),
+      });
       rawTxArr.push(tx);
     }
     let batchExec = await Promise.all(rawTxArr);
