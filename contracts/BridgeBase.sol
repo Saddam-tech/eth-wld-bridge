@@ -14,6 +14,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     uint256 public bridgeFeeRate;
+    uint256 public networkFeeRate;
     bool public emergencyStopped;
     uint public _nonce;
     //prettier-ignore
@@ -118,13 +119,18 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         bridgeFeeRate = rate; // % in wei
     }
 
+    function setNetworkFeeRate(uint256 rate) external onlyOwner {
+        networkFeeRate = rate; // % in wei
+    }
+
     function setNetworkFee(
         uint id,
         address contract_address,
         string calldata fee_type,
         uint256 fee
     ) external onlyOwner {
-        networkFee = NetworkFee(id, contract_address, fee_type, fee);
+        uint256 _fee = fee.mul(networkFeeRate).div(percentage);
+        networkFee = NetworkFee(id, contract_address, fee_type, _fee);
     }
 
     function getBridgeFee(uint256 amountIn) public view returns (uint256 fee) {
