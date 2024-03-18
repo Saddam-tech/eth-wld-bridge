@@ -1,4 +1,4 @@
-const gasLimit = 1000000;
+const gasLimit = 10000000;
 const txProcessInterval = 15000;
 
 const CHAINS = {

@@ -5,7 +5,7 @@ const path = require("path");
 const resolvePath = path.resolve(__dirname, "./.encryptedKey.json");
 const fs = require("fs-extra");
 const ethers = require("ethers");
-const { getParameterFromAWS } = require("./scripts/vaultAccess");
+const { getParameterFromAWS } = require("./configs/vaultAccess");
 /** @type import('hardhat/config').HardhatUserConfig */
 const gas = 3000000;
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");

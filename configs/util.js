@@ -24,6 +24,10 @@ function convertBigNumToString(bigNum) {
   return ethers.BigNumber.from(bigNum).toString();
 }
 
+function formatAddress(address) {
+  return [address.slice(0, 9), "...", address.slice(-7)].join("");
+}
+
 async function consumeTx(args) {
   try {
     let { queue, contract, wallet, method } = args;
@@ -140,4 +144,5 @@ module.exports = {
   createSignature,
   convertBigNumToString,
   consumeTx,
+  formatAddress,
 };

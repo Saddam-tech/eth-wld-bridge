@@ -43,11 +43,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         emergencyStopped = false;
         networkFeeRate = _networkFeeRate;
         bridgeFeeRate = _bridgeFeeRate;
+        uint256 _networkFee_amount = networkFee_amount.mul(networkFeeRate).div(
+            percentage
+        );
         networkFee = NetworkFee(
             networkFee_id,
             contract_address,
             networkFee_type,
-            networkFee_amount
+            _networkFee_amount
         );
     }
 

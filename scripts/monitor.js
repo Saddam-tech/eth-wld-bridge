@@ -9,6 +9,7 @@ const {
   map_token_address_to_token_address,
   convertBigNumToString,
   consumeTx,
+  formatAddress,
 } = require("../configs/util");
 const {
   gasLimit,
@@ -22,9 +23,9 @@ const { EVENTS } = require("../configs/events");
 const { insert, query_all, move, query_params } = require("../db/queries");
 const { TABLES } = require("../db/tables");
 const { sendMessage } = require("../configs/telegram_bot");
-const { getParameterFromAWS } = require("./vaultAccess");
+const { getParameterFromAWS } = require("../configs/vaultAccess");
 
-const encryptedJson = fs.readFileSync("./.encryptedKey.json", "utf8");
+const encryptedJson = fs.readFileSync("../.encryptedKey.json", "utf8");
 
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
@@ -133,14 +134,20 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(1));
-      console.log("from: ", from);
-      console.log("to: ", to);
+      console.log("from: ", formatAddress(from));
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", token);
-      console.log("chain2token: ", map_token_address_to_token_address[token]);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log("chain1token: ", formatAddress(token));
+      console.log(
+        "chain2token: ",
+        formatAddress(map_token_address_to_token_address[token])
+      );
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -177,16 +184,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
         ${MESSAGES.TOKEN_TRANSFER(1)}
-        from: ${from}
-        to: ${to}
-        amount: ${ethers.utils.formatEther(convertedAmount)}
-        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-        network_fee: ${ethers.utils.formatEther(networkFee)}
-        token_chain_1: ${token}
-        token_chain_2: ${otherChainToken}
-        timestamp: ${convertedTimestamp}
-        nonce: ${convertedNonce}
-        `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
@@ -205,14 +212,20 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(2));
-      console.log("from: ", from);
-      console.log("to: ", to);
+      console.log("from: ", formatAddress(from));
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", map_token_address_to_token_address[token]);
-      console.log("chain2token: ", token);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log(
+        "chain1token: ",
+        formatAddress(map_token_address_to_token_address[token])
+      );
+      console.log("chain2token: ", formatAddress(token));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -249,16 +262,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
         ${MESSAGES.TOKEN_TRANSFER(2)}
-        from: ${from}
-        to: ${to}
-        amount: ${ethers.utils.formatEther(convertedAmount)}
-        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-        network_fee: ${ethers.utils.formatEther(networkFee)}
-        token_chain_1: ${token}
-        token_chain_2: ${otherChainToken}
-        timestamp: ${convertedTimestamp}
-        nonce: ${convertedNonce}
-        `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
@@ -277,14 +290,20 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(1));
-      console.log("from: ", from);
-      console.log("to: ", to);
+      console.log("from: ", formatAddress(from));
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", token);
-      console.log("chain2token: ", map_token_address_to_token_address[token]);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log("chain1token: ", formatAddress(token));
+      console.log(
+        "chain2token: ",
+        formatAddress(map_token_address_to_token_address[token])
+      );
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -321,16 +340,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
        ${MESSAGES.TOKEN_TRANSFER(1)}
-       from: ${from}
-       to: ${to}
-       amount: ${ethers.utils.formatEther(convertedAmount)}
-       bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-       network_fee: ${ethers.utils.formatEther(networkFee)}
-       token_chain_1: ${token}
-       token_chain_2: ${otherChainToken}
-       timestamp: ${convertedTimestamp}
-       nonce: ${convertedNonce}
-       `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
@@ -349,14 +368,20 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.TOKEN_TRANSFER(2));
-      console.log("from: ", from);
-      console.log("to: ", to);
+      console.log("from: ", formatAddress(from));
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", map_token_address_to_token_address[token]);
-      console.log("chain2token: ", token);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log(
+        "chain1token: ",
+        formatAddress(map_token_address_to_token_address)[token]
+      );
+      console.log("chain2token: ", formatAddress(token));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -393,16 +418,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
          ${MESSAGES.TOKEN_TRANSFER(2)}
-         from: ${from}
-         to: ${to}
-         amount: ${ethers.utils.formatEther(convertedAmount)}
-         bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-         network_fee: ${ethers.utils.formatEther(networkFee)}
-         token_chain_1: ${token}
-         token_chain_2: ${otherChainToken}
-         timestamp: ${convertedTimestamp}
-         nonce: ${convertedNonce}
-         `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
@@ -423,12 +448,15 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.ETH_TRANSFER(1));
-      console.log("from: ", from);
-      console.log("to: ", to);
+      console.log("from: ", formatAddress(from));
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
       console.log("chain1token: ", token);
       console.log("chain2token: ", map_token_address_to_token_address[token]);
       console.log("timestamp: ", timestamp);
@@ -467,16 +495,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
        ${MESSAGES.ETH_TRANSFER(1)}
-       from: ${from}
-       to: ${to}
-       amount: ${ethers.utils.formatEther(convertedAmount)}
-       bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-       network_fee: ${ethers.utils.formatEther(networkFee)}
-       token_chain_1: ${token}
-       token_chain_2: ${otherChainToken}
-       timestamp: ${convertedTimestamp}
-       nonce: ${convertedNonce}
-       `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
   // Listen for (LockETH) event on CHAIN_2_CONTRACT
@@ -494,14 +522,20 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.ETH_TRANSFER(2));
-      console.log("from: ", from);
-      console.log("to: ", to);
+      console.log("from: ", formatAddress(from));
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", map_token_address_to_token_address[token]);
-      console.log("chain2token: ", token);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log(
+        "chain1token: ",
+        formatAddress(map_token_address_to_token_address[token])
+      );
+      console.log("chain2token: ", formatAddress(token));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -538,16 +572,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
         ${MESSAGES.ETH_TRANSFER(2)}
-        from: ${from}
-        to: ${to}
-        amount: ${ethers.utils.formatEther(convertedAmount)}
-        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-        network_fee: ${ethers.utils.formatEther(networkFee)}
-        token_chain_1: ${token}
-        token_chain_2: ${otherChainToken}
-        timestamp: ${convertedTimestamp}
-        nonce: ${convertedNonce}
-        `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
@@ -566,13 +600,19 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.BURN(1));
-      console.log("to: ", to);
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", token);
-      console.log("chain2token: ", map_token_address_to_token_address[token]);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log("chain1token: ", formatAddress(token));
+      console.log(
+        "chain2token: ",
+        formatAddress(map_token_address_to_token_address[token])
+      );
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -609,16 +649,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
        ${MESSAGES.BURN(1)}
-       from: ${from}
-       to: ${to}
-       amount: ${ethers.utils.formatEther(convertedAmount)}
-       bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-       network_fee: ${ethers.utils.formatEther(networkFee)}
-       token_chain_1: ${token}
-       token_chain_2: ${otherChainToken}
-       timestamp: ${convertedTimestamp}
-       nonce: ${convertedNonce}
-       `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
@@ -637,13 +677,19 @@ async function monitorLockEvents() {
       networkFee
     ) => {
       console.log(MESSAGES.BURN(2));
-      console.log("to: ", to);
+      console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
       console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log("networkFee_contract_address: ", networkFeeContractAddress);
-      console.log("chain1token: ", map_token_address_to_token_address[token]);
-      console.log("chain2token: ", token);
+      console.log(
+        "networkFee_contract_address: ",
+        formatAddress(networkFeeContractAddress)
+      );
+      console.log(
+        "chain1token: ",
+        formatAddress(map_token_address_to_token_address[token])
+      );
+      console.log("chain2token: ", formatAddress(token));
       console.log("timestamp: ", timestamp);
       console.log("nonce: ", nonce);
       // Check if the same transaction is being executed the second time
@@ -680,16 +726,16 @@ async function monitorLockEvents() {
       // Sending notification to telegram bot
       sendMessage(`
         ${MESSAGES.BURN(2)}
-        from: ${from}
-        to: ${to}
-        amount: ${ethers.utils.formatEther(convertedAmount)}
-        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
-        network_fee: ${ethers.utils.formatEther(networkFee)}
-        token_chain_1: ${token}
-        token_chain_2: ${otherChainToken}
-        timestamp: ${convertedTimestamp}
-        nonce: ${convertedNonce}
-        `);
+from: ${formatAddress(from)}
+to: ${formatAddress(to)}
+amount: ${ethers.utils.formatEther(convertedAmount)}
+bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+network_fee: ${ethers.utils.formatEther(networkFee)}
+token_chain_1: ${formatAddress(token)}
+token_chain_2: ${formatAddress(otherChainToken)}
+timestamp: ${convertedTimestamp}
+nonce: ${convertedNonce}
+`);
     }
   );
 
