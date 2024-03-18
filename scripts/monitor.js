@@ -179,9 +179,9 @@ async function monitorLockEvents() {
         ${MESSAGES.TOKEN_TRANSFER(1)}
         from: ${from}
         to: ${to}
-        amount: ${convertedAmount}
-        bridge_fee: ${bridgeFee}
-        network_fee: ${networkFee}
+        amount: ${ethers.utils.formatEther(convertedAmount)}
+        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+        network_fee: ${ethers.utils.formatEther(networkFee)}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
@@ -251,9 +251,9 @@ async function monitorLockEvents() {
         ${MESSAGES.TOKEN_TRANSFER(2)}
         from: ${from}
         to: ${to}
-        amount: ${convertedAmount}
-        bridge_fee: ${bridgeFee}
-        network_fee: ${networkFee}
+        amount: ${ethers.utils.formatEther(convertedAmount)}
+        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+        network_fee: ${ethers.utils.formatEther(networkFee)}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
@@ -323,9 +323,9 @@ async function monitorLockEvents() {
        ${MESSAGES.TOKEN_TRANSFER(1)}
        from: ${from}
        to: ${to}
-       amount: ${convertedAmount}
-       bridge_fee: ${bridgeFee}
-       network_fee: ${networkFee}
+       amount: ${ethers.utils.formatEther(convertedAmount)}
+       bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+       network_fee: ${ethers.utils.formatEther(networkFee)}
        token_chain_1: ${token}
        token_chain_2: ${otherChainToken}
        timestamp: ${convertedTimestamp}
@@ -395,9 +395,9 @@ async function monitorLockEvents() {
          ${MESSAGES.TOKEN_TRANSFER(2)}
          from: ${from}
          to: ${to}
-         amount: ${convertedAmount}
-         bridge_fee: ${bridgeFee}
-         network_fee: ${networkFee}
+         amount: ${ethers.utils.formatEther(convertedAmount)}
+         bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+         network_fee: ${ethers.utils.formatEther(networkFee)}
          token_chain_1: ${token}
          token_chain_2: ${otherChainToken}
          timestamp: ${convertedTimestamp}
@@ -469,9 +469,9 @@ async function monitorLockEvents() {
        ${MESSAGES.ETH_TRANSFER(1)}
        from: ${from}
        to: ${to}
-       amount: ${convertedAmount}
-       bridge_fee: ${bridgeFee}
-       network_fee: ${networkFee}
+       amount: ${ethers.utils.formatEther(convertedAmount)}
+       bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+       network_fee: ${ethers.utils.formatEther(networkFee)}
        token_chain_1: ${token}
        token_chain_2: ${otherChainToken}
        timestamp: ${convertedTimestamp}
@@ -540,9 +540,9 @@ async function monitorLockEvents() {
         ${MESSAGES.ETH_TRANSFER(2)}
         from: ${from}
         to: ${to}
-        amount: ${convertedAmount}
-        bridge_fee: ${bridgeFee}
-        network_fee: ${networkFee}
+        amount: ${ethers.utils.formatEther(convertedAmount)}
+        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+        network_fee: ${ethers.utils.formatEther(networkFee)}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
@@ -611,9 +611,9 @@ async function monitorLockEvents() {
        ${MESSAGES.BURN(1)}
        from: ${from}
        to: ${to}
-       amount: ${convertedAmount}
-       bridge_fee: ${bridgeFee}
-       network_fee: ${networkFee}
+       amount: ${ethers.utils.formatEther(convertedAmount)}
+       bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+       network_fee: ${ethers.utils.formatEther(networkFee)}
        token_chain_1: ${token}
        token_chain_2: ${otherChainToken}
        timestamp: ${convertedTimestamp}
@@ -682,9 +682,9 @@ async function monitorLockEvents() {
         ${MESSAGES.BURN(2)}
         from: ${from}
         to: ${to}
-        amount: ${convertedAmount}
-        bridge_fee: ${bridgeFee}
-        network_fee: ${networkFee}
+        amount: ${ethers.utils.formatEther(convertedAmount)}
+        bridge_fee: ${ethers.utils.formatEther(bridgeFee)}
+        network_fee: ${ethers.utils.formatEther(networkFee)}
         token_chain_1: ${token}
         token_chain_2: ${otherChainToken}
         timestamp: ${convertedTimestamp}
