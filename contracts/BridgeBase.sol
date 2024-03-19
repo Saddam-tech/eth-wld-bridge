@@ -186,6 +186,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     }
 
     function burnToken(
+        address to,
         uint256 bridgeCalcFee,
         uint256 amount,
         address token
@@ -219,7 +220,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         IToken(token).burn(msg.sender, amount);
         emit BurnToken(
             msg.sender,
-            msg.sender,
+            to,
             bridgeCalcFee,
             amount,
             token,
@@ -232,6 +233,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     }
 
     function lockToken(
+        address to,
         uint256 bridgeCalcFee,
         address token,
         uint256 amount
@@ -268,7 +270,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         );
         emit LockToken(
             msg.sender,
-            msg.sender,
+            to,
             bridgeCalcFee,
             amount,
             token,
@@ -316,6 +318,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     // WRAPPED ETHER
 
     function lockETH(
+        address to,
         address token,
         uint256 bridgeCalcFee
     ) external payable notInEmergency nonReentrant {
@@ -345,7 +348,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         IWETH(token).deposit{value: afterFee}(msg.sender); // lock
         emit LockETH(
             msg.sender,
-            msg.sender,
+            to,
             bridgeCalcFee,
             afterFee,
             token,
@@ -416,6 +419,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     }
 
     function burnWETH(
+        address to,
         uint256 bridgeCalcFee,
         uint256 amount,
         address token
@@ -449,7 +453,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         IWETH(token).burn(msg.sender, amount);
         emit BurnWETH(
             msg.sender,
-            msg.sender,
+            to,
             bridgeCalcFee,
             amount,
             token,

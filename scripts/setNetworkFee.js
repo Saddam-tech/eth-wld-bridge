@@ -26,6 +26,7 @@ async function main() {
 
   // const pk_pw = await getParameterFromAWS();
   const pk_pw = process.env.PRIVATE_KEY_PW;
+  // const pk_pw = await getParameterFromAWS();
   const decodedpk = new ethers.Wallet.fromEncryptedJsonSync(
     encryptedJson,
     pk_pw
