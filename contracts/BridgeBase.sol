@@ -22,9 +22,12 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     NetworkFee public networkFee;
     enum NetworkFeeTypes {
         NOFEE,
-        WETHORWWLC,
-        WLCORETH
+        TOGASASSET,
+        FROMGASASSET
     }
+    // no gas = 0 (no gas)
+    // to gas asset = 1 (weth or wwlc)
+    // from gas asset = 2 (wlc or eth)
     struct NetworkFee {
         uint id;
         address contract_address;
@@ -199,7 +202,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
-        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+        if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
                     networkFee.amount,
@@ -213,7 +216,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
-        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
             (bool _success, ) = owner().call{value: networkFee.amount}("");
             require(_success, "Transfer to owner failed! (network fee)");
         }
@@ -246,7 +249,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
-        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+        if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
                     networkFee.amount,
@@ -260,7 +263,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
-        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
             (bool _success, ) = owner().call{value: networkFee.amount}("");
             require(_success, "Transfer to owner failed! (network fee)");
         }
@@ -317,6 +320,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
 
     // WRAPPED ETHER
 
+    // lock coin
+
     function lockETH(
         address to,
         address token,
@@ -327,7 +332,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed! (bridge fee)");
-        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+        if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
                     networkFee.amount,
@@ -341,7 +346,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
-        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
             (bool _success, ) = owner().call{value: networkFee.amount}("");
             require(_success, "Transfer to owner failed! (network fee)");
         }
@@ -432,7 +437,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed!");
-        if (networkFee.id == castEnum(NetworkFeeTypes.WETHORWWLC)) {
+        if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
                     networkFee.amount,
@@ -446,7 +451,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
-        } else if (networkFee.id == castEnum(NetworkFeeTypes.WLCORETH)) {
+        } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
             (bool _success, ) = owner().call{value: networkFee.amount}("");
             require(_success, "Transfer to owner failed! (network fee)");
         }

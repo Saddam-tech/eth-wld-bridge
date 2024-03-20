@@ -1,0 +1,18 @@
+{
+  "development": {
+    "host": "localhost",
+    "username": "owner",
+    "port": "3306",
+    "password": "84103777sam7ech",
+    "database": "eth_wld_bridge",
+    "dialect": "mariadb"
+  },
+  "production": {
+    "host": "localhost",
+    "username": "owner",
+    "port": "3306",
+    "password": "84103777sam7ech",
+    "database": "eth_wld_bridge",
+    "dialect": "mariadb"
+  }
+}
