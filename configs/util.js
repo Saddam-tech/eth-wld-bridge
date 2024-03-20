@@ -2,8 +2,9 @@ const { ethers } = require("hardhat");
 const { PROCESSED, gasLimit } = require("./constants");
 const { TABLES } = require("../db/tables");
 const { MESSAGES } = require("./messages");
-const { move } = require("../db/queries");
+const { deleteRow } = require("../db/queries");
 const { sendMessage } = require("./telegram_bot");
+const db = require("../db/mariadb/models");
 require("dotenv").config();
 
 const message_type = ["address", "uint256", "uint256", "address"];
@@ -54,7 +55,8 @@ async function consumeTx(args) {
       contract
         .connect(wallet)
         [method](destinations, amounts, nonces, tokens, admin_signature)
-        .then((tx) => {
+        .then(async (tx) => {
+          let rawPromises = [];
           for (let i = 0; i < queue.length; i++) {
             let {
               id,
@@ -69,23 +71,22 @@ async function consumeTx(args) {
               function_type,
             } = queue[i];
             processed = PROCESSED.TRUE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_PROCESSED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
+            rawPromises[i] = db["tx_processed"].create({
+              id,
+              from_address,
+              to_address,
+              amount,
+              token,
+              timestamp,
+              nonce,
+              processed,
+              chain,
+              function_type,
+              tx_hash: tx.hash,
+            });
+            deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
           }
+          await Promise.all(rawPromises);
           sendMessage(`
           ${MESSAGES.BATCH_PROCESSED(
             queue[0].chain,
@@ -96,7 +97,8 @@ async function consumeTx(args) {
             MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)
           );
         })
-        .catch((err) => {
+        .catch(async (err) => {
+          let rawPromises = [];
           for (let i = 0; i < queue.length; i++) {
             let {
               id,
@@ -111,23 +113,22 @@ async function consumeTx(args) {
               function_type,
             } = queue[i];
             processed = PROCESSED.FALSE;
-            move(
-              TABLES.TX_QUEUE,
-              TABLES.TX_FAILED,
-              [
-                from_address,
-                to_address,
-                amount,
-                nonce,
-                token,
-                timestamp,
-                chain,
-                processed,
-                function_type,
-              ],
-              id
-            );
+            deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+            rawPromises[i] = db[TABLES.TX_FAILED].create({
+              // recreating row inside mariadb tx_failed table
+              id,
+              from_address,
+              to_address,
+              amount,
+              token,
+              timestamp,
+              nonce,
+              processed,
+              chain,
+              function_type,
+            });
           }
+          await Promise.all(rawPromises);
           sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(err);

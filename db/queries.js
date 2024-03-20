@@ -38,11 +38,10 @@ async function insert(table, rows) {
   }
 }
 
-async function move(from_table, to_table, params, id) {
+async function deleteRow(table, id) {
   try {
-    let sql = `DELETE FROM ${from_table} WHERE id = ?`;
+    let sql = `DELETE FROM ${table} WHERE id = ?`;
     db.serialize(() => {
-      insert(to_table, params);
       db.run(sql, [id], (err) => {
         if (err) {
           console.error(err);
@@ -92,4 +91,4 @@ async function query_params(table, param, value) {
   }
 }
 
-module.exports = { insert, query_all, query_params, move };
+module.exports = { insert, query_all, query_params, deleteRow };

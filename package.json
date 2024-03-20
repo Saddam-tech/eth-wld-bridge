@@ -33,6 +33,7 @@
     "aws-sdk": "^2.1561.0",
     "mariadb": "^3.2.3",
     "node-telegram-bot-api": "^0.64.0",
+    "sequelize": "^6.37.1",
     "sqlite3": "^5.1.7"
   }
 }

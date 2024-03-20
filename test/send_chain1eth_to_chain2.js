@@ -45,9 +45,14 @@ async function main() {
   const parsedFee = ethers.utils.formatEther(bridgeFee);
   const total = 1 + Number(parsedFee);
 
-  const tx = await MyContract.lockETH(WWLC_ADDRESS_ETHEREUM, bridgeFee, {
-    value: ethers.utils.parseUnits(total.toString(), 18),
-  });
+  const tx = await MyContract.lockETH(
+    signer.address,
+    WWLC_ADDRESS_ETHEREUM,
+    bridgeFee,
+    {
+      value: ethers.utils.parseUnits(total.toString(), 18),
+    }
+  );
 
   console.log({ tx });
 }

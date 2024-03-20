@@ -10,18 +10,18 @@ async function main() {
   console.log("Deploying contracts...");
   const bridge = await ethers.getContractFactory("BridgeBase");
   const WETH = await ethers.getContractFactory("WETH");
-  const _WETH = await WETH.deploy("Wrapped ETH", "WETH");
+  const _WETH = await WETH.deploy("Wrapped WLC", "WLC");
   const ERC20Custom = await ethers.getContractFactory("ERC20Custom");
   const _ERC20Custom = await ERC20Custom.deploy("Dai", "DAI");
   await _WETH.deployed();
   await _ERC20Custom.deployed();
   const _bridge = await bridge.deploy(
-    ethers.utils.parseUnits("0.01", 18),
-    ethers.utils.parseUnits("500", 18),
-    1,
+    ethers.utils.parseUnits("0", 18),
+    ethers.utils.parseUnits("0", 18),
+    process.env.NETWORKFEE_ID,
     _WETH.address,
-    "WETH",
-    ethers.utils.parseUnits("0.01", 18)
+    process.env.NETWORKFEE_FEETYPE,
+    ethers.utils.parseUnits("0", 18)
   );
   await _bridge.deployed();
   const signer = await ethers.getSigner();
