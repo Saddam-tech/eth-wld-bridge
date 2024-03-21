@@ -59,7 +59,7 @@ async function main() {
   console.log({ tx });
 }
 
-cron.schedule(`1, */23, *, *, *`, async () =>
+cron.schedule(`1 */23 * * *`, async () =>
   main()
     .then(() => process.exit(0))
     .catch((err) => {
