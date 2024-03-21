@@ -7,6 +7,7 @@ const {
 const { gasLimit } = require("../configs/constants");
 const { getParameterFromAWS } = require("../configs/vaultAccess");
 const encryptedJson = fs.readFileSync("../.encryptedKey.json", "utf8");
+const cron = require("node-cron");
 
 async function main() {
   const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
@@ -58,9 +59,11 @@ async function main() {
   console.log({ tx });
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.log(err);
-    process.exit(1);
-  });
+cron.schedule(`1, */23, *, *, *`, async () =>
+  main()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.log(err);
+      process.exit(1);
+    })
+);
