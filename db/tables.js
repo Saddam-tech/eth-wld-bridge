@@ -2,6 +2,10 @@ const TABLES = {
   TX_QUEUE: "tx_queue",
   TX_FAILED: "tx_failed",
   TX_PROCESSED: "tx_processed",
+  // params
+  TELEGRAM_LISTENER: "telegram_listener",
+  PARAMETERS: "parameters",
+  CONTRACTS: "contracts",
 };
 
 const COLUMNS = {

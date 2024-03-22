@@ -87,7 +87,7 @@ async function consumeTx(args) {
             deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
           }
           await Promise.all(rawPromises);
-          sendMessage(`
+          await sendMessage(`
           ${MESSAGES.BATCH_PROCESSED(
             queue[0].chain,
             destinations.length
@@ -129,7 +129,7 @@ async function consumeTx(args) {
             });
           }
           await Promise.all(rawPromises);
-          sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
+          await sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(MESSAGES.TX_FAILED(queue[0].chain));
           console.log(err);
         });

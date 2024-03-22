@@ -162,12 +162,12 @@ async function monitorLockEvents() {
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -182,7 +182,7 @@ async function monitorLockEvents() {
         FUNCTIONS.MINTTOKEN,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
         ${MESSAGES.TOKEN_TRANSFER(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -240,12 +240,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -260,7 +260,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.MINTTOKEN,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
         ${MESSAGES.TOKEN_TRANSFER(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -318,12 +318,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -338,7 +338,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.UNLOCKTOKEN,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
        ${MESSAGES.TOKEN_TRANSFER(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -396,12 +396,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -416,7 +416,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.UNLOCKTOKEN,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
          ${MESSAGES.TOKEN_TRANSFER(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -473,12 +473,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -493,7 +493,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.MINTWETH,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
        ${MESSAGES.ETH_TRANSFER(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -550,12 +550,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -570,7 +570,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.MINTWETH,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
         ${MESSAGES.ETH_TRANSFER(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -627,12 +627,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -647,7 +647,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.UNLOCKETH,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
        ${MESSAGES.BURN(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
@@ -704,12 +704,12 @@ nonce: ${convertedNonce}
       );
       if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
         console.log(MESSAGES.ALREADY_PROCESSED);
-        sendMessage(MESSAGES.ALREADY_PROCESSED);
+        await sendMessage(MESSAGES.ALREADY_PROCESSED);
         return;
       }
       if (alreadyQueuedTxs.length > 0) {
         console.log(MESSAGES.ALREADY_QUEUED);
-        sendMessage(MESSAGES.ALREADY_QUEUED);
+        await sendMessage(MESSAGES.ALREADY_QUEUED);
         return;
       }
       insert(TABLES.TX_QUEUE, [
@@ -724,7 +724,7 @@ nonce: ${convertedNonce}
         FUNCTIONS.UNLOCKETH,
       ]);
       // Sending notification to telegram bot
-      sendMessage(`
+      await sendMessage(`
         ${MESSAGES.BURN(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}

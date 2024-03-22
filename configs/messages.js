@@ -1,4 +1,8 @@
 const MESSAGES = {
+  WELCOME: (name) =>
+    `Welcome ${
+      name ?? "Worldlander"
+    } 😃. I am a bot that notifies of incoming calls to Worldland Bridge!`,
   INIT: "Started monitoring chains [1, 2] for Lock transactions...",
   TOKEN_TRANSFER: (chain) => `TransferToken event detected on CHAIN_${chain}`,
   ETH_TRANSFER: (chain) => `ETH LOCK event detected on CHAIN_${chain}`,
