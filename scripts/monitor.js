@@ -133,7 +133,7 @@ async function monitorLockEvents() {
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.TOKEN_TRANSFER(1));
+      console.log(MESSAGES.LOCK_TOKEN(1));
       console.log("from: ", formatAddress(from));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
@@ -183,7 +183,7 @@ async function monitorLockEvents() {
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-        ${MESSAGES.TOKEN_TRANSFER(1)}
+        ${MESSAGES.LOCK_TOKEN(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -211,7 +211,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.TOKEN_TRANSFER(2));
+      console.log(MESSAGES.LOCK_TOKEN(2));
       console.log("from: ", formatAddress(from));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
@@ -261,7 +261,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-        ${MESSAGES.TOKEN_TRANSFER(2)}
+        ${MESSAGES.LOCK_TOKEN(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -289,7 +289,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.TOKEN_TRANSFER(1));
+      console.log(MESSAGES.BURN_TOKEN(1));
       console.log("from: ", formatAddress(from));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
@@ -339,7 +339,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-       ${MESSAGES.TOKEN_TRANSFER(1)}
+       ${MESSAGES.BURN_TOKEN(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -367,7 +367,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.TOKEN_TRANSFER(2));
+      console.log(MESSAGES.BURN_TOKEN(2));
       console.log("from: ", formatAddress(from));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
@@ -417,7 +417,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-         ${MESSAGES.TOKEN_TRANSFER(2)}
+         ${MESSAGES.BURN_TOKEN(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -447,7 +447,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.ETH_TRANSFER(1));
+      console.log(MESSAGES.LOCK_ETH(1));
       console.log("from: ", formatAddress(from));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
@@ -494,7 +494,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-       ${MESSAGES.ETH_TRANSFER(1)}
+       ${MESSAGES.LOCK_ETH(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -521,7 +521,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.ETH_TRANSFER(2));
+      console.log(MESSAGES.LOCK_ETH(2));
       console.log("from: ", formatAddress(from));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
@@ -571,7 +571,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-        ${MESSAGES.ETH_TRANSFER(2)}
+        ${MESSAGES.LOCK_ETH(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -599,7 +599,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.BURN(1));
+      console.log(MESSAGES.BURN_WETH(1));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
@@ -648,7 +648,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-       ${MESSAGES.BURN(1)}
+       ${MESSAGES.BURN_WETH(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -676,7 +676,7 @@ nonce: ${convertedNonce}
       networkFeeContractAddress,
       networkFee
     ) => {
-      console.log(MESSAGES.BURN(2));
+      console.log(MESSAGES.BURN_WETH(2));
       console.log("to: ", formatAddress(to));
       console.log("amount: ", ethers.utils.formatEther(amount));
       console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
@@ -725,7 +725,7 @@ nonce: ${convertedNonce}
       ]);
       // Sending notification to telegram bot
       await sendMessage(`
-        ${MESSAGES.BURN(2)}
+        ${MESSAGES.BURN_WETH(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}

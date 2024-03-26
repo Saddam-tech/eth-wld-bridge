@@ -35,22 +35,16 @@ async function main() {
   const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider2); // sets the fee on rpc provider 2 (Worldland)
 
   let gasPrice = ethers.utils.formatEther(await provider1.getGasPrice()); // ethereum gas price
+  console.log({ gasPrice });
   gasPrice = parseFloat(gasPrice);
   const contractUnitCount = parseFloat(process.env.CONTRACT_UNITCOUNT);
   let networkFee = (gasPrice * contractUnitCount).toString();
-  networkFee = networkFee;
   const parsed = ethers.utils.parseEther(networkFee);
-  console.log({ parsed, gasPrice });
-  console.log({
-    id: process.env.NETWORKFEE_ID,
-    address: process.env.NETWORKFEE_CONTRACT_ADDRESS,
-    fee_type: process.env.NETWORKFEE_FEETYPE,
-    parsed,
-  });
+  console.log({ networkFee });
   const tx = await contract
     .connect(signer)
     .setNetworkFee(
-      proceses.env.NETWORKFEE_ID,
+      process.env.NETWORKFEE_ID,
       process.env.NETWORKFEE_CONTRACT_ADDRESS,
       process.env.NETWORKFEE_FEETYPE,
       parsed
@@ -59,11 +53,13 @@ async function main() {
   console.log({ tx });
 }
 
-cron.schedule(`1 */23 * * *`, async () =>
-  main()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.log(err);
-      process.exit(1);
-    })
-);
+main();
+
+// cron.schedule(`* */23 * * *`, async () =>
+//   main()
+//     .then()
+//     .catch((err) => {
+//       console.log(err);
+//       process.exit(1);
+//     })
+// );

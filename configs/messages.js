@@ -4,9 +4,12 @@ const MESSAGES = {
       name ?? "Worldlander"
     } 😃. I am a bot that notifies of incoming calls to Worldland Bridge!`,
   INIT: "Started monitoring chains [1, 2] for Lock transactions...",
-  TOKEN_TRANSFER: (chain) => `TransferToken event detected on CHAIN_${chain}`,
-  ETH_TRANSFER: (chain) => `ETH LOCK event detected on CHAIN_${chain}`,
-  BURN: (chain) => `BurnWETH event detected on CHAIN_${chain}`,
+
+  LOCK_TOKEN: (chain) => `TOKEN LOCK EVENT DETECTED ON CHAIN ${chain}`,
+  BURN_TOKEN: (chain) => `TOKEN BURN EVENT DETECTED ON CHAIN ${chain}`,
+  LOCK_ETH: (chain) => `COIN LOCK EVENT DETECTED ON CHAIN ${chain}`,
+  BURN_WETH: (chain) => `W-TOKEN BURN EVENT DETECTED ON CHAIN ${chain}`,
+
   BATCH_PROCESSED: (chain, num) =>
     `Processed ${num} transactions in batch on chain ${chain}!`,
   TX_FAILED: (chain) => `Failed to process the transaction on chain ${chain}`,
