@@ -43,8 +43,8 @@ async function main() {
   const tx = await MyContract.burnToken(
     signer.address,
     bridgeFee,
-    TOKEN_ADDRESS_ETHEREUM,
     ethers.utils.parseUnits(total.toString(), 18),
+    TOKEN_ADDRESS_ETHEREUM,
     {
       value: "0x00",
     }

@@ -39,11 +39,11 @@ async function main() {
   }
 
   const bridgeFee = await MyContract.getBridgeFee(
-    ethers.utils.parseUnits("0.1", 18)
+    ethers.utils.parseUnits("1", 18)
   );
 
   const parsedFee = ethers.utils.formatEther(bridgeFee);
-  const total = 0.1 + Number(parsedFee);
+  const total = 1 + Number(parsedFee);
 
   const tx = await MyContract.lockETH(
     signer.address,

@@ -18,13 +18,21 @@ function telegram_listener() {
         last_name: lastname,
         username,
       } = msg.chat;
-      await db[TABLES.TELEGRAM_LISTENER].create({
-        chat_id,
-        firstname,
-        lastname,
-        username,
-        active: 1,
+      let existing_user = await db[TABLES.TELEGRAM_LISTENERS].findOne({
+        where: {
+          chat_id,
+          active: 1,
+        },
       });
+      if (!existing_user) {
+        await db[TABLES.TELEGRAM_LISTENERS].create({
+          chat_id,
+          firstname,
+          lastname,
+          username,
+          active: 1,
+        });
+      }
     });
   } catch (err) {
     console.log(err);
@@ -33,7 +41,7 @@ function telegram_listener() {
 
 async function sendMessage(message) {
   try {
-    const users = await db[TABLES.TELEGRAM_LISTENER].findAll({
+    const users = await db[TABLES.TELEGRAM_LISTENERS].findAll({
       where: {
         active: 1,
       },

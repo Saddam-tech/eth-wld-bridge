@@ -22,7 +22,7 @@ const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
 const { insert, query_all, move, query_params } = require("../db/queries");
 const { TABLES } = require("../db/tables");
-const { sendMessage } = require("../configs/telegram_bot");
+const { sendMessage, telegram_listener } = require("../configs/telegram_bot");
 const { getParameterFromAWS } = require("../configs/vaultAccess");
 
 const encryptedJson = fs.readFileSync("../.encryptedKey.json", "utf8");
@@ -379,7 +379,7 @@ nonce: ${convertedNonce}
       );
       console.log(
         "chain1token: ",
-        formatAddress(map_token_address_to_token_address)[token]
+        formatAddress(map_token_address_to_token_address[token])
       );
       console.log("chain2token: ", formatAddress(token));
       console.log("timestamp: ", timestamp);
@@ -738,6 +738,9 @@ nonce: ${convertedNonce}
 `);
     }
   );
+
+  // listen for telegram queries
+  telegram_listener();
 
   // Process tx queue in batch every 15 secs
   setInterval(async () => {

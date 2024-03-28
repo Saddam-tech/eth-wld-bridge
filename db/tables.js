@@ -3,7 +3,7 @@ const TABLES = {
   TX_FAILED: "tx_failed",
   TX_PROCESSED: "tx_processed",
   // params
-  TELEGRAM_LISTENER: "telegram_listener",
+  TELEGRAM_LISTENERS: "telegram_listeners",
   PARAMETERS: "parameters",
   CONTRACTS: "contracts",
 };

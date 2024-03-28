@@ -10,12 +10,12 @@ module.exports = function (sequelize, DataTypes) {
       },
       created_at: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
         defaultValue: sequelize.fn("current_timestamp"),
       },
       updated_at: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       chat_id: {
         type: DataTypes.INTEGER(11).UNSIGNED,

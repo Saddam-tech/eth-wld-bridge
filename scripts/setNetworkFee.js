@@ -36,7 +36,7 @@ async function main() {
 
   let gasPrice = ethers.utils.formatEther(await provider1.getGasPrice()); // ethereum gas price
   console.log({ gasPrice });
-  gasPrice = parseFloat(gasPrice);
+  gasPrice = Number(gasPrice);
   const contractUnitCount = parseFloat(process.env.CONTRACT_UNITCOUNT);
   let networkFee = (gasPrice * contractUnitCount).toString();
   const parsed = ethers.utils.parseEther(networkFee);

@@ -13,7 +13,7 @@ const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
 const TOKEN_ADDRESS_WORLDLAND = process.env.TOKEN_ADDRESS_WORLDLAND;
 
 async function main() {
-  const signer = await ethers.getSigner();
+  const signer = await ethers.getSigner(1);
 
   const MyContract = new ethers.Contract(
     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
@@ -42,8 +42,8 @@ async function main() {
   const tx = await MyContract.burnToken(
     signer.address,
     bridgeFee,
-    TOKEN_ADDRESS_WORLDLAND,
     ethers.utils.parseUnits(total.toString(), 18),
+    TOKEN_ADDRESS_WORLDLAND,
     {
       value: "0x00",
     }

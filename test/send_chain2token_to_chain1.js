@@ -38,7 +38,7 @@ async function main() {
   const tx = await MyContract.lockToken(
     signer.address,
     bridgeFee,
-    TOKEN_ADDRESS_ETHEREUM,
+    TOKEN_ADDRESS_WORLDLAND,
     ethers.utils.parseUnits(total.toString(), 18),
     {
       value: "0x00",

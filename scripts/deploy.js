@@ -16,12 +16,12 @@ async function main() {
   await _WETH.deployed();
   await _ERC20Custom.deployed();
   const _bridge = await bridge.deploy(
-    ethers.utils.parseUnits("0", 18),
-    ethers.utils.parseUnits("0", 18),
-    process.env.NETWORKFEE_ID,
-    _WETH.address,
-    process.env.NETWORKFEE_FEETYPE,
-    ethers.utils.parseUnits("0", 18)
+    ethers.utils.parseUnits("1", 18), // bridge fee rate
+    ethers.utils.parseUnits("500", 18), // network fee rate
+    process.env.NETWORKFEE_ID, // network fee id
+    process.env.NETWORKFEE_CONTRACT_ADDRESS, // network fee contract address
+    process.env.NETWORKFEE_FEETYPE, // network fee type
+    ethers.utils.parseUnits("0.000102300729411261", 18) // network fee amount
   );
   await _bridge.deployed();
   const signer = await ethers.getSigner();

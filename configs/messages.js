@@ -2,7 +2,7 @@ const MESSAGES = {
   WELCOME: (name) =>
     `Welcome ${
       name ?? "Worldlander"
-    } 😃. I am a bot that notifies of incoming calls to Worldland Bridge!`,
+    } 😃. I will be notifying you of incoming calls to Worldland Bridge!`,
   INIT: "Started monitoring chains [1, 2] for Lock transactions...",
 
   LOCK_TOKEN: (chain) => `TOKEN LOCK EVENT DETECTED ON CHAIN ${chain}`,
@@ -11,7 +11,9 @@ const MESSAGES = {
   BURN_WETH: (chain) => `W-TOKEN BURN EVENT DETECTED ON CHAIN ${chain}`,
 
   BATCH_PROCESSED: (chain, num) =>
-    `Processed ${num} transactions in batch on chain ${chain}!`,
+    `Processed ${num} transaction${
+      num > 1 ? "s in batch on chain" : " on chain"
+    } ${chain}!`,
   TX_FAILED: (chain) => `Failed to process the transaction on chain ${chain}`,
   NO_TX: (chain) => `No transactions to process on chain ${chain}.`,
   ALREADY_PROCESSED:

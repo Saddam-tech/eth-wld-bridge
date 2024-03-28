@@ -11,7 +11,7 @@ const ETHEREUM_BRIDGE_CONTRACT_ADDRESS =
 const WETH_ADDRESS_ETHEREUM = process.env.WETH_ADDRESS_ETHEREUM;
 
 async function main() {
-  const signer = await ethers.getSigner();
+  const signer = await ethers.getSigner(1);
 
   const MyContract = new ethers.Contract(
     ETHEREUM_BRIDGE_CONTRACT_ADDRESS,
