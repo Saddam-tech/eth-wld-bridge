@@ -37,9 +37,14 @@ async function main() {
         ethereum_bridge_abi,
         signers[i]
       );
-      const tx = MyContract.lockETH(WETH_ADDRESS_ETHEREUM, bridgeFee, {
-        value: ethers.utils.parseUnits(total.toString(), 18),
-      });
+      const tx = MyContract.lockETH(
+        signers[i],
+        WETH_ADDRESS_ETHEREUM,
+        bridgeFee,
+        {
+          value: ethers.utils.parseUnits(total.toString(), 18),
+        }
+      );
       rawTxArr.push(tx);
     }
     let batchExec = await Promise.all(rawTxArr);

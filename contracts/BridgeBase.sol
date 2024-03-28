@@ -18,7 +18,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
     bool public emergencyStopped;
     uint public _nonce;
     //prettier-ignore
-    uint256 percentage = 100 * 10**18;
+    uint256 percentage = 100 * 10**18; //=> 100 % in wei
     NetworkFee public networkFee;
     enum NetworkFeeTypes {
         NOFEE,
@@ -198,10 +198,13 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 _bridgeCalcFee = getBridgeFee(amount);
+        uint256 afterFee = amount.sub(bridgeCalcFee);
+        uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
-        require(success, "Transfer to owner failed!");
+        require(
+            IToken(token).transferFrom(msg.sender, owner(), bridgeCalcFee), // bridge fee transfer
+            "Transfer to owner failed! (bridge fee)"
+        );
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -220,12 +223,12 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             (bool _success, ) = owner().call{value: networkFee.amount}("");
             require(_success, "Transfer to owner failed! (network fee)");
         }
-        IToken(token).burn(msg.sender, amount);
+        IToken(token).burn(msg.sender, afterFee);
         emit BurnToken(
             msg.sender,
             to,
             bridgeCalcFee,
-            amount,
+            afterFee,
             token,
             block.timestamp,
             _nonce,
@@ -245,10 +248,13 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IToken(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 _bridgeCalcFee = getBridgeFee(amount);
+        uint256 afterFee = amount.sub(bridgeCalcFee);
+        uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
-        require(success, "Transfer to owner failed!");
+        require(
+            IToken(token).transferFrom(msg.sender, owner(), bridgeCalcFee), // bridge fee transfer
+            "Transfer to owner failed! (bridge fee)"
+        );
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -268,14 +274,14 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             require(_success, "Transfer to owner failed! (network fee)");
         }
         require(
-            IToken(token).transferFrom(msg.sender, address(this), amount),
+            IToken(token).transferFrom(msg.sender, address(this), afterFee),
             "Lock failed"
         );
         emit LockToken(
             msg.sender,
             to,
             bridgeCalcFee,
-            amount,
+            afterFee,
             token,
             block.timestamp,
             _nonce,
@@ -433,10 +439,13 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             IWETH(token).allowance(msg.sender, address(this)) > amount,
             "Insufficient allowance!"
         );
-        uint256 _bridgeCalcFee = getBridgeFee(amount);
+        uint256 afterFee = amount.sub(bridgeCalcFee);
+        uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
-        require(success, "Transfer to owner failed!");
+        require(
+            IWETH(token).transferFrom(msg.sender, owner(), bridgeCalcFee), // bridge fee transfer
+            "Transfer to owner failed! (bridge fee)"
+        );
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
                 IWETH(networkFee.contract_address).balanceOf(msg.sender) >=
@@ -455,12 +464,12 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             (bool _success, ) = owner().call{value: networkFee.amount}("");
             require(_success, "Transfer to owner failed! (network fee)");
         }
-        IWETH(token).burn(msg.sender, amount);
+        IWETH(token).burn(msg.sender, afterFee);
         emit BurnWETH(
             msg.sender,
             to,
             bridgeCalcFee,
-            amount,
+            afterFee,
             token,
             block.timestamp,
             _nonce,

@@ -46,7 +46,7 @@ async function main() {
       ethers.utils.parseUnits("1", 18)
     );
     const parsedFee0 = ethers.utils.formatEther(bridgeFee0);
-    const parsedFee1 = ethers.utils.formatEther(bridgeFee0);
+    const parsedFee1 = ethers.utils.formatEther(bridgeFee1);
     const total0 = 1 + Number(parsedFee0);
     const total1 = 1 + Number(parsedFee1);
     for (let i = 0; i < signers.length; i++) {
@@ -69,12 +69,22 @@ async function main() {
       //     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
       //     ethers.utils.parseUnits("1000000", 18)
       //   );
-      const tx0 = MyContract0.lockETH(WETH_ADDRESS_ETHEREUM, bridgeFee0, {
-        value: ethers.utils.parseUnits(total0.toString(), 18),
-      });
-      const tx1 = MyContract1.lockETH(WETH_ADDRESS_WORLDLAND, bridgeFee1, {
-        value: ethers.utils.parseUnits(total1.toString(), 18),
-      });
+      const tx0 = MyContract0.lockETH(
+        signers[i],
+        WETH_ADDRESS_ETHEREUM,
+        bridgeFee0,
+        {
+          value: ethers.utils.parseUnits(total0.toString(), 18),
+        }
+      );
+      const tx1 = MyContract1.lockETH(
+        signers[i],
+        WETH_ADDRESS_WORLDLAND,
+        bridgeFee1,
+        {
+          value: ethers.utils.parseUnits(total1.toString(), 18),
+        }
+      );
       //   rawTxArr.push(approve);
       rawTxArr.push(tx0);
       rawTxArr.push(tx1);

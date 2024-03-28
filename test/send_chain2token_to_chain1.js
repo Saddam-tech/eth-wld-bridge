@@ -33,10 +33,16 @@ async function main() {
   const bridgeFee = await MyContract.getBridgeFee(
     ethers.utils.parseUnits("10", 18)
   );
+  const parsedFee = ethers.utils.formatEther(bridgeFee);
+  const total = 10 + Number(parsedFee);
   const tx = await MyContract.lockToken(
+    signer.address,
     bridgeFee,
-    TOKEN_ADDRESS_WORLDLAND,
-    ethers.utils.parseUnits("10", 18)
+    TOKEN_ADDRESS_ETHEREUM,
+    ethers.utils.parseUnits(total.toString(), 18),
+    {
+      value: "0x00",
+    }
   );
 
   console.log({ tx });
