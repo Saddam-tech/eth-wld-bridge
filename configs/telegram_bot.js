@@ -5,7 +5,7 @@ const { TABLES } = require("../db/tables");
 const token = "6763159391:AAGCdk_66lQTmebSOFZOVr7T9GdsbAHifKQ";
 const telegram_bot = new TelegramBot(token, { polling: true });
 
-function telegram_listener() {
+async function telegram_listener() {
   try {
     telegram_bot.onText(/\/start/, async (msg) => {
       telegram_bot.sendMessage(
@@ -36,6 +36,7 @@ function telegram_listener() {
     });
   } catch (err) {
     console.log(err);
+    await sendMessage(err);
   }
 }
 

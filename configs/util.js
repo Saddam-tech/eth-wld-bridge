@@ -56,86 +56,103 @@ async function consumeTx(args) {
         .connect(wallet)
         [method](destinations, amounts, nonces, tokens, admin_signature)
         .then(async (tx) => {
-          let rawPromises = [];
-          for (let i = 0; i < queue.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = queue[i];
-            processed = PROCESSED.TRUE;
-            rawPromises[i] = db["tx_processed"].create({
-              id,
-              from_address,
-              to_address,
-              amount,
-              token,
-              timestamp,
-              nonce,
-              processed,
-              chain,
-              function_type,
-              tx_hash: tx.hash,
-            });
-            deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+          try {
+            let rawPromises = [];
+            for (let i = 0; i < queue.length; i++) {
+              let {
+                id,
+                from_address,
+                to_address,
+                amount,
+                nonce,
+                token,
+                timestamp,
+                chain,
+                processed,
+                function_type,
+              } = queue[i];
+              processed = PROCESSED.TRUE;
+              rawPromises[i] = db["tx_processed"].create({
+                id,
+                from_address,
+                to_address,
+                amount,
+                token,
+                timestamp,
+                nonce,
+                processed,
+                chain,
+                function_type,
+                tx_hash: tx.hash,
+              });
+              deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+            }
+            await Promise.all(rawPromises);
+            await sendMessage(`
+            ${MESSAGES.BATCH_PROCESSED(
+              queue[0].chain,
+              destinations.length
+            )} Transaction Hash: ${tx.hash}`);
+            console.log({ txHash: tx.hash });
+            console.log(
+              MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)
+            );
+          } catch (err) {
+            if (err) {
+              await sendMessage(err);
+            }
           }
-          await Promise.all(rawPromises);
-          await sendMessage(`
-          ${MESSAGES.BATCH_PROCESSED(
-            queue[0].chain,
-            destinations.length
-          )} Transaction Hash: ${tx.hash}`);
-          console.log({ txHash: tx.hash });
-          console.log(
-            MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)
-          );
         })
         .catch(async (err) => {
-          let rawPromises = [];
-          for (let i = 0; i < queue.length; i++) {
-            let {
-              id,
-              from_address,
-              to_address,
-              amount,
-              nonce,
-              token,
-              timestamp,
-              chain,
-              processed,
-              function_type,
-            } = queue[i];
-            processed = PROCESSED.FALSE;
-            deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
-            rawPromises[i] = db[TABLES.TX_FAILED].create({
-              // recreating row inside mariadb tx_failed table
-              id,
-              from_address,
-              to_address,
-              amount,
-              token,
-              timestamp,
-              nonce,
-              processed,
-              chain,
-              function_type,
-            });
+          try {
+            let rawPromises = [];
+            for (let i = 0; i < queue.length; i++) {
+              let {
+                id,
+                from_address,
+                to_address,
+                amount,
+                nonce,
+                token,
+                timestamp,
+                chain,
+                processed,
+                function_type,
+              } = queue[i];
+              processed = PROCESSED.FALSE;
+              deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              rawPromises[i] = db[TABLES.TX_FAILED].create({
+                // recreating row inside mariadb tx_failed table
+                id,
+                from_address,
+                to_address,
+                amount,
+                token,
+                timestamp,
+                nonce,
+                processed,
+                chain,
+                function_type,
+              });
+            }
+            await Promise.all(rawPromises);
+            await sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
+            console.log(MESSAGES.TX_FAILED(queue[0].chain));
+            if (err) {
+              console.log(err);
+              await sendMessage(err);
+            }
+          } catch (err) {
+            console.log(err);
+            await sendMessage(err);
           }
-          await Promise.all(rawPromises);
-          await sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
-          console.log(MESSAGES.TX_FAILED(queue[0].chain));
-          console.log(err);
         });
     }
   } catch (err) {
     console.error(err);
+    if (err) {
+      await sendMessage(err);
+    }
   }
 }
 

@@ -113,77 +113,82 @@ async function processTransactionQueue() {
       console.log(MESSAGES.NO_TX(2));
     }
   } catch (err) {
-    console.log(err);
+    if (err) {
+      console.log(err);
+      await sendMessage(err);
+    }
   }
 }
 
 async function monitorLockEvents() {
-  console.log(MESSAGES.INIT);
-  // Listen for LockToken event on CHAIN_1_CONTRACT
-  CHAIN_1_CONTRACT.on(
-    EVENTS.LOCKTOKEN,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.LOCK_TOKEN(1));
-      console.log("from: ", formatAddress(from));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log("chain1token: ", formatAddress(token));
-      console.log(
-        "chain2token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+  try {
+    console.log(MESSAGES.INIT);
+    // Listen for LockToken event on CHAIN_1_CONTRACT
+    CHAIN_1_CONTRACT.on(
+      EVENTS.LOCKTOKEN,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_2,
-        PROCESSED.FALSE,
-        FUNCTIONS.MINTTOKEN,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-        ${MESSAGES.LOCK_TOKEN(1)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.LOCK_TOKEN(1));
+          console.log("from: ", formatAddress(from));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log("chain1token: ", formatAddress(token));
+          console.log(
+            "chain2token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_2,
+            PROCESSED.FALSE,
+            FUNCTIONS.MINTTOKEN,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+            ${MESSAGES.LOCK_TOKEN(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -193,75 +198,82 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
+      }
+    );
 
-  // Listen for LockToken event on CHAIN_2_CONTRACT
-  CHAIN_2_CONTRACT.on(
-    EVENTS.LOCKTOKEN,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.LOCK_TOKEN(2));
-      console.log("from: ", formatAddress(from));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log(
-        "chain1token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("chain2token: ", formatAddress(token));
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    // Listen for LockToken event on CHAIN_2_CONTRACT
+    CHAIN_2_CONTRACT.on(
+      EVENTS.LOCKTOKEN,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_2,
-        PROCESSED.FALSE,
-        FUNCTIONS.MINTTOKEN,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-        ${MESSAGES.LOCK_TOKEN(2)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.LOCK_TOKEN(2));
+          console.log("from: ", formatAddress(from));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log(
+            "chain1token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("chain2token: ", formatAddress(token));
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_2,
+            PROCESSED.FALSE,
+            FUNCTIONS.MINTTOKEN,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+            ${MESSAGES.LOCK_TOKEN(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -271,75 +283,82 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
+      }
+    );
 
-  // Listen for BurnToken event on CHAIN_1_CONTRACT
-  CHAIN_1_CONTRACT.on(
-    EVENTS.BURNTOKEN,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.BURN_TOKEN(1));
-      console.log("from: ", formatAddress(from));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log("chain1token: ", formatAddress(token));
-      console.log(
-        "chain2token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    // Listen for BurnToken event on CHAIN_1_CONTRACT
+    CHAIN_1_CONTRACT.on(
+      EVENTS.BURNTOKEN,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_2,
-        PROCESSED.FALSE,
-        FUNCTIONS.UNLOCKTOKEN,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-       ${MESSAGES.BURN_TOKEN(1)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.BURN_TOKEN(1));
+          console.log("from: ", formatAddress(from));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log("chain1token: ", formatAddress(token));
+          console.log(
+            "chain2token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_2,
+            PROCESSED.FALSE,
+            FUNCTIONS.UNLOCKTOKEN,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+           ${MESSAGES.BURN_TOKEN(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -349,75 +368,82 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
+      }
+    );
 
-  // Listen for BurnToken event on CHAIN_2_CONTRACT
-  CHAIN_2_CONTRACT.on(
-    EVENTS.BURNTOKEN,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.BURN_TOKEN(2));
-      console.log("from: ", formatAddress(from));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log(
-        "chain1token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("chain2token: ", formatAddress(token));
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    // Listen for BurnToken event on CHAIN_2_CONTRACT
+    CHAIN_2_CONTRACT.on(
+      EVENTS.BURNTOKEN,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_1,
-        PROCESSED.FALSE,
-        FUNCTIONS.UNLOCKTOKEN,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-         ${MESSAGES.BURN_TOKEN(2)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.BURN_TOKEN(2));
+          console.log("from: ", formatAddress(from));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log(
+            "chain1token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("chain2token: ", formatAddress(token));
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_1,
+            PROCESSED.FALSE,
+            FUNCTIONS.UNLOCKTOKEN,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+             ${MESSAGES.BURN_TOKEN(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -427,74 +453,84 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
-
-  // BRIDGING WETH
-
-  // Listen for the (LockETH) event on the CHAIN_1_CONTRACT
-  CHAIN_1_CONTRACT.on(
-    EVENTS.LOCK_ETH,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.LOCK_ETH(1));
-      console.log("from: ", formatAddress(from));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log("chain1token: ", token);
-      console.log("chain2token: ", map_token_address_to_token_address[token]);
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
       }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    );
+
+    // BRIDGING WETH
+
+    // Listen for the (LockETH) event on the CHAIN_1_CONTRACT
+    CHAIN_1_CONTRACT.on(
+      EVENTS.LOCK_ETH,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_2,
-        PROCESSED.FALSE,
-        FUNCTIONS.MINTWETH,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-       ${MESSAGES.LOCK_ETH(1)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.LOCK_ETH(1));
+          console.log("from: ", formatAddress(from));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log("chain1token: ", token);
+          console.log(
+            "chain2token: ",
+            map_token_address_to_token_address[token]
+          );
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_2,
+            PROCESSED.FALSE,
+            FUNCTIONS.MINTWETH,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+           ${MESSAGES.LOCK_ETH(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -504,74 +540,81 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
-  // Listen for (LockETH) event on CHAIN_2_CONTRACT
-  CHAIN_2_CONTRACT.on(
-    EVENTS.LOCK_ETH,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.LOCK_ETH(2));
-      console.log("from: ", formatAddress(from));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log(
-        "chain1token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("chain2token: ", formatAddress(token));
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
       }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    );
+    // Listen for (LockETH) event on CHAIN_2_CONTRACT
+    CHAIN_2_CONTRACT.on(
+      EVENTS.LOCK_ETH,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_1,
-        PROCESSED.FALSE,
-        FUNCTIONS.MINTWETH,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-        ${MESSAGES.LOCK_ETH(2)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.LOCK_ETH(2));
+          console.log("from: ", formatAddress(from));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log(
+            "chain1token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("chain2token: ", formatAddress(token));
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_1,
+            PROCESSED.FALSE,
+            FUNCTIONS.MINTWETH,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+            ${MESSAGES.LOCK_ETH(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -581,74 +624,81 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
+      }
+    );
 
-  // Listen for (BurnWETH) event on CHAIN_1_CONTRACT
-  CHAIN_1_CONTRACT.on(
-    EVENTS.BURNWETH,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.BURN_WETH(1));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log("chain1token: ", formatAddress(token));
-      console.log(
-        "chain2token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    // Listen for (BurnWETH) event on CHAIN_1_CONTRACT
+    CHAIN_1_CONTRACT.on(
+      EVENTS.BURNWETH,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_2,
-        PROCESSED.FALSE,
-        FUNCTIONS.UNLOCKETH,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-       ${MESSAGES.BURN_WETH(1)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.BURN_WETH(1));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log("chain1token: ", formatAddress(token));
+          console.log(
+            "chain2token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_2,
+            PROCESSED.FALSE,
+            FUNCTIONS.UNLOCKETH,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+           ${MESSAGES.BURN_WETH(1)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -658,74 +708,81 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
-    }
-  );
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
+      }
+    );
 
-  // Listen for (BurnWETH) event on CHAIN_2_CONTRACT
-  CHAIN_2_CONTRACT.on(
-    EVENTS.BURNWETH,
-    async (
-      from,
-      to,
-      bridgeFee,
-      amount,
-      token,
-      timestamp,
-      nonce,
-      networkFeeContractAddress,
-      networkFee
-    ) => {
-      console.log(MESSAGES.BURN_WETH(2));
-      console.log("to: ", formatAddress(to));
-      console.log("amount: ", ethers.utils.formatEther(amount));
-      console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
-      console.log("networkFee: ", ethers.utils.formatEther(networkFee));
-      console.log(
-        "networkFee_contract_address: ",
-        formatAddress(networkFeeContractAddress)
-      );
-      console.log(
-        "chain1token: ",
-        formatAddress(map_token_address_to_token_address[token])
-      );
-      console.log("chain2token: ", formatAddress(token));
-      console.log("timestamp: ", timestamp);
-      console.log("nonce: ", nonce);
-      // Check if the same transaction is being executed the second time
-      let otherChainToken = map_token_address_to_token_address[token];
-      let convertedAmount = convertBigNumToString(amount);
-      let convertedNonce = convertBigNumToString(nonce);
-      let convertedTimestamp = convertBigNumToString(timestamp);
-      let alreadyQueuedTxs = await query_params(
-        TABLES.TX_QUEUE,
-        "nonce",
-        convertedNonce
-      );
-      if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
-        console.log(MESSAGES.ALREADY_PROCESSED);
-        await sendMessage(MESSAGES.ALREADY_PROCESSED);
-        return;
-      }
-      if (alreadyQueuedTxs.length > 0) {
-        console.log(MESSAGES.ALREADY_QUEUED);
-        await sendMessage(MESSAGES.ALREADY_QUEUED);
-        return;
-      }
-      insert(TABLES.TX_QUEUE, [
+    // Listen for (BurnWETH) event on CHAIN_2_CONTRACT
+    CHAIN_2_CONTRACT.on(
+      EVENTS.BURNWETH,
+      async (
         from,
         to,
-        convertedAmount,
-        convertedNonce,
-        otherChainToken,
-        convertedTimestamp,
-        CHAINS.CHAIN_1,
-        PROCESSED.FALSE,
-        FUNCTIONS.UNLOCKETH,
-      ]);
-      // Sending notification to telegram bot
-      await sendMessage(`
-        ${MESSAGES.BURN_WETH(2)}
+        bridgeFee,
+        amount,
+        token,
+        timestamp,
+        nonce,
+        networkFeeContractAddress,
+        networkFee
+      ) => {
+        try {
+          console.log(MESSAGES.BURN_WETH(2));
+          console.log("to: ", formatAddress(to));
+          console.log("amount: ", ethers.utils.formatEther(amount));
+          console.log("bridgeFee: ", ethers.utils.formatEther(bridgeFee));
+          console.log("networkFee: ", ethers.utils.formatEther(networkFee));
+          console.log(
+            "networkFee_contract_address: ",
+            formatAddress(networkFeeContractAddress)
+          );
+          console.log(
+            "chain1token: ",
+            formatAddress(map_token_address_to_token_address[token])
+          );
+          console.log("chain2token: ", formatAddress(token));
+          console.log("timestamp: ", timestamp);
+          console.log("nonce: ", nonce);
+          // Check if the same transaction is being executed the second time
+          let otherChainToken = map_token_address_to_token_address[token];
+          let convertedAmount = convertBigNumToString(amount);
+          let convertedNonce = convertBigNumToString(nonce);
+          let convertedTimestamp = convertBigNumToString(timestamp);
+          let alreadyQueuedTxs = await query_params(
+            TABLES.TX_QUEUE,
+            "nonce",
+            convertedNonce
+          );
+          if (await CHAIN_1_CONTRACT.processedNonces(nonce)) {
+            console.log(MESSAGES.ALREADY_PROCESSED);
+            await sendMessage(MESSAGES.ALREADY_PROCESSED);
+            return;
+          }
+          if (alreadyQueuedTxs.length > 0) {
+            console.log(MESSAGES.ALREADY_QUEUED);
+            await sendMessage(MESSAGES.ALREADY_QUEUED);
+            return;
+          }
+          insert(TABLES.TX_QUEUE, [
+            from,
+            to,
+            convertedAmount,
+            convertedNonce,
+            otherChainToken,
+            convertedTimestamp,
+            CHAINS.CHAIN_1,
+            PROCESSED.FALSE,
+            FUNCTIONS.UNLOCKETH,
+          ]);
+          // Sending notification to telegram bot
+          await sendMessage(`
+            ${MESSAGES.BURN_WETH(2)}
 from: ${formatAddress(from)}
 to: ${formatAddress(to)}
 amount: ${ethers.utils.formatEther(convertedAmount)}
@@ -735,17 +792,29 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
-`);
+    `);
+        } catch (err) {
+          if (err) {
+            console.log(err);
+            await sendMessage(err);
+          }
+        }
+      }
+    );
+
+    // listen for telegram queries
+    telegram_listener();
+
+    // Process tx queue in batch every 15 secs
+    setInterval(async () => {
+      await processTransactionQueue();
+    }, txProcessInterval);
+  } catch (err) {
+    if (err) {
+      console.log(err);
+      await sendMessage(err);
     }
-  );
-
-  // listen for telegram queries
-  telegram_listener();
-
-  // Process tx queue in batch every 15 secs
-  setInterval(async () => {
-    await processTransactionQueue();
-  }, txProcessInterval);
+  }
 }
 
 monitorLockEvents().catch((err) => {

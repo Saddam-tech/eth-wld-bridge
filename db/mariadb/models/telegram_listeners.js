@@ -18,7 +18,7 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: true,
       },
       chat_id: {
-        type: DataTypes.INTEGER(11).UNSIGNED,
+        type: DataTypes.INTEGER(11),
         allowNull: false,
       },
       username: {
@@ -34,7 +34,7 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: true,
       },
       active: {
-        type: DataTypes.INTEGER(11).UNSIGNED,
+        type: DataTypes.INTEGER(11),
         allowNull: false,
       },
     },

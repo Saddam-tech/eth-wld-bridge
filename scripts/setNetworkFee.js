@@ -6,7 +6,10 @@ const {
 } = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
 const { gasLimit } = require("../configs/constants");
 const { getParameterFromAWS } = require("../configs/vaultAccess");
-const encryptedJson = fs.readFileSync("../.encryptedKey.json", "utf8");
+const path = require("path");
+const resolvePath = path.resolve(__dirname, "../.encryptedKey.json");
+const encryptedJson = fs.readFileSync(resolvePath, "utf8");
+
 const cron = require("node-cron");
 
 async function main() {
@@ -53,13 +56,13 @@ async function main() {
   console.log({ tx });
 }
 
-main();
+// main();
 
-// cron.schedule(`* */23 * * *`, async () =>
-//   main()
-//     .then()
-//     .catch((err) => {
-//       console.log(err);
-//       process.exit(1);
-//     })
-// );
+cron.schedule(`* */23 * * *`, async () =>
+  main()
+    .then()
+    .catch((err) => {
+      console.log(err);
+      process.exit(1);
+    })
+);
