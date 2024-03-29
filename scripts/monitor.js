@@ -20,12 +20,13 @@ const {
 } = require("../configs/constants");
 const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
-const { insert, query_all, move, query_params } = require("../db/queries");
+const { insert, query_all, query_params } = require("../db/queries");
 const { TABLES } = require("../db/tables");
 const { sendMessage, telegram_listener } = require("../configs/telegram_bot");
 const { getParameterFromAWS } = require("../configs/vaultAccess");
-
-const encryptedJson = fs.readFileSync("../.encryptedKey.json", "utf8");
+const path = require("path");
+const resolvePath = path.resolve(__dirname, "../.encryptedKey.json");
+const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
@@ -54,7 +55,6 @@ async function processTransactionQueue() {
   try {
     let queue_chain_1 = [];
     let queue_chain_2 = [];
-
     const tx_queue = await query_all(TABLES.TX_QUEUE);
     console.log({ tx_queue });
     if (tx_queue.length > 0) {
