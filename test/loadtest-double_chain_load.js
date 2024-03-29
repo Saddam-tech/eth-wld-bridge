@@ -70,7 +70,7 @@ async function main() {
       //     ethers.utils.parseUnits("1000000", 18)
       //   );
       const tx0 = MyContract0.lockETH(
-        signers[i],
+        signers[i].address,
         WETH_ADDRESS_ETHEREUM,
         bridgeFee0,
         {
@@ -78,7 +78,7 @@ async function main() {
         }
       );
       const tx1 = MyContract1.lockETH(
-        signers[i],
+        signers[i].address,
         WETH_ADDRESS_WORLDLAND,
         bridgeFee1,
         {

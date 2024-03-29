@@ -44,9 +44,9 @@ async function main() {
   const tx = await contract
     .connect(signer)
     .setNetworkFee(
-      process.env.NETWORKFEE_ID,
-      process.env.NETWORKFEE_CONTRACT_ADDRESS,
-      process.env.NETWORKFEE_FEETYPE,
+      process.env.NETWORKFEE_ID_CHAIN2,
+      process.env.NETWORKFEE_CONTRACT_ADDRESS_CHAIN2,
+      process.env.NETWORKFEE_FEETYPE_CHAIN2,
       parsed
     );
 

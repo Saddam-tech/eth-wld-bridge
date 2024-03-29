@@ -8,20 +8,32 @@ const {
 
 async function main() {
   console.log("Deploying contracts...");
+  let {
+    NETWORKFEE_ID_CHAIN2,
+    NETWORKFEE_FEETYPE_CHAIN2,
+    WRAPPED_COIN_NAME_CHAIN2,
+    WRAPPED_COIN_SYMBOL_CHAIN2,
+    BRIDGE_FEERATE_CHAIN2,
+    NETWORK_FEERATE_CHAIN2,
+    NETWORK_FEE_AMOUNT_CHAIN2,
+  } = process.env;
   const bridge = await ethers.getContractFactory("BridgeBase");
   const WETH = await ethers.getContractFactory("WETH");
-  const _WETH = await WETH.deploy("Wrapped WLC", "WLC");
+  const _WETH = await WETH.deploy(
+    WRAPPED_COIN_NAME_CHAIN2,
+    WRAPPED_COIN_SYMBOL_CHAIN2
+  );
   const ERC20Custom = await ethers.getContractFactory("ERC20Custom");
   const _ERC20Custom = await ERC20Custom.deploy("Dai", "DAI");
   await _WETH.deployed();
   await _ERC20Custom.deployed();
   const _bridge = await bridge.deploy(
-    ethers.utils.parseUnits("1", 18), // bridge fee rate
-    ethers.utils.parseUnits("500", 18), // network fee rate
-    process.env.NETWORKFEE_ID, // network fee id
-    process.env.NETWORKFEE_CONTRACT_ADDRESS, // network fee contract address
-    process.env.NETWORKFEE_FEETYPE, // network fee type
-    ethers.utils.parseUnits("0.000102300729411261", 18) // network fee amount
+    ethers.utils.parseUnits(BRIDGE_FEERATE_CHAIN2, 18), // bridge fee rate
+    ethers.utils.parseUnits(NETWORK_FEERATE_CHAIN2, 18), // network fee rate
+    NETWORKFEE_ID_CHAIN2, // network fee id
+    _WETH.address, // network fee contract address
+    NETWORKFEE_FEETYPE_CHAIN2, // network fee type
+    ethers.utils.parseUnits(NETWORK_FEE_AMOUNT_CHAIN2, 18) // network fee amount
   );
   await _bridge.deployed();
   const signer = await ethers.getSigner();

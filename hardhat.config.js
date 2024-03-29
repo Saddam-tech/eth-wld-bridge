@@ -7,7 +7,7 @@ const fs = require("fs-extra");
 const ethers = require("ethers");
 const { getParameterFromAWS } = require("./configs/vaultAccess");
 /** @type import('hardhat/config').HardhatUserConfig */
-const gas = 3000000;
+const gas = 300000000000;
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 const wallet = ethers.Wallet.fromEncryptedJsonSync(
   encryptedJson,
