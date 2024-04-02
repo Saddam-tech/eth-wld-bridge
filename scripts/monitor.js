@@ -267,7 +267,7 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_2,
+            CHAINS.CHAIN_1,
             PROCESSED.FALSE,
             FUNCTIONS.MINTTOKEN,
           ]);

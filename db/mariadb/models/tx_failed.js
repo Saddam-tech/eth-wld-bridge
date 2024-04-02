@@ -53,6 +53,26 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(30),
         allowNull: false,
       },
+      from_chain: {
+        type: DataTypes.INTEGER(11),
+        allowNull: false,
+      },
+      to_chain: {
+        type: DataTypes.INTEGER(11),
+        allowNull: false,
+      },
+      from_chain_id: {
+        type: DataTypes.INTEGER(11),
+        allowNull: false,
+      },
+      to_chain_id: {
+        type: DataTypes.INTEGER(11),
+        allowNull: false,
+      },
+      tx_hash: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+      },
     },
     {
       sequelize,

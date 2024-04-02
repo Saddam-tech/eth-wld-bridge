@@ -11,6 +11,7 @@ const resolvePath = path.resolve(__dirname, "../.encryptedKey.json");
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 
 const cron = require("node-cron");
+const { convertBigNumToString } = require("../configs/util");
 
 async function main() {
   const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
@@ -39,11 +40,12 @@ async function main() {
 
   let gasPrice = ethers.utils.formatEther(await provider1.getGasPrice()); // ethereum gas price
   console.log({ gasPrice });
-  gasPrice = Number(gasPrice);
+  gasPrice = parseFloat(gasPrice);
   const contractUnitCount = parseFloat(process.env.CONTRACT_UNITCOUNT);
   let networkFee = (gasPrice * contractUnitCount).toString();
-  const parsed = ethers.utils.parseEther(networkFee);
   console.log({ networkFee });
+  const parsed = ethers.utils.parseUnits(networkFee, 18);
+  console.log({ parsed });
   const tx = await contract
     .connect(signer)
     .setNetworkFee(
@@ -58,7 +60,7 @@ async function main() {
 
 // main();
 
-cron.schedule(`* */23 * * *`, async () =>
+cron.schedule(`1 */23 * * *`, async () =>
   main()
     .then()
     .catch((err) => {

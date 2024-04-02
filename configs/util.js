@@ -67,9 +67,13 @@ async function consumeTx(args) {
                 nonce,
                 token,
                 timestamp,
-                chain,
                 processed,
                 function_type,
+                from_chain,
+                to_chain,
+                from_chain_id,
+                to_chain_id,
+                tx_hash,
               } = queue[i];
               processed = PROCESSED.TRUE;
               rawPromises[i] = db["tx_processed"].create({
@@ -81,25 +85,32 @@ async function consumeTx(args) {
                 timestamp,
                 nonce,
                 processed,
-                chain,
+                from_chain,
+                to_chain,
+                from_chain_id,
+                to_chain_id,
                 function_type,
-                tx_hash: tx.hash,
+                ["tx_hash_c" + from_chain]: tx_hash,
+                ["tx_hash_c" + to_chain]: tx.hash,
               });
               deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
             }
             await Promise.all(rawPromises);
             await sendMessage(`
             ${MESSAGES.BATCH_PROCESSED(
-              queue[0].chain,
+              queue[0].to_chain_id,
               destinations.length
             )} Transaction Hash: ${tx.hash}`);
             console.log({ txHash: tx.hash });
             console.log(
-              MESSAGES.BATCH_PROCESSED(queue[0].chain, destinations.length)
+              MESSAGES.BATCH_PROCESSED(
+                queue[0].to_chain_id,
+                destinations.length
+              )
             );
           } catch (err) {
             if (err) {
-              await sendMessage(err);
+              await sendMessage(JSON.stringify(err));
             }
           }
         })
@@ -115,9 +126,13 @@ async function consumeTx(args) {
                 nonce,
                 token,
                 timestamp,
-                chain,
                 processed,
                 function_type,
+                from_chain,
+                to_chain,
+                from_chain_id,
+                to_chain_id,
+                tx_hash,
               } = queue[i];
               processed = PROCESSED.FALSE;
               deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
@@ -131,27 +146,31 @@ async function consumeTx(args) {
                 timestamp,
                 nonce,
                 processed,
-                chain,
                 function_type,
+                from_chain,
+                to_chain,
+                from_chain_id,
+                to_chain_id,
+                tx_hash,
               });
             }
             await Promise.all(rawPromises);
-            await sendMessage(MESSAGES.TX_FAILED(queue[0].chain));
-            console.log(MESSAGES.TX_FAILED(queue[0].chain));
+            await sendMessage(MESSAGES.TX_FAILED(queue[0].to_chain_id));
+            console.log(MESSAGES.TX_FAILED(queue[0].to_chain_id));
             if (err) {
               console.log(err);
-              await sendMessage(err);
+              await sendMessage(JSON.stringify(err));
             }
           } catch (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         });
     }
   } catch (err) {
     console.error(err);
     if (err) {
-      await sendMessage(err);
+      await sendMessage(JSON.stringify(err));
     }
   }
 }
