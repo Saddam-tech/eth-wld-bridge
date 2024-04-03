@@ -15,4 +15,5 @@ artifacts
 
 # .db file
 
-worldland_bridge.db
+tx_queue.db
+tx_queue_backup.db

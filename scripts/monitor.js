@@ -68,11 +68,11 @@ async function processTransactionQueue() {
           // processed transactions will not exist in tx_queue table, but it does not hurt to make an extra check here
           // continue if the transaction is not processed yet
           // start sorting the transactions
-          if (tx_queue[i].chain === CHAINS.CHAIN_1) {
+          if (tx_queue[i].to_chain === CHAINS.CHAIN_1) {
             // saving into chain_1 queue temporary memory
             queue_chain_1.push(tx_queue[i]);
           }
-          if (tx_queue[i].chain === CHAINS.CHAIN_2) {
+          if (tx_queue[i].to_chain === CHAINS.CHAIN_2) {
             // saving into chain_2 queue temporary memory
             queue_chain_2.push(tx_queue[i]);
           }
