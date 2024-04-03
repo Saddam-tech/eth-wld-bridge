@@ -100,8 +100,9 @@ async function consumeTx(args) {
             ${MESSAGES.BATCH_PROCESSED(
               queue[0].to_chain_id,
               destinations.length
-            )} Transaction Hash: ${tx.hash}`);
-            console.log({ txHash: tx.hash });
+            )} 
+Transaction Hash: ${tx.hash}`);
+            console.log("txHash :", tx.hash);
             console.log(
               MESSAGES.BATCH_PROCESSED(
                 queue[0].to_chain_id,
