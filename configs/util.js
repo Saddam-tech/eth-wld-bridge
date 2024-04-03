@@ -102,15 +102,16 @@ async function consumeTx(args) {
               destinations.length
             )} 
 Transaction Hash: ${tx.hash}`);
-            console.log("txHash :", tx.hash);
             console.log(
               MESSAGES.BATCH_PROCESSED(
                 queue[0].to_chain_id,
                 destinations.length
               )
             );
+            console.log({ txHash: tx.hash });
           } catch (err) {
             if (err) {
+              console.error(err);
               await sendMessage(JSON.stringify(err));
             }
           }
@@ -169,8 +170,8 @@ Transaction Hash: ${tx.hash}`);
         });
     }
   } catch (err) {
-    console.error(err);
     if (err) {
+      console.error(err);
       await sendMessage(JSON.stringify(err));
     }
   }

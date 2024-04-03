@@ -116,7 +116,7 @@ async function processTransactionQueue() {
   } catch (err) {
     if (err) {
       console.log(err);
-      await sendMessage(err);
+      await sendMessage(JSON.stringify(err));
     }
   }
 }
