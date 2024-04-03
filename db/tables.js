@@ -18,6 +18,11 @@ const COLUMNS = {
   chain: "chain",
   processed: "processed",
   function_type: "function_type",
+  from_chain: "from_chain",
+  to_chain: "to_chain",
+  from_chain_id: "from_chain_id",
+  to_chain_id: "to_chain_id",
+  tx_hash: "tx_hash",
 };
 
 module.exports = { TABLES, COLUMNS };

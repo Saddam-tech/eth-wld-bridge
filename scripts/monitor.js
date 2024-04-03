@@ -17,6 +17,7 @@ const {
   CHAINS,
   PROCESSED,
   FUNCTIONS,
+  CHAIN_IDS,
 } = require("../configs/constants");
 const { MESSAGES } = require("../configs/messages");
 const { EVENTS } = require("../configs/events");
@@ -135,7 +136,8 @@ async function monitorLockEvents() {
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.LOCK_TOKEN(1));
@@ -155,6 +157,9 @@ async function monitorLockEvents() {
           );
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C1);
+          console.log("to_chain_id: ", CHAIN_IDS.C2);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -182,9 +187,13 @@ async function monitorLockEvents() {
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_2,
             PROCESSED.FALSE,
             FUNCTIONS.MINTTOKEN,
+            CHAINS.CHAIN_1,
+            CHAINS.CHAIN_2,
+            CHAIN_IDS.C1,
+            CHAIN_IDS.C2,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -198,11 +207,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C1}
+to_chain_id: ${CHAIN_IDS.C2}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -220,7 +232,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.LOCK_TOKEN(2));
@@ -240,6 +253,9 @@ nonce: ${convertedNonce}
           console.log("chain2token: ", formatAddress(token));
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C2);
+          console.log("to_chain_id: ", CHAIN_IDS.C1);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -267,9 +283,13 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_1,
             PROCESSED.FALSE,
             FUNCTIONS.MINTTOKEN,
+            CHAINS.CHAIN_2,
+            CHAINS.CHAIN_1,
+            CHAIN_IDS.C2,
+            CHAIN_IDS.C1,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -283,11 +303,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C2}
+to_chain_id: ${CHAIN_IDS.C1}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -305,7 +328,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.BURN_TOKEN(1));
@@ -325,6 +349,9 @@ nonce: ${convertedNonce}
           );
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C1);
+          console.log("to_chain_id: ", CHAIN_IDS.C2);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -352,9 +379,13 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_2,
             PROCESSED.FALSE,
             FUNCTIONS.UNLOCKTOKEN,
+            CHAINS.CHAIN_1,
+            CHAINS.CHAIN_2,
+            CHAIN_IDS.C1,
+            CHAIN_IDS.C2,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -368,11 +399,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C1}
+to_chain_id: ${CHAIN_IDS.C2}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -390,7 +424,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.BURN_TOKEN(2));
@@ -410,6 +445,9 @@ nonce: ${convertedNonce}
           console.log("chain2token: ", formatAddress(token));
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C2);
+          console.log("to_chain_id: ", CHAIN_IDS.C1);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -437,9 +475,13 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_1,
             PROCESSED.FALSE,
             FUNCTIONS.UNLOCKTOKEN,
+            CHAINS.CHAIN_2,
+            CHAINS.CHAIN_1,
+            CHAIN_IDS.C2,
+            CHAIN_IDS.C1,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -453,11 +495,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C2}
+to_chain_id: ${CHAIN_IDS.C1}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -477,7 +522,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.LOCK_ETH(1));
@@ -497,6 +543,9 @@ nonce: ${convertedNonce}
           );
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C1);
+          console.log("to_chain_id: ", CHAIN_IDS.C2);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -524,9 +573,13 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_2,
             PROCESSED.FALSE,
             FUNCTIONS.MINTWETH,
+            CHAINS.CHAIN_1,
+            CHAINS.CHAIN_2,
+            CHAIN_IDS.C1,
+            CHAIN_IDS.C2,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -540,11 +593,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C1}
+to_chain_id: ${CHAIN_IDS.C2}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -561,7 +617,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.LOCK_ETH(2));
@@ -581,6 +638,9 @@ nonce: ${convertedNonce}
           console.log("chain2token: ", formatAddress(token));
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C2);
+          console.log("to_chain_id: ", CHAIN_IDS.C1);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -608,9 +668,13 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_1,
             PROCESSED.FALSE,
             FUNCTIONS.MINTWETH,
+            CHAINS.CHAIN_2,
+            CHAINS.CHAIN_1,
+            CHAIN_IDS.C2,
+            CHAIN_IDS.C1,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -624,11 +688,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C2}
+to_chain_id: ${CHAIN_IDS.C1}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -646,7 +713,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.BURN_WETH(1));
@@ -665,6 +733,9 @@ nonce: ${convertedNonce}
           );
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C1);
+          console.log("to_chain_id: ", CHAIN_IDS.C2);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -692,9 +763,13 @@ nonce: ${convertedNonce}
             convertedNonce,
             otherChainToken,
             convertedTimestamp,
-            CHAINS.CHAIN_2,
             PROCESSED.FALSE,
             FUNCTIONS.UNLOCKETH,
+            CHAINS.CHAIN_1,
+            CHAINS.CHAIN_2,
+            CHAIN_IDS.C1,
+            CHAIN_IDS.C2,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -708,11 +783,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C1}
+to_chain_id: ${CHAIN_IDS.C2}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -730,7 +808,8 @@ nonce: ${convertedNonce}
         timestamp,
         nonce,
         networkFeeContractAddress,
-        networkFee
+        networkFee,
+        event
       ) => {
         try {
           console.log(MESSAGES.BURN_WETH(2));
@@ -749,6 +828,9 @@ nonce: ${convertedNonce}
           console.log("chain2token: ", formatAddress(token));
           console.log("timestamp: ", timestamp);
           console.log("nonce: ", nonce);
+          console.log("from_chain_id: ", CHAIN_IDS.C2);
+          console.log("to_chain_id: ", CHAIN_IDS.C1);
+          console.log("tx_hash: ", event?.transactionHash);
           // Check if the same transaction is being executed the second time
           let otherChainToken = map_token_address_to_token_address[token];
           let convertedAmount = convertBigNumToString(amount);
@@ -779,6 +861,11 @@ nonce: ${convertedNonce}
             CHAINS.CHAIN_1,
             PROCESSED.FALSE,
             FUNCTIONS.UNLOCKETH,
+            CHAINS.CHAIN_2,
+            CHAINS.CHAIN_1,
+            CHAIN_IDS.C2,
+            CHAIN_IDS.C1,
+            event?.transactionHash,
           ]);
           // Sending notification to telegram bot
           await sendMessage(`
@@ -792,11 +879,14 @@ token_chain_1: ${formatAddress(token)}
 token_chain_2: ${formatAddress(otherChainToken)}
 timestamp: ${convertedTimestamp}
 nonce: ${convertedNonce}
+from_chain_id: ${CHAIN_IDS.C2}
+to_chain_id: ${CHAIN_IDS.C1}
+tx_hash_user: ${event?.transactionHash}
     `);
         } catch (err) {
           if (err) {
             console.log(err);
-            await sendMessage(err);
+            await sendMessage(JSON.stringify(err));
           }
         }
       }
@@ -804,7 +894,6 @@ nonce: ${convertedNonce}
 
     // listen for telegram queries
     telegram_listener();
-
     // Process tx queue in batch every 15 secs
     setInterval(async () => {
       await processTransactionQueue();
@@ -812,7 +901,7 @@ nonce: ${convertedNonce}
   } catch (err) {
     if (err) {
       console.log(err);
-      await sendMessage(err);
+      await sendMessage(JSON.stringify(err));
     }
   }
 }

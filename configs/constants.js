@@ -6,6 +6,11 @@ const CHAINS = {
   CHAIN_2: 2,
 };
 
+const CHAIN_IDS = {
+  C1: 11155111,
+  C2: 10395,
+};
+
 const PROCESSED = {
   FALSE: 0,
   TRUE: 1,
@@ -24,4 +29,5 @@ module.exports = {
   CHAINS,
   PROCESSED,
   FUNCTIONS,
+  CHAIN_IDS,
 };

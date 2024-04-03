@@ -8,9 +8,13 @@ const columns = [
   COLUMNS.nonce,
   COLUMNS.token,
   COLUMNS.timestamp,
-  COLUMNS.chain,
   COLUMNS.processed,
   COLUMNS.function_type,
+  COLUMNS.from_chain,
+  COLUMNS.to_chain,
+  COLUMNS.from_chain_id,
+  COLUMNS.to_chain_id,
+  COLUMNS.tx_hash,
 ];
 
 function insert_string(table_name, column_names) {
