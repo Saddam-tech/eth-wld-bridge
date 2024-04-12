@@ -4,13 +4,14 @@ const fs = require("fs-extra");
 const {
   abi: bridge_abi,
 } = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
-const { gasLimit } = require("../configs/constants");
+const { gasLimit, CHAIN_IDS } = require("../configs/constants");
 const { getParameterFromAWS } = require("../configs/vaultAccess");
 const path = require("path");
 const resolvePath = path.resolve(__dirname, "../.encryptedKey.json");
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");
 const cron = require("node-cron");
 const db = require("../db/mariadb/models");
+const { TABLES } = require("../db/tables");
 
 async function feeSetter() {
   try {
@@ -38,23 +39,37 @@ async function feeSetter() {
     const signer = new ethers.Wallet(decodedpk, provider2); // sets the fee on rpc provider 2 (Worldland)
 
     let gasPrice = ethers.utils.formatEther(await provider1.getGasPrice()); // ethereum gas price
+    const contractUnitCount = process.env.CONTRACT_UNITCOUNT.toString();
     console.log({ gasPrice });
-    gasPrice = parseFloat(gasPrice);
-    const contractUnitCount = parseFloat(process.env.CONTRACT_UNITCOUNT);
-    let networkFee = (gasPrice * contractUnitCount).toString();
-    console.log({ networkFee });
-    const parsed = ethers.utils.parseUnits(networkFee, 18);
-    console.log({ parsed });
+
+    let bnGasPrice = ethers.utils.parseUnits(gasPrice.toString(), "ether");
+    let bnContractUnitCount = ethers.BigNumber.from(contractUnitCount);
+    let bnNetworkFee = bnGasPrice.mul(bnContractUnitCount);
+
     const tx = await contract
       .connect(signer)
       .setNetworkFee(
         process.env.NETWORKFEE_ID_CHAIN2,
         process.env.NETWORKFEE_CONTRACT_ADDRESS_CHAIN2,
         process.env.NETWORKFEE_FEETYPE_CHAIN2,
-        parsed
+        bnNetworkFee
       );
-    db;
+    const networkFeeRate = await contract.networkFeeRate();
+    const _networkFee = await contract.networkFee();
+    await db[TABLES.FEE_ARCHIVE].create({
+      chain_id: CHAIN_IDS.C2,
+      fee_rate: ethers.utils.formatEther(networkFeeRate),
+      gasPrice: ethers.utils.formatEther(await provider1.getGasPrice()),
+      networkFee: ethers.utils.formatEther(Object.values(_networkFee)[3]),
+      contractUnitCount: contractUnitCount,
+      signer: signer.address,
+      contract_address: Object.values(_networkFee)[1],
+    });
     console.log({ tx });
+    console.log(
+      "Network fee has been set: ",
+      ethers.utils.formatEther(Object.values(_networkFee)[3])
+    );
   } catch (err) {
     if (err) {
       console.log(err);
@@ -62,13 +77,13 @@ async function feeSetter() {
   }
 }
 
-feeSetter();
+// feeSetter();
 
-// cron.schedule(`1 */23 * * *`, async () =>
-//   feeSetter()
-//     .then()
-//     .catch((err) => {
-//       console.log(err);
-//       process.exit(1);
-//     })
-// );
+cron.schedule(`1 */23 * * *`, async () =>
+  feeSetter()
+    .then()
+    .catch((err) => {
+      console.log(err);
+      process.exit(1);
+    })
+);

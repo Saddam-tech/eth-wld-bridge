@@ -6,6 +6,7 @@ const TABLES = {
   TELEGRAM_LISTENERS: "telegram_listeners",
   PARAMETERS: "parameters",
   CONTRACTS: "contracts",
+  FEE_ARCHIVE: "fee_archive",
 };
 
 const COLUMNS = {

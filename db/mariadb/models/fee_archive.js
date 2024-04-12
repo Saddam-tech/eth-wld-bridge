@@ -10,14 +10,14 @@ module.exports = function (sequelize, DataTypes) {
       },
       created_at: {
         type: DataTypes.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: sequelize.fn("current_timestamp"),
       },
       updated_at: {
         type: DataTypes.DATE,
         allowNull: true,
       },
-      chat_id: {
+      chain_id: {
         type: DataTypes.INTEGER(11),
         allowNull: false,
       },
@@ -41,7 +41,7 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      contractAddress: {
+      contract_address: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
