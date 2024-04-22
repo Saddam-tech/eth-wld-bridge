@@ -2,6 +2,8 @@
 
 Technical Documentation
 
+version 3.0
+
 The BridgeBase is a major contract forked from Cosmos Gravity Bridge that holds the main functions and stores the users' funds.
 
 - The BridgeBase contract has to be deployed both on Ethereum and Worldland and a separate node has to be started to listen to events coming from contracts.
