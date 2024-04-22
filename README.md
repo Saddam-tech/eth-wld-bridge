@@ -269,8 +269,8 @@ verifySig => Utility function to verify geth style signatures. [Link to the code
 ### Contract deployment on testnet
 
 ```
-yarn deploy --network sepolia
-yarn deploy --network worldland
+yarn deploy-1 --network sepolia
+yarn deploy-2 --network worldland
 ```
 
 These scripts do the following:
@@ -293,7 +293,7 @@ To test the bridge on testnet (currently sepolia) run:
 - Send 1 eth from Sepolia testnet to Worldland:
 
 ```
-yarn hardhat run scripts/send_chain1eth_to_chain2.js --network sepolia
+yarn hardhat run test/send_chain1eth_to_chain2.js --network sepolia
 ```
 
 Result should be:
@@ -304,7 +304,7 @@ Result should be:
 - Send 1 eth from Worldland to Sepolia:
 
 ```
-yarn hardhat run scripts/send_chain2eth_to_chain1.js --network worldland
+yarn hardhat run test/send_chain2eth_to_chain1.js --network worldland
 ```
 
 Result should be:
@@ -315,8 +315,8 @@ Result should be:
 ### Contract deployment on local hardhat network
 
 ```
-yarn deploy --network localhost_1
-yarn deploy --network localhost_2
+yarn deploy-1 --network localhost_1
+yarn deploy-2 --network localhost_2
 ```
 
 These scripts do the following:
@@ -339,13 +339,13 @@ To test the bridge on locahost run:
 - Send 1 eth from localhost_1 to localhost_2:
 
 ```
-yarn hardhat run scripts/send_chain1eth_to_chain2.js --network localhost_1
+yarn hardhat run test/send_chain1eth_to_chain2.js --network localhost_1
 ```
 
 - Send 1 eth from localhost_2 to localhost_1:
 
 ```
-yarn hardhat run scripts/send_chain2eth_to_chain1.js --network localhost_2
+yarn hardhat run test/send_chain2eth_to_chain1.js --network localhost_2
 ```
 
 #### For the bridge transaction load test

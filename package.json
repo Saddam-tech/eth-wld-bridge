@@ -23,7 +23,8 @@
     "typechain": "^8.1.0"
   },
   "scripts": {
-    "deploy": "yarn hardhat run scripts/deploy.js",
+    "deploy-1": "yarn hardhat run scripts/deploy_chain1.js",
+    "deploy-2": "yarn hardhat run scripts/deploy_chain2.js",
     "watch--dev": "yarn hardhat run scripts/monitor.js --network localhost_1",
     "watch--prod": "yarn hardhat run scripts/monitor.js --network worldland"
   },
