@@ -4,27 +4,29 @@ Technical Documentation
 
 The BridgeBase is a major contract forked from Cosmos Gravity Bridge that holds the main functions and stores the users' funds.
 
-- The BridgeBase contract has to be deployed both on Ethereum and Worldland and node has to be started to listen to events coming from contracts.
+- The BridgeBase contract has to be deployed both on Ethereum and Worldland and a separate node has to be started to listen to events coming from contracts.
 
 There are two main functionalities:
 
 ### - ETH to Wrapped ETH transfer:
 
 ![graph_1](assets/graph_1.png)
+Picture 1
 
-The logic is quite simple, the sender (see step 1 in the picture) calls the lockETH function within the Bridge contract on Ethereum network and sends an amount of ETH to the contract. The lockETH function emits an ETH transfer event which is picked up by Worldland Bridge Node. It then mints wrapped Eth on the tendermint chain (Worldland) to the user address.
+The flow is quite simple, the sender (see step 1 in the picture) calls the lockETH function within the Bridge contract on Ethereum network and sends an amount of ETH to the contract, the lockETH function subtracts bridgeFee and networkFee along with the requested amount from the sender’s balance. The lockETH function emits an ETH transfer event which is picked up by Worldland Bridge Node. It then mints wrapped Eth on the tendermint chain (Worldland) to the user address.
 
-If a sender wants to get their funds back on Ethereum they call burnWETH function in BridgeBase contract on Worldland that burns their wrapped eth and emits burn event which is then picked up by node and the amount of locked eth is sent from the contract on Ethereum to the user address.
+If a sender wants to get their funds back on Ethereum they call burnWETH function in BridgeBase contract on Worldland that burns their wrapped eth, subtracts bridge and network fees and emits burn event which is then picked up by node and the amount of locked eth is sent from the contract on Ethereum to the user address.
 
 ### - Token to Token transfer:
 
 ![graph_2](assets/graph_2.png)
+Picture 2
 
-The logic is pretty much similar to ETH to WETH transfer. The original tokens are locked in Ethereum and the same amount is minted on the tendermint chain (Worldland). If a sender wants their tokens back on Ethereum they burn a specific amount on the Worldland deployed BridgeBase contract and node(signer) will transfer the amount from the contract to the user on Ethereum.
+The flow is pretty much similar to ETH to WETH transfer. The original tokens are locked in Ethereum and the same amount is minted on the tendermint chain (Worldland). If a sender wants their tokens back on Ethereum they burn a specific amount on the Worldland deployed BridgeBase contract and node(signer) will transfer the token amount from the contract to the user on Ethereum. (Bridge and Network Fees are subtracted upon token transfer)
 
 ## ERC20 / WETH contract deployment and ownership transfer
 
-- ERC20 / WETH contracts should be mintable
+- ERC20 / WETH contracts are mintable
 
 Steps to complete the process:
 
@@ -37,12 +39,20 @@ Steps to complete the process:
 ## Node(signer)
 
 ![node-event-driven](assets/node-event-driven.png)
+Picture 3
 
 Encrypted owner private key is stored on the server.
 
-In order to start the bridge process, a transaction monitoring script should be run initially by providing a password to the encrypted key in the environment file by the owner(the password can be deleted from the environment file after starting the process). The events are listened to from contracts on both chains at the same time. Transactions are queued and batch executed each 15 seconds which saves a significant amount in transaction fees. The process is completely event-driven which means the monitoring script listens (listening does not cost gas) to incoming events from both chains and stores transactions in the transaction pool. The transaction pool is checked each 15 seconds, waiting transactions are sent in batch and removed from the pool.
+In order to start the bridge process, we have to decode the owner's encrypted private key (stored in the server) with a password that is stored in the AWS Parameter Store. As from the security perspective keeping the encrypted key’s password in the server itself is not advised, the bridge node uses AWS Parameter Storage to store and retrieve password whenever needed. From the AWS console we assign our EC2 instance an IAM read-only role that enables only this instance to be able to read the private data from the parameter store where our password is stored (see picture 4 for detailed explanation). The events are listened to from contracts on both chains at the same time. Transactions are queued and batch executed each 15 seconds which saves a significant amount in transaction fees. The process is completely event-driven which means the monitoring script listens (listening does not cost gas) to incoming events from both chains and stores transactions in the transaction pool. (using sqlite3 for storing the temporary pending transactions in the queue) The transaction pool is checked each 15 seconds, pending transactions are signed and sent in batch and removed from the pool. After each transaction the tx log is sent to telegram bot.
 
-- Steps to initiate the node:
+![pw-parameter-store](assets/pw-parameter-store.png)
+Picture 4
+
+![sqlite3](assets/sqlite3.png)
+
+- using sqlite3 for storing temporary pending transactions in the queue
+
+* Steps to initiate the node:
 
 1.  Encrypt the owner private key:
 
@@ -50,7 +60,7 @@ In order to start the bridge process, a transaction monitoring script should be 
 
         PRIVATE_KEY=your_private_key
 
-    b. Set a password for your private key inside of .env file in the following format: (the password is used to decrypt the encrypted private key later):
+    b. Set a password for your private key inside of .env file in the following format: (the password is used to encrypt the private key) (The password can be deleted after encryptedKey.json is generated):
 
         PRIVATE_KEY_PW=your_password
 
@@ -60,7 +70,11 @@ In order to start the bridge process, a transaction monitoring script should be 
 
     - Providing you have PRIVATE_KEY and PRIVATE_KEY_PW environment variables set inside the .env file it will generate .encryptedKey.json file which is a cryptographically generated description and hash of the private key inside the root folder. Now we can safely delete the PRIVATE_KEY variable from the environment file.
 
-2.  Run the node:
+2.  Save the password in the AWS Parameter Store.
+
+    Go to the AWS console -> Systems Manager -> Parameter Store and save your private key password. Create a new Policy that restricts the access to the password to be read-only. Create a new role to be able to query the password. Assign the role to the EC2 instance that runs the bridge monitoring process.
+
+3.  Run the node
 
     - This documentation assumes that you have pm2 (daemon process manager) installed in your system.
 
@@ -80,7 +94,9 @@ In order to start the bridge process, a transaction monitoring script should be 
 
 ![node-tx-track](assets/node-tx-track.png)
 
-- Ether lock event detection state on chain 2 (Worldland):
+- Now we can safely delete the PRIVATE_KEY_PW variable from the environment file.
+
+* Ether lock event detection state on chain 2 (Worldland):
 
 ![lock-event-detect](assets/lock-event-detect.png)
 
@@ -88,21 +104,30 @@ In order to start the bridge process, a transaction monitoring script should be 
 
 3. Delete the PRIVATE_KEY_PW variable from .env file
 
+4. Start the REST server:
+
+   a. Go to the rest-backend_eth-wld-bridge repository root folder and run:
+
+   ![pm2-start-ecosystem](assets/pm2-start-ecosystem.png)
+
+   As all the processed and failed transactions are recorded to the mariadb tx_processed and tx_failed tables respectively we can make a REST query from our frontend application and show transaction details (tx hash) of both chains to each user.
+
 ## Security Concerns
-
-- After deleting the PRIVATE_KEY and PRIVATE_KEY_PW they are still stored in the memory of the computer. Before usage please consider the following risks associated with it:
-
-RAM scraping is a technique used by cybercriminals to extract sensitive data from a computer's random access memory (RAM)
-
-- Possible solution:
-
-* Keep the server address private (security measure known as “security through obscurity”):
-
-As there is no external REST request/responses made to and from the server. The IP address could be stored privately and not shared to the public. This puts an extra layer of security.
 
 - Reentrancy attacks against the functions of the contract:​
 
 BridgeBase contract uses ReentrancyGuard.sol contract from OpenZepellin to check reentrancy attacks against critical functions. The functions are protected with non-reentrant modifier.​
+
+## REST Backend overview
+
+![bridge-rest-stack](assets/bridge-rest-stack.png)
+
+- NodeJs
+- ExpressJs
+- Sequelize
+- MariaDB
+
+The above is being used as a REST backend stack in the bridge server. The main purpose is to keep a record of the processed and failed transactions. Nevertheless we are storing the contract_addresses, fee_archive and telegram_listeners.
 
 - Emergency situations:​
 
@@ -119,6 +144,10 @@ When the bridge node is in a monitoring state sending transactions from the admi
 - Node being down for no reason when webpage is available:​
 
 If bridge node is down for any reason (not in the monitoring state), the emergencyStop function should be called on the bridge contracts both on Ethereum and Worldland to prevent any user depositing funds into the contract.​
+
+- If coin/token is locked in the contract and is not minted/unlocked on the other chain:
+
+  a. Contract has extractLockedETH/extractLockedTokens functions that let the owner transfer the locked eth/tokens inside the contract to a different address.
 
 ### BridgeBase :
 
