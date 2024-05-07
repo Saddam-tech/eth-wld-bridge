@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../utils/Context.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
 /**
  * @devContract module that provides a multi-owner access control mechanism, where

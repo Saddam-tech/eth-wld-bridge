@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./utils/MultiOwnable.sol";
 import "./WETH.sol";
 import "./IWETH.sol";
 import "./IToken.sol";
 
-contract BridgeBase is Ownable, ReentrancyGuard {
+contract BridgeBase is MultiOwnable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     uint256 public bridgeFeeRate;
