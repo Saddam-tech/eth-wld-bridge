@@ -1,7 +1,7 @@
-const { ethers } = require("hardhat");
-const fs = require("fs-extra");
 require("dotenv").config();
-
+const { ethers } = require("hardhat");
+const amqp = require("amqplib/callback_api");
+const fs = require("fs-extra");
 const {
   abi: BRIDGE_ABI,
 } = require("../artifacts/contracts/BridgeBase.sol/BridgeBase.json");
@@ -28,7 +28,8 @@ const { getParameterFromAWS } = require("../configs/vaultAccess");
 const path = require("path");
 const resolvePath = path.resolve(__dirname, "../.encryptedKey.json");
 const encryptedJson = fs.readFileSync(resolvePath, "utf8");
-
+const amqp_server = "amqp://localhost";
+const queue = process.env.QUEUE_NAME;
 const CHAIN_1_BRIDGE_ADDRESS = process.env.ETHEREUM_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_2_BRIDGE_ADDRESS = process.env.WORLDLAND_BRIDGE_CONTRACT_ADDRESS;
 const CHAIN_1_PROVIDER = new ethers.providers.JsonRpcProvider(
@@ -180,21 +181,46 @@ async function monitorLockEvents() {
             await sendMessage(MESSAGES.ALREADY_QUEUED);
             return;
           }
-          insert(TABLES.TX_QUEUE, [
-            from,
-            to,
-            convertedAmount,
-            convertedNonce,
-            otherChainToken,
-            convertedTimestamp,
-            PROCESSED.FALSE,
-            FUNCTIONS.MINTTOKEN,
-            CHAINS.CHAIN_1,
-            CHAINS.CHAIN_2,
-            CHAIN_IDS.C1,
-            CHAIN_IDS.C2,
-            event?.transactionHash,
-          ]);
+          // insert(TABLES.TX_QUEUE, [
+          //   from,
+          //   to,
+          //   convertedAmount,
+          //   convertedNonce,
+          //   otherChainToken,
+          //   convertedTimestamp,
+          //   PROCESSED.FALSE,
+          //   FUNCTIONS.MINTTOKEN,
+          //   CHAINS.CHAIN_1,
+          //   CHAINS.CHAIN_2,
+          //   CHAIN_IDS.C1,
+          //   CHAIN_IDS.C2,
+          //   event?.transactionHash,
+          // ]);
+          amqp.connect(amqp_server, function (error0, connection) {
+            if (error0) {
+              throw error0;
+            }
+            connection.createChannel(function (error1, channel) {
+              if (error1) {
+                throw error1;
+              }
+
+              const msg = process.argv.slice(2).join(" ") || "Hello World!";
+
+              channel.assertQueue(queue, {
+                durable: true,
+              });
+
+              channel.sendToQueue(queue, Buffer.from(msg), {
+                persistent: true,
+              });
+              console.log(" [x] Sent %s", msg);
+
+              setTimeout(function () {
+                connection.close();
+              }, 500);
+            });
+          });
           // Sending notification to telegram bot
           await sendMessage(`
             ${MESSAGES.LOCK_TOKEN(1)}
