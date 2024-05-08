@@ -40,13 +40,19 @@ async function consumeTx(args, channel) {
       let tokens = [];
       for (let i = 0; i < queue.length; i++) {
         if (!queue[i].processed) {
-          let { to_address, amount, nonce, token } = queue[i];
-          destinations.push(to_address);
+          let { to, amount, nonce, token } = queue[i];
+          destinations.push(to);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
         }
       }
+      console.log({
+        destinations: destinations[0],
+        amounts: amounts[0],
+        nonces: nonces[0],
+        tokens: tokens[0],
+      });
       const admin_signature = await createSignature(
         message_type,
         [destinations[0], amounts[0], nonces[0], tokens[0]],
@@ -62,13 +68,13 @@ async function consumeTx(args, channel) {
               let {
                 id,
                 from_address,
-                to_address,
+                to,
                 amount,
                 nonce,
                 token,
                 timestamp,
                 processed,
-                function_type,
+                method,
                 from_chain,
                 to_chain,
                 from_chain_id,
@@ -79,7 +85,7 @@ async function consumeTx(args, channel) {
               // rawPromises[i] = db["tx_processed"].create({
               //   id,
               //   from_address,
-              //   to_address,
+              //   to,
               //   amount,
               //   token,
               //   timestamp,
@@ -89,7 +95,7 @@ async function consumeTx(args, channel) {
               //   to_chain,
               //   from_chain_id,
               //   to_chain_id,
-              //   function_type,
+              //   method,
               //   ["tx_hash_c" + from_chain]: tx_hash,
               //   ["tx_hash_c" + to_chain]: tx.hash,
               // });
@@ -125,13 +131,13 @@ async function consumeTx(args, channel) {
               let {
                 id,
                 from_address,
-                to_address,
+                to,
                 amount,
                 nonce,
                 token,
                 timestamp,
                 processed,
-                function_type,
+                method,
                 from_chain,
                 to_chain,
                 from_chain_id,
@@ -145,13 +151,13 @@ async function consumeTx(args, channel) {
               //   // recreating row inside mariadb tx_failed table
               //   id,
               //   from_address,
-              //   to_address,
+              //   to,
               //   amount,
               //   token,
               //   timestamp,
               //   nonce,
               //   processed,
-              //   function_type,
+              //   method,
               //   from_chain,
               //   to_chain,
               //   from_chain_id,

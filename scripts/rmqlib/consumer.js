@@ -82,7 +82,7 @@ async function processTransactionQueue(queue, ack) {
           queue: queue_chain_1,
           contract: CHAIN_1_CONTRACT,
           wallet: WALLET_CHAIN_1,
-          method: queue_chain_1[0].function_type,
+          method: queue_chain_1[0].method,
         },
         ack
       );
@@ -102,7 +102,7 @@ async function processTransactionQueue(queue, ack) {
           queue: queue_chain_2,
           contract: CHAIN_2_CONTRACT,
           wallet: WALLET_CHAIN_2,
-          method: queue_chain_2[0].function_type,
+          method: queue_chain_2[0].method,
         },
         ack
       );
@@ -136,7 +136,6 @@ amqp.connect(amqp_server, function (error0, connection) {
         let inner_queue = [];
         let parsedMessage = JSON.parse(msg.content.toString());
         console.log(MESSAGES.RBMQ_RECEIVED_MSG);
-        console.log({ parsedMessage });
         inner_queue.push(parsedMessage);
         setInterval(async () => {
           await processTransactionQueue(inner_queue, {
