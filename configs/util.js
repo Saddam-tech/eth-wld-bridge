@@ -1,11 +1,11 @@
+require("dotenv").config();
 const { ethers } = require("hardhat");
 const { PROCESSED, gasLimit } = require("./constants");
 const { TABLES } = require("../db/tables");
 const { MESSAGES } = require("./messages");
-const { deleteRow } = require("../db/queries");
-const { sendMessage } = require("./telegram_bot");
-const db = require("../db/mariadb/models");
-require("dotenv").config();
+// const { deleteRow } = require("../db/queries");
+// const { sendMessage } = require("./telegram_bot");
+// const db = require("../db/mariadb/models");
 
 const message_type = ["address", "uint256", "uint256", "address"];
 
@@ -29,7 +29,7 @@ function formatAddress(address) {
   return [address.slice(0, 9), "...", address.slice(-7)].join("");
 }
 
-async function consumeTx(args) {
+async function consumeTx(args, channel) {
   try {
     let { queue, contract, wallet, method } = args;
     // batch submission
@@ -76,32 +76,33 @@ async function consumeTx(args) {
                 tx_hash,
               } = queue[i];
               processed = PROCESSED.TRUE;
-              rawPromises[i] = db["tx_processed"].create({
-                id,
-                from_address,
-                to_address,
-                amount,
-                token,
-                timestamp,
-                nonce,
-                processed,
-                from_chain,
-                to_chain,
-                from_chain_id,
-                to_chain_id,
-                function_type,
-                ["tx_hash_c" + from_chain]: tx_hash,
-                ["tx_hash_c" + to_chain]: tx.hash,
-              });
-              deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              // rawPromises[i] = db["tx_processed"].create({
+              //   id,
+              //   from_address,
+              //   to_address,
+              //   amount,
+              //   token,
+              //   timestamp,
+              //   nonce,
+              //   processed,
+              //   from_chain,
+              //   to_chain,
+              //   from_chain_id,
+              //   to_chain_id,
+              //   function_type,
+              //   ["tx_hash_c" + from_chain]: tx_hash,
+              //   ["tx_hash_c" + to_chain]: tx.hash,
+              // });
+              // deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              channel.ack();
             }
             await Promise.all(rawPromises);
-            await sendMessage(`
-            ${MESSAGES.BATCH_PROCESSED(
-              queue[0].to_chain_id,
-              destinations.length
-            )} 
-Transaction Hash: ${tx.hash}`);
+            //             await sendMessage(`
+            //             ${MESSAGES.BATCH_PROCESSED(
+            //               queue[0].to_chain_id,
+            //               destinations.length
+            //             )}
+            // Transaction Hash: ${tx.hash}`);
             console.log(
               MESSAGES.BATCH_PROCESSED(
                 queue[0].to_chain_id,
@@ -112,7 +113,8 @@ Transaction Hash: ${tx.hash}`);
           } catch (err) {
             if (err) {
               console.error(err);
-              await sendMessage(JSON.stringify(err));
+              channel.nack();
+              // await sendMessage(JSON.stringify(err));
             }
           }
         })
@@ -137,42 +139,43 @@ Transaction Hash: ${tx.hash}`);
                 tx_hash,
               } = queue[i];
               processed = PROCESSED.FALSE;
-              deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
-              rawPromises[i] = db[TABLES.TX_FAILED].create({
-                // recreating row inside mariadb tx_failed table
-                id,
-                from_address,
-                to_address,
-                amount,
-                token,
-                timestamp,
-                nonce,
-                processed,
-                function_type,
-                from_chain,
-                to_chain,
-                from_chain_id,
-                to_chain_id,
-                tx_hash,
-              });
+              // deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              channel.nack();
+              // rawPromises[i] = db[TABLES.TX_FAILED].create({
+              //   // recreating row inside mariadb tx_failed table
+              //   id,
+              //   from_address,
+              //   to_address,
+              //   amount,
+              //   token,
+              //   timestamp,
+              //   nonce,
+              //   processed,
+              //   function_type,
+              //   from_chain,
+              //   to_chain,
+              //   from_chain_id,
+              //   to_chain_id,
+              //   tx_hash,
+              // });
             }
             await Promise.all(rawPromises);
-            await sendMessage(MESSAGES.TX_FAILED(queue[0].to_chain_id));
+            // await sendMessage(MESSAGES.TX_FAILED(queue[0].to_chain_id));
             console.log(MESSAGES.TX_FAILED(queue[0].to_chain_id));
             if (err) {
               console.log(err);
-              await sendMessage(JSON.stringify(err));
+              // await sendMessage(JSON.stringify(err));
             }
           } catch (err) {
             console.log(err);
-            await sendMessage(JSON.stringify(err));
+            // await sendMessage(JSON.stringify(err));
           }
         });
     }
   } catch (err) {
     if (err) {
       console.error(err);
-      await sendMessage(JSON.stringify(err));
+      // await sendMessage(JSON.stringify(err));
     }
   }
 }

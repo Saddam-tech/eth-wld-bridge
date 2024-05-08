@@ -7,6 +7,9 @@ const MESSAGES = {
   RBMQ_CONNECT: "RabbitMQ: connection established",
   RBMQ_CHANNEL_CREATED: "RabbitMQ: created a communication channel",
   RBMQ_QUEUE_ADDED: "RabbitMQ: created a queue",
+  RBMQ_WAITING: (queue_name) =>
+    `RabbitMQ: Waiting for messages in %${queue_name}. To exit press CTRL+C`,
+  RBMQ_RECEIVED_MSG: "RabbitMQ: Received message",
   LOCK_TOKEN: (chain) => `TOKEN LOCK EVENT DETECTED ON CHAIN ${chain}`,
   BURN_TOKEN: (chain) => `TOKEN BURN EVENT DETECTED ON CHAIN ${chain}`,
   LOCK_ETH: (chain) => `COIN LOCK EVENT DETECTED ON CHAIN ${chain}`,
