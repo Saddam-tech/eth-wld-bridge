@@ -47,12 +47,6 @@ async function consumeTx(args) {
           tokens.push(token);
         }
       }
-      console.log({
-        destinations: destinations[0],
-        amounts: amounts[0],
-        nonces: nonces[0],
-        tokens: tokens[0],
-      });
       const admin_signature = await createSignature(
         message_type,
         [destinations[0], amounts[0], nonces[0], tokens[0]],
