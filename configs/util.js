@@ -29,7 +29,7 @@ function formatAddress(address) {
   return [address.slice(0, 9), "...", address.slice(-7)].join("");
 }
 
-async function consumeTx(args, channel) {
+async function consumeTx(args) {
   try {
     let { queue, contract, wallet, method } = args;
     // batch submission
@@ -100,7 +100,6 @@ async function consumeTx(args, channel) {
               //   ["tx_hash_c" + to_chain]: tx.hash,
               // });
               // deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
-              channel.ack();
             }
             await Promise.all(rawPromises);
             //             await sendMessage(`
@@ -119,7 +118,6 @@ async function consumeTx(args, channel) {
           } catch (err) {
             if (err) {
               console.error(err);
-              channel.nack();
               // await sendMessage(JSON.stringify(err));
             }
           }
@@ -146,7 +144,6 @@ async function consumeTx(args, channel) {
               } = queue[i];
               processed = PROCESSED.FALSE;
               // deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
-              channel.nack();
               // rawPromises[i] = db[TABLES.TX_FAILED].create({
               //   // recreating row inside mariadb tx_failed table
               //   id,

@@ -7,6 +7,7 @@ const {
   txProcessInterval,
   CHAINS,
   PROCESSED,
+  prefetchCount,
 } = require("../../configs/constants");
 const {
   abi: BRIDGE_ABI,
@@ -43,7 +44,7 @@ const CHAIN_2_CONTRACT = new ethers.Contract(
 
 let PRIVATE_KEY_PW = "";
 
-async function processTransactionQueue(queue, ack) {
+async function processTransactionQueue(queue) {
   try {
     let queue_chain_1 = [];
     let queue_chain_2 = [];
@@ -77,15 +78,12 @@ async function processTransactionQueue(queue, ack) {
         PRIVATE_KEY_PW
       );
       const WALLET_CHAIN_1 = new ethers.Wallet(encryptedPk, CHAIN_1_PROVIDER);
-      consumeTx(
-        {
-          queue: queue_chain_1,
-          contract: CHAIN_1_CONTRACT,
-          wallet: WALLET_CHAIN_1,
-          method: queue_chain_1[0].method,
-        },
-        ack
-      );
+      consumeTx({
+        queue: queue_chain_1,
+        contract: CHAIN_1_CONTRACT,
+        wallet: WALLET_CHAIN_1,
+        method: queue_chain_1[0].method,
+      });
     } else {
       console.log(MESSAGES.NO_TX(1));
     }
@@ -97,15 +95,12 @@ async function processTransactionQueue(queue, ack) {
         PRIVATE_KEY_PW
       );
       const WALLET_CHAIN_2 = new ethers.Wallet(encryptedPk, CHAIN_2_PROVIDER);
-      consumeTx(
-        {
-          queue: queue_chain_2,
-          contract: CHAIN_2_CONTRACT,
-          wallet: WALLET_CHAIN_2,
-          method: queue_chain_2[0].method,
-        },
-        ack
-      );
+      consumeTx({
+        queue: queue_chain_2,
+        contract: CHAIN_2_CONTRACT,
+        wallet: WALLET_CHAIN_2,
+        method: queue_chain_2[0].method,
+      });
     } else {
       console.log(MESSAGES.NO_TX(2));
     }
@@ -128,24 +123,25 @@ amqp.connect(amqp_server, function (error0, connection) {
     channel.assertQueue(queue, {
       durable: true,
     });
-    channel.prefetch(1);
+    channel.prefetch(prefetchCount); // allows the slave server to consume a number of messages at a time
     console.log(MESSAGES.RBMQ_WAITING(queue));
+    let inner_queue = [];
+    function selfCall() {
+      let interval = setInterval(async () => {
+        await processTransactionQueue(inner_queue);
+        inner_queue = [];
+        clearInterval(interval);
+      }, txProcessInterval);
+    }
     channel.consume(
       queue,
-      function (msg) {
-        let inner_queue = [];
+      async function (msg) {
         let parsedMessage = JSON.parse(msg.content.toString());
         console.log(MESSAGES.RBMQ_RECEIVED_MSG);
         inner_queue.push(parsedMessage);
-        setInterval(async () => {
-          await processTransactionQueue(inner_queue, {
-            ack: () => channel.ack(msg),
-            nack: () => channel.nack(msg),
-          });
-          inner_queue = [];
-        }, txProcessInterval);
+        selfCall();
       },
-      { noAck: false }
+      { noAck: true }
     );
   });
 });

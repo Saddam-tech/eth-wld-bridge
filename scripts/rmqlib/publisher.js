@@ -523,7 +523,7 @@ async function monitorLockEvents() {
               // );
               if (await CHAIN_2_CONTRACT.processedNonces(nonce)) {
                 console.log(MESSAGES.ALREADY_PROCESSED);
-                await sendMessage(MESSAGES.ALREADY_PROCESSED);
+                // await sendMessage(MESSAGES.ALREADY_PROCESSED);
                 return;
               }
               // if (alreadyQueuedTxs.length > 0) {
