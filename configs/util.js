@@ -3,6 +3,7 @@ const { ethers } = require("hardhat");
 const { PROCESSED, gasLimit } = require("./constants");
 const { TABLES } = require("../db/tables");
 const { MESSAGES } = require("./messages");
+const { makeAPICall } = require("./axios");
 // const { deleteRow } = require("../db/queries");
 // const { sendMessage } = require("./telegram_bot");
 // const db = require("../db/mariadb/models");
@@ -57,10 +58,9 @@ async function consumeTx(args) {
         [method](destinations, amounts, nonces, tokens, admin_signature)
         .then(async (tx) => {
           try {
-            let rawPromises = [];
             for (let i = 0; i < queue.length; i++) {
+              let req_payload = [];
               let {
-                id,
                 from_address,
                 to,
                 amount,
@@ -76,26 +76,25 @@ async function consumeTx(args) {
                 tx_hash,
               } = queue[i];
               processed = PROCESSED.TRUE;
-              // rawPromises[i] = db["tx_processed"].create({
-              //   id,
-              //   from_address,
-              //   to,
-              //   amount,
-              //   token,
-              //   timestamp,
-              //   nonce,
-              //   processed,
-              //   from_chain,
-              //   to_chain,
-              //   from_chain_id,
-              //   to_chain_id,
-              //   method,
-              //   ["tx_hash_c" + from_chain]: tx_hash,
-              //   ["tx_hash_c" + to_chain]: tx.hash,
-              // });
-              // deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              let tx_data = {
+                from_address,
+                to_address: to,
+                amount,
+                token,
+                timestamp,
+                nonce,
+                processed,
+                from_chain,
+                to_chain,
+                from_chain_id,
+                to_chain_id,
+                function_type: method,
+                ["tx_hash_c" + from_chain]: tx_hash,
+                ["tx_hash_c" + to_chain]: tx.hash,
+              };
+              req_payload[i] = tx_data;
             }
-            await Promise.all(rawPromises);
+            // makeAPICall()
             //             await sendMessage(`
             //             ${MESSAGES.BATCH_PROCESSED(
             //               queue[0].to_chain_id,

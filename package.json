@@ -35,6 +35,8 @@
     "amqplib": "^0.10.4",
     "aws-cdk-lib": "^2.128.0",
     "aws-sdk": "^2.1561.0",
+    "axios": "^1.6.8",
+    "jsonwebtoken": "^9.0.2",
     "mariadb": "^3.2.3",
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.64.0",
