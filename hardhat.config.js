@@ -1,5 +1,5 @@
-require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("@nomicfoundation/hardhat-toolbox");
 require("./tasks/get-accounts");
 const path = require("path");
 const resolvePath = path.resolve(__dirname, "./.encryptedKey.json");

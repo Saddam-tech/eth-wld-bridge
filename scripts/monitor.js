@@ -1,6 +1,6 @@
+require("dotenv").config();
 const { ethers } = require("hardhat");
 const fs = require("fs-extra");
-require("dotenv").config();
 
 const {
   abi: BRIDGE_ABI,
