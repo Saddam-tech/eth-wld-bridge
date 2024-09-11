@@ -25,13 +25,18 @@
   "scripts": {
     "deploy-1": "yarn hardhat run scripts/deploy_chain1.js",
     "deploy-2": "yarn hardhat run scripts/deploy_chain2.js",
-    "watch--dev": "yarn hardhat run scripts/monitor.js --network localhost_1",
-    "watch--prod": "yarn hardhat run scripts/monitor.js --network worldland"
+    "publisher--dev": "yarn hardhat run scripts/rmqlib/publisher.js",
+    "consumer--dev": "yarn hardhat run scripts/rmqlib/consumer.js",
+    "publisher--prod": "yarn hardhat run scripts/rmqlib/publisher.js --network worldland",
+    "consumer--prod": "yarn hardhat run scripts/rmqlib/consumer.js --network worldland"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",
+    "amqplib": "^0.10.4",
     "aws-cdk-lib": "^2.128.0",
     "aws-sdk": "^2.1561.0",
+    "axios": "^1.6.8",
+    "jsonwebtoken": "^9.0.2",
     "mariadb": "^3.2.3",
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.64.0",

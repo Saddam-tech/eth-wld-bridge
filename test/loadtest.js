@@ -38,7 +38,7 @@ async function main() {
         signers[i]
       );
       const tx = MyContract.lockETH(
-        signers[i],
+        signers[i].address,
         WETH_ADDRESS_ETHEREUM,
         bridgeFee,
         {

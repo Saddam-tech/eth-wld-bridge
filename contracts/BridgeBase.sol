@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./utils/MultiOwnable.sol";
 import "./WETH.sol";
 import "./IWETH.sol";
 import "./IToken.sol";
 
-contract BridgeBase is Ownable, ReentrancyGuard {
+contract BridgeBase is MultiOwnable, ReentrancyGuard {
     using SafeMath for uint256;
     mapping(uint256 => bool) public processedNonces;
     uint256 public bridgeFeeRate;
@@ -176,10 +176,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 )
             )
         );
-        require(
-            recoverSigner(message, signature) == owner(),
-            "Wrong signature!"
-        );
+        address recovered = recoverSigner(message, signature);
+        require(isOwner(recovered), "Wrong signature!");
         // mint transaction amounts to destinations
         for (uint256 i = 0; i < amounts.length; i++) {
             require(!processedNonces[nonces[i]], "Mint already processed!");
@@ -202,7 +200,11 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
-            IToken(token).transferFrom(msg.sender, owner(), bridgeCalcFee), // bridge fee transfer
+            IToken(token).transferFrom(
+                msg.sender,
+                getOwners()[0],
+                bridgeCalcFee
+            ), // bridge fee transfer
             "Transfer to owner failed! (bridge fee)"
         );
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
@@ -214,13 +216,15 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
-                    owner(),
+                    getOwners()[0],
                     networkFee.amount
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
         } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
-            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            (bool _success, ) = getOwners()[0].call{value: networkFee.amount}(
+                ""
+            );
             require(_success, "Transfer to owner failed! (network fee)");
         }
         IToken(token).burn(msg.sender, afterFee);
@@ -252,7 +256,11 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
-            IToken(token).transferFrom(msg.sender, owner(), bridgeCalcFee), // bridge fee transfer
+            IToken(token).transferFrom(
+                msg.sender,
+                getOwners()[0],
+                bridgeCalcFee
+            ), // bridge fee transfer
             "Transfer to owner failed! (bridge fee)"
         );
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
@@ -264,13 +272,15 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
-                    owner(),
+                    getOwners()[0],
                     networkFee.amount
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
         } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
-            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            (bool _success, ) = getOwners()[0].call{value: networkFee.amount}(
+                ""
+            );
             require(_success, "Transfer to owner failed! (network fee)");
         }
         require(
@@ -308,10 +318,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 )
             )
         );
-        require(
-            recoverSigner(message, signature) == owner(),
-            "Wrong signature!"
-        );
+        address recovered = recoverSigner(message, signature);
+        require(isOwner(recovered), "Wrong signature!");
         // unlock transaction amounts to destinations
         for (uint256 i = 0; i < amounts.length; i++) {
             require(
@@ -336,7 +344,7 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 afterFee = msg.value.sub(bridgeCalcFee);
         uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
-        (bool success, ) = owner().call{value: bridgeCalcFee}(""); // bridge fee transfer
+        (bool success, ) = getOwners()[0].call{value: bridgeCalcFee}(""); // bridge fee transfer
         require(success, "Transfer to owner failed! (bridge fee)");
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
             require(
@@ -347,13 +355,15 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
-                    owner(),
+                    getOwners()[0],
                     networkFee.amount
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
         } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
-            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            (bool _success, ) = getOwners()[0].call{value: networkFee.amount}(
+                ""
+            );
             require(_success, "Transfer to owner failed! (network fee)");
         }
         IWETH(token).deposit{value: afterFee}(msg.sender); // lock
@@ -388,10 +398,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 )
             )
         );
-        require(
-            recoverSigner(message, signature) == owner(),
-            "Wrong signature!"
-        );
+        address recovered = recoverSigner(message, signature);
+        require(isOwner(recovered), "Wrong signature!");
         // unlock transaction amounts to destinations
         for (uint256 i = 0; i < amounts.length; i++) {
             require(!processedNonces[nonces[i]], "UnLock already processed!");
@@ -417,10 +425,8 @@ contract BridgeBase is Ownable, ReentrancyGuard {
                 )
             )
         );
-        require(
-            recoverSigner(message, signature) == owner(),
-            "Wrong signature!"
-        );
+        address recovered = recoverSigner(message, signature);
+        require(isOwner(recovered), "Wrong signature!");
         // mint transaction amounts to destinations
         for (uint256 i = 0; i < amounts.length; i++) {
             require(!processedNonces[nonces[i]], "Mint already processed!");
@@ -443,7 +449,11 @@ contract BridgeBase is Ownable, ReentrancyGuard {
         uint256 _bridgeCalcFee = getBridgeFee(afterFee);
         require(bridgeCalcFee == _bridgeCalcFee, "Insufficient bridge fee!");
         require(
-            IWETH(token).transferFrom(msg.sender, owner(), bridgeCalcFee), // bridge fee transfer
+            IWETH(token).transferFrom(
+                msg.sender,
+                getOwners()[0],
+                bridgeCalcFee
+            ), // bridge fee transfer
             "Transfer to owner failed! (bridge fee)"
         );
         if (networkFee.id == castEnum(NetworkFeeTypes.TOGASASSET)) {
@@ -455,13 +465,15 @@ contract BridgeBase is Ownable, ReentrancyGuard {
             require(
                 IWETH(networkFee.contract_address).transferFrom(
                     msg.sender,
-                    owner(),
+                    getOwners()[0],
                     networkFee.amount
                 ), // network fee transfer
                 "Transfer to owner failed! (network fee)"
             );
         } else if (networkFee.id == castEnum(NetworkFeeTypes.FROMGASASSET)) {
-            (bool _success, ) = owner().call{value: networkFee.amount}("");
+            (bool _success, ) = getOwners()[0].call{value: networkFee.amount}(
+                ""
+            );
             require(_success, "Transfer to owner failed! (network fee)");
         }
         IWETH(token).burn(msg.sender, afterFee);

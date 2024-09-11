@@ -1,5 +1,6 @@
 const gasLimit = 10000000;
 const txProcessInterval = 15000;
+const prefetchCount = 15;
 
 const CHAINS = {
   CHAIN_1: 1,
@@ -26,6 +27,7 @@ const FUNCTIONS = {
 module.exports = {
   gasLimit,
   txProcessInterval,
+  prefetchCount,
   CHAINS,
   PROCESSED,
   FUNCTIONS,

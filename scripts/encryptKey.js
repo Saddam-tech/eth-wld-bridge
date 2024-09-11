@@ -1,7 +1,7 @@
+require("dotenv").config();
 const { ethers } = require("hardhat");
 const fs = require("fs-extra");
 const path = require("path");
-require("dotenv").config();
 
 async function main() {
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY);

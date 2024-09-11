@@ -1,11 +1,12 @@
+require("dotenv").config();
 const { ethers } = require("hardhat");
 const { PROCESSED, gasLimit } = require("./constants");
 const { TABLES } = require("../db/tables");
 const { MESSAGES } = require("./messages");
-const { deleteRow } = require("../db/queries");
-const { sendMessage } = require("./telegram_bot");
-const db = require("../db/mariadb/models");
-require("dotenv").config();
+const { makeAPICall } = require("./axios");
+// const { deleteRow } = require("../db/queries");
+// const { sendMessage } = require("./telegram_bot");
+// const db = require("../db/mariadb/models");
 
 const message_type = ["address", "uint256", "uint256", "address"];
 
@@ -40,8 +41,8 @@ async function consumeTx(args) {
       let tokens = [];
       for (let i = 0; i < queue.length; i++) {
         if (!queue[i].processed) {
-          let { to_address, amount, nonce, token } = queue[i];
-          destinations.push(to_address);
+          let { to, amount, nonce, token } = queue[i];
+          destinations.push(to);
           amounts.push(amount);
           nonces.push(nonce);
           tokens.push(token);
@@ -57,18 +58,17 @@ async function consumeTx(args) {
         [method](destinations, amounts, nonces, tokens, admin_signature)
         .then(async (tx) => {
           try {
-            let rawPromises = [];
             for (let i = 0; i < queue.length; i++) {
+              let req_payload = [];
               let {
-                id,
                 from_address,
-                to_address,
+                to,
                 amount,
                 nonce,
                 token,
                 timestamp,
                 processed,
-                function_type,
+                method,
                 from_chain,
                 to_chain,
                 from_chain_id,
@@ -76,10 +76,9 @@ async function consumeTx(args) {
                 tx_hash,
               } = queue[i];
               processed = PROCESSED.TRUE;
-              rawPromises[i] = db["tx_processed"].create({
-                id,
+              let tx_data = {
                 from_address,
-                to_address,
+                to_address: to,
                 amount,
                 token,
                 timestamp,
@@ -89,19 +88,19 @@ async function consumeTx(args) {
                 to_chain,
                 from_chain_id,
                 to_chain_id,
-                function_type,
+                function_type: method,
                 ["tx_hash_c" + from_chain]: tx_hash,
                 ["tx_hash_c" + to_chain]: tx.hash,
-              });
-              deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              };
+              req_payload[i] = tx_data;
             }
-            await Promise.all(rawPromises);
-            await sendMessage(`
-            ${MESSAGES.BATCH_PROCESSED(
-              queue[0].to_chain_id,
-              destinations.length
-            )} 
-Transaction Hash: ${tx.hash}`);
+            // makeAPICall()
+            //             await sendMessage(`
+            //             ${MESSAGES.BATCH_PROCESSED(
+            //               queue[0].to_chain_id,
+            //               destinations.length
+            //             )}
+            // Transaction Hash: ${tx.hash}`);
             console.log(
               MESSAGES.BATCH_PROCESSED(
                 queue[0].to_chain_id,
@@ -112,7 +111,7 @@ Transaction Hash: ${tx.hash}`);
           } catch (err) {
             if (err) {
               console.error(err);
-              await sendMessage(JSON.stringify(err));
+              // await sendMessage(JSON.stringify(err));
             }
           }
         })
@@ -123,13 +122,13 @@ Transaction Hash: ${tx.hash}`);
               let {
                 id,
                 from_address,
-                to_address,
+                to,
                 amount,
                 nonce,
                 token,
                 timestamp,
                 processed,
-                function_type,
+                method,
                 from_chain,
                 to_chain,
                 from_chain_id,
@@ -137,42 +136,42 @@ Transaction Hash: ${tx.hash}`);
                 tx_hash,
               } = queue[i];
               processed = PROCESSED.FALSE;
-              deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
-              rawPromises[i] = db[TABLES.TX_FAILED].create({
-                // recreating row inside mariadb tx_failed table
-                id,
-                from_address,
-                to_address,
-                amount,
-                token,
-                timestamp,
-                nonce,
-                processed,
-                function_type,
-                from_chain,
-                to_chain,
-                from_chain_id,
-                to_chain_id,
-                tx_hash,
-              });
+              // deleteRow(TABLES.TX_QUEUE, id); // deleting row from sqlite tx_queue table
+              // rawPromises[i] = db[TABLES.TX_FAILED].create({
+              //   // recreating row inside mariadb tx_failed table
+              //   id,
+              //   from_address,
+              //   to,
+              //   amount,
+              //   token,
+              //   timestamp,
+              //   nonce,
+              //   processed,
+              //   method,
+              //   from_chain,
+              //   to_chain,
+              //   from_chain_id,
+              //   to_chain_id,
+              //   tx_hash,
+              // });
             }
             await Promise.all(rawPromises);
-            await sendMessage(MESSAGES.TX_FAILED(queue[0].to_chain_id));
+            // await sendMessage(MESSAGES.TX_FAILED(queue[0].to_chain_id));
             console.log(MESSAGES.TX_FAILED(queue[0].to_chain_id));
             if (err) {
               console.log(err);
-              await sendMessage(JSON.stringify(err));
+              // await sendMessage(JSON.stringify(err));
             }
           } catch (err) {
             console.log(err);
-            await sendMessage(JSON.stringify(err));
+            // await sendMessage(JSON.stringify(err));
           }
         });
     }
   } catch (err) {
     if (err) {
       console.error(err);
-      await sendMessage(JSON.stringify(err));
+      // await sendMessage(JSON.stringify(err));
     }
   }
 }
