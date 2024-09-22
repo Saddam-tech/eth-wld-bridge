@@ -12,7 +12,7 @@ const WORLDLAND_BRIDGE_CONTRACT_ADDRESS =
 const WETH_ADDRESS_WORLDLAND = process.env.WETH_ADDRESS_WORLDLAND;
 
 async function main() {
-  const signer = await ethers.getSigner(1);
+  const signer = await ethers.getSigner();
   const MyContract = new ethers.Contract(
     WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
     ethereum_bridge_abi,
@@ -24,14 +24,17 @@ async function main() {
     signer
   );
 
+  console.log({ address: signer.address, WORLDLAND_BRIDGE_CONTRACT_ADDRESS });
+
   let allowance = ethers.utils.formatEther(
     await WETH_CONTRACT.allowance(
       signer.address,
       WORLDLAND_BRIDGE_CONTRACT_ADDRESS
     )
   );
+  console.log({ allowance: Number(allowance) });
 
-  if (Number(allowance) <= 0) {
+  if (Number(allowance) === 0) {
     await WETH_CONTRACT.approve(
       WORLDLAND_BRIDGE_CONTRACT_ADDRESS,
       ethers.utils.parseUnits("1000000", 18)
